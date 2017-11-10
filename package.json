@@ -1,22 +1,29 @@
 {
-  "name": "electron-quick-start",
+  "name": "twitch-bot-desktop",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "twitch bot with UI",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron bin/dev"
   },
-  "repository": "https://github.com/electron/electron-quick-start",
-  "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
-  ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": "mmeshcheriakov@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "electron": "^1.7.9",
+    "electron-prebuilt": "^1.4.13",
+    "electron-reload": "^1.2.2",
+    "react": "^16.1.0",
+    "react-dom": "^16.1.0"
+  },
   "devDependencies": {
-    "electron": "~1.7.8"
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-electron": "^1.4.15",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-register": "^6.26.0"
   }
 }

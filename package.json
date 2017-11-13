@@ -19,6 +19,7 @@
     "material-ui-icons": "^1.0.0-beta.17",
     "react": "^16.1.0",
     "react-dom": "^16.1.0",
+    "tmi.js": "^1.2.1",
     "typeface-roboto": "0.0.45"
   },
   "devDependencies": {

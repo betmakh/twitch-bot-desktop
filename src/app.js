@@ -2,12 +2,6 @@ import React from 'react';
 import { render } from 'react-dom';
 // import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
-import MainMenu from './components/MainMenu.jsx';
+import MainContainer from './components/Main.jsx';
 
-render(
-	<div>
-		<MainMenu />
-		Hello bitch228
-	</div>,
-	document.getElementById('root')
-);
+render(<MainContainer />, document.getElementById('root'));

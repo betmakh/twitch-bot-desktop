@@ -1,2 +1,6 @@
-require('babel-register')
-require('../main')
+require('babel-register');
+const path = require('path');
+require('electron-reload')(path.resolve('../'), {
+  electron: require('electron')
+});
+require('../main');

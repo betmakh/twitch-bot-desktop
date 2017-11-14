@@ -3,4 +3,16 @@ const path = require('path');
 require('electron-reload')(path.resolve('../'), {
   electron: require('electron')
 });
+
+const webpack = require("webpack");
+
+const compiler = webpack(require('../webpack.config'));
+
+const watching = compiler.watch({
+  aggregateTimeout: 300,
+  poll: 1000
+}, (err, stats) => {
+  // Print watch/build result here...
+});
+
 require('../main');

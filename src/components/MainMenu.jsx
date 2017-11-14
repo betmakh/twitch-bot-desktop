@@ -8,54 +8,34 @@ import ChatIcon from 'material-ui-icons/Chat';
 import CastIcon from 'material-ui-icons/Cast';
 import Drawer from 'material-ui/Drawer';
 import ViewListIcon from 'material-ui-icons/ViewList';
+import { withStyles } from 'material-ui/styles';
+
+
+const styles = theme => ({
+    itemActive: {
+    	background: theme.palette.common.faintBlack
+    }
+})
 
 class MainMenu extends React.Component {
 	constructor(props) {
 		super(props);
 	}
 
-	// render() {
-	// 	return (
-	// 		<Drawer type="permanent">
-	// 			<MenuList>
-	// 				<MenuItem>
-	// 					<ListItemIcon>
-	// 						<ChatIcon />
-	// 					</ListItemIcon>Chat
-	// 				</MenuItem>
-	// 				<MenuItem>
-	// 					<ListItemIcon>
-	// 						<SettingsIcon />
-	// 					</ListItemIcon>My account
-	// 				</MenuItem>
-	// 				<MenuItem>
-	// 					<ListItemIcon>
-	// 						<CastIcon />
-	// 					</ListItemIcon>Stream settings
-	// 				</MenuItem>
-	// 				<MenuItem>
-	// 					<ListItemIcon>
-	// 						<ViewListIcon />
-	// 					</ListItemIcon>List of watchers
-	// 				</MenuItem>
-	// 			</MenuList>
-	// 		</Drawer>
-	// 	);
-	// }
-
 	render() {
+		const {classes} = this.props;
 		return (
-			<Paper>
-				<MenuList>
-					<MenuItem>
+			<Drawer type="permanent" >
+				<MenuList style={{width: this.props.drawerWidth}}>
+					<MenuItem className={classes.itemActive}>
 						<ListItemIcon>
 							<ChatIcon />
 						</ListItemIcon>Chat
 					</MenuItem>
-					<MenuItem>
-						<ListItemIcon>
-							<SettingsIcon />
-						</ListItemIcon>My account
+					<MenuItem disabled={1}>
+						<ListItemIcon >
+							<ViewListIcon />
+						</ListItemIcon>List of watchers
 					</MenuItem>
 					<MenuItem>
 						<ListItemIcon>
@@ -64,13 +44,14 @@ class MainMenu extends React.Component {
 					</MenuItem>
 					<MenuItem>
 						<ListItemIcon>
-							<ViewListIcon />
-						</ListItemIcon>List of watchers
+							<SettingsIcon />
+						</ListItemIcon>Setting
 					</MenuItem>
 				</MenuList>
-			</Paper>
+			</Drawer>
 		);
 	}
+
 }
 
-export default MainMenu;
+export default withStyles(styles)(MainMenu);

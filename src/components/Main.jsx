@@ -4,52 +4,71 @@ import React from 'react';
 import MainMenu from './MainMenu.jsx';
 import TwitchClient from '../utils/main';
 import ChatComponent from './Chat.jsx';
+import {GetMessageAudio} from '../utils/ChatUtils.js';
+
+const drawerWidth = 240;
 
 class MainAppContainer extends React.Component {
 	state = {
 		connected: true,
 		messages: [],
-		maxMessages: 50
+		maxMessages: 50,
+		drawerWidth,
+		channels: []
 	};
 
 	messageReceived(msg) {
 		var messages = this.state.messages,
-			maxMessages = this.state.maxMessages;
+			maxMessages = this.state.maxMessages,
+			audio = GetMessageAudio(msg.text),
+			self = this;
 
-		messages.push(msg);
 
-		while (messages.length > maxMessages) {
-			messages.shift();
-		}
-		this.setState({
-			messages: messages
+		audio.then(url => {
+			msg.audioSrc = url
+			messages.push(msg);
+			while (messages.length > maxMessages) {
+				messages.shift();
+			}
+			self.setState({
+				messages: messages
+			});
 		});
+
+	}
+
+	componentWillMount() {
+	    var self = this;
+
+	    TwitchClient.connect();
+	    
+	    TwitchClient.on('connected', function(address, port) {
+	    	self.setState({channels:TwitchClient.getOptions().channels })
+	    });
+
+	    TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
+	    	var id = Date.now();
+
+	        self.messageReceived({
+	            user: userstate,
+	            text: message,
+	            id: Date.now(),
+	            byOwn
+	        });
+	    });
 	}
 
 	constructor(props) {
 		super(props);
-		var self = this;
 		this.messageReceived.bind(this);
 
-		TwitchClient.connect();
-
-		TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
-			self.messageReceived({
-				user: userstate,
-				text: message,
-				id: Date.now()
-			});
-		});
+	
 	}
 	render() {
 		return (
 			<Grid container>
-				<Grid item xs={4}>
-					<MainMenu />
-				</Grid>
-				<Grid item xs={8}>
-					<ChatComponent messages={this.state.messages} />
-				</Grid>
+					<MainMenu drawerWidth={this.state.drawerWidth}/>
+					<ChatComponent {...this.state}/>
 			</Grid>
 		);
 	}

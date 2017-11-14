@@ -53,44 +53,64 @@ class ChatComponent extends React.Component {
 
 		this.state = {
 			autoplay: true,
-			audioQueue: queue
+			audioQueue: queue,
+			lastAutoPlayedMsgID : null
 		};
 	}
 	
-	onFinishPlayingCallback(id) {
-		var queue = this.state.audioQueue;
-		queue.shift();
-		this.setState({audioQueue: queue})
+	onFinishPlayingCallback() {
+		var queue = this.state.audioQueue,
+			playedMsg = queue.shift();
+
+		if (playedMsg.isAutoplay) {
+			this.setState({audioQueue: queue,lastAutoPlayedMsgID:playedMsg.id })
+		} else {
+			this.setState({audioQueue: queue})
+		}
+		
 	}
 
-	// queue audio message
-	queueMsg(msg) {
+	// queue audio message to TTS
+	queueMsg(msg, isAutoplay = false) {
+		console.log("isAutoplay", isAutoplay);
 		var {audioQueue} = this.state;
 		audioQueue.push({
-			src: msg.audioSrc
+			src: msg.audioSrc,
+			id: msg.id,
+			isAutoplay
 		})
 
 		this.setState({audioQueue})
 	}
 
-	// componentWillReceiveProps(nextProps) {
- // 		var currentMessages = this.props.messages,
- // 			newMessages = _.clone(nextProps.messages),
- // 			diff = [],
- // 			lastMsg = newMessages.pop();
+	// detect new messages to autoplay
+	componentWillReceiveProps(nextProps) {
+ 		var currentMessages = this.props.messages,
+ 			newMessages = _.clone(nextProps.messages),
+ 			{autoplay, lastAutoPlayedMsgID, audioQueue} = this.state,
+ 			lastMsg = newMessages.pop();
 
- // 		this.props = nextProps;
+ 		if (autoplay) {
+ 			if (audioQueue.length) lastAutoPlayedMsgID = audioQueue[audioQueue.length - 1].id;
+ 			while (lastMsg && lastMsg.id !== lastAutoPlayedMsgID) {
+ 			    console.log("lastAutoPlayedMsgID", lastAutoPlayedMsgID);
+ 				this.queueMsg(lastMsg, true);
+ 				lastMsg = newMessages.pop(); 
+ 			}
+ 		}
 
- // 		while (lastMsg && (lastMsg.id !== currentMessages[currentMessages.length - 1])) {
- // 			diff.push(lastMsg);
- // 			lastMsg = newMessages.pop(); 
- // 		}
-
-	// }
+	}
 
 	toggleAutoplay() {
-		var {autoplay} = this.state;
-		this.setState({autoplay : !autoplay})
+		var {autoplay} = this.state,
+			{messages} = this.props,
+			resultState = {autoplay : !autoplay};
+
+		if (!autoplay && messages.length) {
+			resultState.lastAutoPlayedMsgID = messages[messages.length - 1 ].id;
+		}
+
+		this.setState(resultState)
 	}
 
 	render() {
@@ -101,7 +121,7 @@ class ChatComponent extends React.Component {
 		return (
 			<div style={{marginLeft: drawerWidth}} className={classes.chatContainer}>
 				{/*play queued messages*/}
-				{audioQueue.length ? (<Sound url={audioQueue[0].src}  playStatus={SoundStatus.PLAYING} onFinishedPlaying={this.onFinishPlayingCallback.bind(this,audioQueue[0].id)}/>) : null}
+				{audioQueue.length ? (<Sound url={audioQueue[0].src}  playStatus={SoundStatus.PLAYING} onFinishedPlaying={this.onFinishPlayingCallback.bind(this)}/>) : null}
 				<AppBar position="static" color="primary" className={classes.header}>
 			        <Toolbar>
 			          <Typography type="title" color="inherit">
@@ -123,7 +143,7 @@ class ChatComponent extends React.Component {
 						<Typography gutterBottom>
 							{msg.text}
 						</Typography>
-				      	<IconButton className={classes.playButton} onClick={this.queueMsg.bind(this,msg)}>
+				      	<IconButton className={classes.playButton} onClick={this.queueMsg.bind(this,msg, false)}>
 				        	<PlayIcon />
 				      	</IconButton>
 					</Paper>

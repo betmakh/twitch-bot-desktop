@@ -41,8 +41,6 @@ const styles = theme => ({
 });
 
 
-// style={{marginLeft: drawerWidth}} className={classes.chatContainer}
-
 class ChatComponent extends React.Component {
 
 	constructor(props) {
@@ -52,7 +50,6 @@ class ChatComponent extends React.Component {
 			}))
 
 		this.state = {
-			autoplay: true,
 			audioQueue: queue,
 			lastAutoPlayedMsgID : null
 		};
@@ -72,7 +69,8 @@ class ChatComponent extends React.Component {
 
 	// queue audio message to TTS
 	queueMsg(msg, isAutoplay = false) {
-		console.log("isAutoplay", isAutoplay);
+		if (!msg.audioSrc) return;
+
 		var {audioQueue} = this.state;
 		audioQueue.push({
 			src: msg.audioSrc,
@@ -86,11 +84,13 @@ class ChatComponent extends React.Component {
 	// detect new messages to autoplay
 	componentWillReceiveProps(nextProps) {
  		var currentMessages = this.props.messages,
- 			newMessages = _.clone(nextProps.messages),
- 			{autoplay, lastAutoPlayedMsgID, audioQueue} = this.state,
- 			lastMsg = newMessages.pop();
+			messageAutoplay = nextProps.messageAutoplay,
+ 			{lastAutoPlayedMsgID, audioQueue} = this.state;
 
- 		if (autoplay) {
+ 		if (messageAutoplay) {
+ 			let newMessages = _.clone(nextProps.messages),
+ 				lastMsg = newMessages.pop();
+
  			if (audioQueue.length) lastAutoPlayedMsgID = audioQueue[audioQueue.length - 1].id;
  			while (lastMsg && lastMsg.id !== lastAutoPlayedMsgID) {
  			    console.log("lastAutoPlayedMsgID", lastAutoPlayedMsgID);
@@ -102,21 +102,22 @@ class ChatComponent extends React.Component {
 	}
 
 	toggleAutoplay() {
-		var {autoplay} = this.state,
-			{messages} = this.props,
-			resultState = {autoplay : !autoplay};
+		var {messages, messageAutoplay} = this.props;
 
-		if (!autoplay && messages.length) {
-			resultState.lastAutoPlayedMsgID = messages[messages.length - 1 ].id;
+		// clear TTS queue
+		if (messages.length) {
+			this.setState({
+				lastAutoPlayedMsgID: messages[messages.length - 1 ].id,
+				audioQueue: []
+			});
 		}
+		this.props.handleToggleAutoplay();
 
-		this.setState(resultState)
 	}
 
 	render() {
-		const { messages, classes, drawerWidth, channels } = this.props;
+		const { messages, classes, drawerWidth, channels, messageAutoplay} = this.props;
 		const {audioQueue} = this.state;
-		console.log("audioQueue", audioQueue);
 
 		return (
 			<div style={{marginLeft: drawerWidth}} className={classes.chatContainer}>
@@ -128,7 +129,7 @@ class ChatComponent extends React.Component {
 			            {channels.join(',')}
 			          </Typography>
   				      	<IconButton onClick={this.toggleAutoplay.bind(this)}>
-				        	{!this.state.autoplay ? <VolumeOffIcon title="turn off sound"/> : <VolumeUpIcon title="turn on sound"/> }
+				        	{!messageAutoplay ? <VolumeOffIcon title="turn off sound"/> : <VolumeUpIcon title="turn on sound"/> }
 				      	</IconButton>
 			        </Toolbar>
 		      	</AppBar>
@@ -143,9 +144,9 @@ class ChatComponent extends React.Component {
 						<Typography gutterBottom>
 							{msg.text}
 						</Typography>
-				      	<IconButton className={classes.playButton} onClick={this.queueMsg.bind(this,msg, false)}>
+						{msg.audioSrc ? (<IconButton className={classes.playButton} onClick={this.queueMsg.bind(this,msg, false)}>
 				        	<PlayIcon />
-				      	</IconButton>
+				      	</IconButton>) : null}
 					</Paper>
 				</Grid>
 				)) : (<Typography gutterBottom >No messages</Typography>)}

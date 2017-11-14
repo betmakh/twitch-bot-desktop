@@ -5,6 +5,9 @@ import MainMenu from './MainMenu.jsx';
 import TwitchClient from '../utils/main';
 import ChatComponent from './Chat.jsx';
 import {GetMessageAudio} from '../utils/ChatUtils.js';
+import Slide from 'material-ui/transitions/Slide';
+import Snackbar from 'material-ui/Snackbar';
+
 
 const drawerWidth = 240;
 
@@ -14,18 +17,17 @@ class MainAppContainer extends React.Component {
 		messages: [],
 		maxMessages: 50,
 		drawerWidth,
-		channels: []
+		channels: [],
+		errorMessage: '',
+		messageAutoplay: true
 	};
 
 	messageReceived(msg) {
 		var messages = this.state.messages,
 			maxMessages = this.state.maxMessages,
-			audio = GetMessageAudio(msg.text),
 			self = this;
 
-
-		audio.then(url => {
-			msg.audioSrc = url
+		var addMsg = msg => {
 			messages.push(msg);
 			while (messages.length > maxMessages) {
 				messages.shift();
@@ -33,7 +35,23 @@ class MainAppContainer extends React.Component {
 			self.setState({
 				messages: messages
 			});
-		});
+		}
+
+		if (self.state.messageAutoplay) {
+			GetMessageAudio(msg.text).then(url => {
+				msg.audioSrc = url;
+				addMsg(msg);
+			}).catch(err => {
+				self.setState({
+					errorMessage: err.message
+				})
+				addMsg(msg);
+
+			})
+		} else {
+			addMsg(msg);
+		}
+
 
 	}
 
@@ -57,6 +75,10 @@ class MainAppContainer extends React.Component {
 	        });
 	    });
 	}
+	
+	handleToggleAutoplay() {
+		this.setState({messageAutoplay : !this.state.messageAutoplay});
+	}
 
 	constructor(props) {
 		super(props);
@@ -65,10 +87,20 @@ class MainAppContainer extends React.Component {
 	
 	}
 	render() {
+		const {errorMessage} = this.state;
 		return (
 			<Grid container>
 					<MainMenu drawerWidth={this.state.drawerWidth}/>
-					<ChatComponent {...this.state}/>
+					<ChatComponent {...this.state} handleToggleAutoplay={this.handleToggleAutoplay.bind(this)}/>
+
+					<Snackbar
+			          open={errorMessage && errorMessage.length ? true : false}
+			          transition={props => (<Slide direction="up" {...props} />)}
+			          SnackbarContentProps={{
+			            'aria-describedby': 'message-id',
+			          }}
+			          message={<span id="message-id">{errorMessage}</span>}
+			        />
 			</Grid>
 		);
 	}

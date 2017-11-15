@@ -1,25 +1,26 @@
 import Grid from 'material-ui/Grid';
 import React from 'react';
+import Snackbar from 'material-ui/Snackbar';
+import Slide from 'material-ui/transitions/Slide';
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';
 
 import MainMenu from './MainMenu.jsx';
 import TwitchClient from '../utils/main';
 import ChatComponent from './Chat.jsx';
-import { GetMessageAudio } from '../utils/ChatUtils.js';
-import Slide from 'material-ui/transitions/Slide';
-import Snackbar from 'material-ui/Snackbar';
+import UserListComponent from './UserList.jsx';
 
 const drawerWidth = 240;
 
 class MainAppContainer extends React.Component {
 	state = {
 		connected: true,
-		messages: [],
 		maxMessages: 50,
 		drawerWidth,
 		channels: [],
 		errorMessage: '',
 		messageAutoplay: true,
-		sectionSelected: ChatComponent.COMPONENT_NAME,
+		sectionSelected: UserListComponent.COMPONENT_NAME,
 		TwitchClient
 	};
 
@@ -29,6 +30,7 @@ class MainAppContainer extends React.Component {
 
 	constructor(props) {
 		super(props);
+		this.state.TwitchClient.connect();
 	}
 
 	render() {
@@ -40,6 +42,11 @@ class MainAppContainer extends React.Component {
 			case ChatComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
 					<ChatComponent {...this.state} handleToggleAutoplay={this.handleToggleAutoplay.bind(this)} />
+				);
+				break;
+			case UserListComponent.COMPONENT_NAME:
+				selectedSectionMarkup = (
+					<UserListComponent {...this.state} channelName={'betmanenko'} />
 				);
 				break;
 		}

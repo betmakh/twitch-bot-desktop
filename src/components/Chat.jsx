@@ -17,7 +17,7 @@ import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 import { SoundStatus, GetMessageAudio } from '../utils/ChatUtils.js';
 import { CHAT_COMPONENT } from '../utils/constants.js';
 
-const styles = theme => ({
+export const styles = theme => ({
 	card: {
 		padding: '0.1em 1.5em',
 		margin: '0.5em',
@@ -44,17 +44,10 @@ class ChatComponent extends React.Component {
 	static COMPONENT_NAME = CHAT_COMPONENT;
 	constructor(props) {
 		super(props);
-		console.log('propscoNS', props);
 		this.messageReceived.bind(this);
 
-		var queue = props.messages.map(msg => ({
-			src: msg.audioSrc
-		}));
-
-		props.TwitchClient.connect();
-
 		this.state = {
-			audioQueue: queue,
+			audioQueue: [],
 			lastAutoPlayedMsgID: null,
 			messages: [],
 			channels: ['Connecting...']

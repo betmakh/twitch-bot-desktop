@@ -20,18 +20,23 @@ class MainAppContainer extends React.Component {
 		drawerWidth,
 		channels: [],
 		errorMessage: '',
-		messageAutoplay: true,
+		commentsAutoplay: true,
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient
 	};
 
-	handleToggleAutoplay() {
-		this.setState({ messageAutoplay: !this.state.messageAutoplay });
-	}
+	// handleToggleAutoplay() {
+	// 	this.setState({ commentsAutoplay: !this.state.commentsAutoplay });
+	// }
 
 	constructor(props) {
 		super(props);
 		this.state.TwitchClient.connect();
+	}
+
+	saveSettings(settings) {
+		console.log('settings', settings);
+		this.setState(settings);
 	}
 
 	render() {
@@ -41,18 +46,14 @@ class MainAppContainer extends React.Component {
 		var selectedSectionMarkup = null;
 		switch (sectionSelected) {
 			case ChatComponent.COMPONENT_NAME:
-				selectedSectionMarkup = (
-					<ChatComponent {...this.state} handleToggleAutoplay={this.handleToggleAutoplay.bind(this)} />
-				);
+				selectedSectionMarkup = <ChatComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />;
 				break;
 			case UserListComponent.COMPONENT_NAME:
-				selectedSectionMarkup = (
-					<UserListComponent {...this.state} channelName={'friendly_devil'} />
-				);
+				selectedSectionMarkup = <UserListComponent {...this.state} channelName={'friendly_devil'} />;
 				break;
 			case SettingsComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
-					<SettingsComponent {...this.state} channelName={'friendly_devil'} />
+					<SettingsComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />
 				);
 				break;
 		}

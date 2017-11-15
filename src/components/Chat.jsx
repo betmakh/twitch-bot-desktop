@@ -36,7 +36,7 @@ export const styles = theme => ({
 		position: 'fixed'
 	},
 	chatBody: {
-		paddingTop: '4.5em'
+		paddingTop: '5.5em'
 	}
 });
 
@@ -80,7 +80,7 @@ class ChatComponent extends React.Component {
 
 	toggleAutoplay() {
 		var { messages } = this.state,
-			{ messageAutoplay } = this.props;
+			{ commentsAutoplay } = this.props;
 
 		// clear TTS queue
 		if (messages.length) {
@@ -89,17 +89,17 @@ class ChatComponent extends React.Component {
 				audioQueue: []
 			});
 		}
-		this.props.handleToggleAutoplay();
+		this.props.saveSettings({ commentsAutoplay: !commentsAutoplay });
 	}
 
 	messageReceived(msg) {
 		var { messages, audioQueue } = this.state,
-			{ messageAutoplay, maxMessages } = this.props,
+			{ commentsAutoplay, maxMessages } = this.props,
 			self = this;
 
 		var addMsg = msg => {
 			messages.push(msg);
-			if (messageAutoplay) {
+			if (commentsAutoplay) {
 				audioQueue.push(msg);
 			}
 			if (messages.length > maxMessages) {
@@ -111,7 +111,7 @@ class ChatComponent extends React.Component {
 			});
 		};
 
-		if (messageAutoplay) {
+		if (commentsAutoplay) {
 			GetMessageAudio(msg.text)
 				.then(url => {
 					msg.audioSrc = url;
@@ -147,7 +147,7 @@ class ChatComponent extends React.Component {
 	}
 
 	render() {
-		const { classes, drawerWidth, messageAutoplay } = this.props;
+		const { classes, drawerWidth, commentsAutoplay } = this.props;
 		const { audioQueue, channels, messages } = this.state;
 
 		return (
@@ -166,7 +166,7 @@ class ChatComponent extends React.Component {
 							{channels.join(',')}
 						</Typography>
 						<IconButton onClick={this.toggleAutoplay.bind(this)}>
-							{!messageAutoplay ? (
+							{!commentsAutoplay ? (
 								<VolumeOffIcon title="turn off sound" />
 							) : (
 								<VolumeUpIcon title="turn on sound" />

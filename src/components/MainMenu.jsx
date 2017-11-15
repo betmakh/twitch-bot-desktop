@@ -9,7 +9,7 @@ import Drawer from 'material-ui/Drawer';
 import ViewListIcon from 'material-ui-icons/ViewList';
 import { withStyles } from 'material-ui/styles';
 
-import { CHAT_COMPONENT, USER_LIST_COMPONENT } from '../utils/constants.js';
+import { CHAT_COMPONENT, USER_LIST_COMPONENT, SETTINGS_COMPONENT } from '../utils/constants.js';
 
 const styles = theme => ({
 	itemActive: {
@@ -33,15 +33,14 @@ class MainMenu extends React.Component {
 				<MenuList style={{ width: this.props.drawerWidth }}>
 					<MenuItem
 						onClick={this.handleSectionSelect.bind(this, CHAT_COMPONENT)}
-						className={sectionSelected === CHAT_COMPONENT ? classes.itemActive : ''}
-					>
+						selected={sectionSelected === CHAT_COMPONENT}>
 						<ListItemIcon>
 							<ChatIcon />
 						</ListItemIcon>Chat
 					</MenuItem>
 					<MenuItem
 						onClick={this.handleSectionSelect.bind(this, USER_LIST_COMPONENT)}
-						className={sectionSelected === USER_LIST_COMPONENT ? classes.itemActive : ''}
+						selected={sectionSelected === USER_LIST_COMPONENT}
 					>
 						<ListItemIcon>
 							<ViewListIcon />
@@ -52,7 +51,8 @@ class MainMenu extends React.Component {
 							<CastIcon />
 						</ListItemIcon>Stream settings
 					</MenuItem>
-					<MenuItem>
+					<MenuItem onClick={this.handleSectionSelect.bind(this, SETTINGS_COMPONENT)}
+						selected={sectionSelected === SETTINGS_COMPONENT}>
 						<ListItemIcon>
 							<SettingsIcon />
 						</ListItemIcon>Setting

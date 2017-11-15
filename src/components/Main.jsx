@@ -9,6 +9,7 @@ import MainMenu from './MainMenu.jsx';
 import TwitchClient from '../utils/main';
 import ChatComponent from './Chat.jsx';
 import UserListComponent from './UserList.jsx';
+import SettingsComponent from './Settings.jsx';
 
 const drawerWidth = 240;
 
@@ -20,7 +21,7 @@ class MainAppContainer extends React.Component {
 		channels: [],
 		errorMessage: '',
 		messageAutoplay: true,
-		sectionSelected: UserListComponent.COMPONENT_NAME,
+		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient
 	};
 
@@ -46,7 +47,12 @@ class MainAppContainer extends React.Component {
 				break;
 			case UserListComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
-					<UserListComponent {...this.state} channelName={'betmanenko'} />
+					<UserListComponent {...this.state} channelName={'friendly_devil'} />
+				);
+				break;
+			case SettingsComponent.COMPONENT_NAME:
+				selectedSectionMarkup = (
+					<SettingsComponent {...this.state} channelName={'friendly_devil'} />
 				);
 				break;
 		}

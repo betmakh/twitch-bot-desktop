@@ -53,25 +53,25 @@ class UserListComponent extends React.Component {
 	    	searchCriteria: '',
 	    	optionsMenu: {},
 	        users: {
-	            "moderators": [
-	                "betmanenko",
-	                "betmanenkobot"
-	            ],
-	            "staff": ["staff1", "dura"],
-	            "admins": ["uber228", "jeka iz zheka", 'nigga1337'],
-	            "global_mods": ["uber228", "jeka iz zheka", 'nigga1337', "staff1", "dura"],
-	            "viewers": ["jeka iz zheka", 'nigga1337', "staff1", "dura"]
+	            // "moderators": [
+	            //     "betmanenko",
+	            //     "betmanenkobot"
+	            // ],
+	            // "staff": ["staff1", "dura"],
+	            // "admins": ["uber228", "jeka iz zheka", 'nigga1337'],
+	            // "global_mods": ["uber228", "jeka iz zheka", 'nigga1337', "staff1", "dura"],
+	            // "viewers": ["jeka iz zheka", 'nigga1337', "staff1", "dura"]
 	        }
 	    }
 	}
 
-	// componentWillMount() {
-	// 	var self = this;
-	// 	API.getViewers(this.props.channelName).then(json => {
-	// 		self.setState({users: json.chatters})
-	// 	})
-	// }
-	// 
+	componentWillMount() {
+		var self = this;
+		API.getViewers(this.props.channelName).then(json => {
+			self.setState({users: json.chatters})
+		})
+	}
+	
 	openUserOptionsMenu(userName) {
 		return event => {
 			var options = this.state.optionsMenu;
@@ -99,7 +99,7 @@ class UserListComponent extends React.Component {
 		const {drawerWidth, classes, channelName} = this.props,
 			{users, searchCriteria} = this.state,
 			optionsMenuID = 'user-options',
-			options = ['ban', 'mute'];
+			options = ['ban', 'timeout', 'mod'];
 
 		var groupsMarkup = [];
 

@@ -7,7 +7,8 @@ import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Sound from 'react-sound';
 import IconButton from 'material-ui/IconButton';
-import _ from 'lodash';
+import { MenuItem } from 'material-ui/Menu';
+import Select from 'material-ui/Select';
 
 // icons
 import PlayIcon from 'material-ui-icons/PlayCircleOutline';
@@ -37,6 +38,9 @@ export const styles = theme => ({
 	},
 	chatBody: {
 		paddingTop: '5.5em'
+	},
+	headerSelect: {
+		color: theme.palette.text.primary
 	}
 });
 
@@ -50,7 +54,8 @@ class ChatComponent extends React.Component {
 			audioQueue: [],
 			lastAutoPlayedMsgID: null,
 			messages: [],
-			channels: ['Connecting...']
+			channels: [],
+			currentChannel: ''
 		};
 	}
 
@@ -130,25 +135,31 @@ class ChatComponent extends React.Component {
 
 	componentWillMount() {
 		const self = this,
-			{ TwitchClient } = this.props;
+			{ TwitchClient, currentChannel } = this.props;
 
-		TwitchClient.on('connected', function(address, port) {
-			self.setState({ channels: TwitchClient.getOptions().channels });
-		});
+		// this.setState({channels})
+
+		// TwitchClient.on('connected', function(address, port) {
+		// 	self.setState({ channels: TwitchClient.getOptions().channels });
+		// });
 
 		TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
-			self.messageReceived({
-				user: userstate,
-				text: message,
-				id: Date.now(),
-				byOwn
-			});
+			console.log('currentChannel', currentChannel);
+			console.log('channel', channel);
+			if (currentChannel === channel.substring(1)) {
+				self.messageReceived({
+					user: userstate,
+					text: message,
+					id: Date.now(),
+					byOwn
+				});
+			}
 		});
 	}
 
 	render() {
-		const { classes, drawerWidth, commentsAutoplay } = this.props;
-		const { audioQueue, channels, messages } = this.state;
+		const { classes, drawerWidth, commentsAutoplay, channels, currentChannel, saveSettings } = this.props;
+		const { audioQueue, messages } = this.state;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -160,11 +171,22 @@ class ChatComponent extends React.Component {
 						onFinishedPlaying={this.onFinishPlayingCallback.bind(this)}
 					/>
 				) : null}
-				<AppBar position="static" color="primary" className={classes.header}>
+				<AppBar position="static" color="accent" className={classes.header}>
 					<Toolbar>
-						<Typography type="title" color="inherit">
+						{/*						<Typography type="title" color="inherit">
 							{channels.join(',')}
-						</Typography>
+						</Typography>*/}
+						<Select
+							autoWidth={true}
+							value={currentChannel}
+							onChange={event => saveSettings({ currentChannel: event.target.value })}
+						>
+							{channels.map(channel => (
+								<MenuItem key={channel} value={channel}>
+									{channel}
+								</MenuItem>
+							))}
+						</Select>
 						<IconButton onClick={this.toggleAutoplay.bind(this)}>
 							{!commentsAutoplay ? (
 								<VolumeOffIcon title="turn off sound" />
@@ -195,7 +217,9 @@ class ChatComponent extends React.Component {
 							</Grid>
 						))
 					) : (
-						<Typography gutterBottom>No messages</Typography>
+						<Typography gutterBottom align="center" className={classes.card}>
+							No messages
+						</Typography>
 					)}
 				</Grid>
 			</div>

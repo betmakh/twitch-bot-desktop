@@ -18,9 +18,10 @@ class MainAppContainer extends React.Component {
 		connected: true,
 		maxMessages: 50,
 		drawerWidth,
-		channels: [],
+		channels: ['betmanenko', 'letofski'],
 		errorMessage: '',
 		commentsAutoplay: true,
+		currentChannel: 'letofski',
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient
 	};
@@ -40,7 +41,7 @@ class MainAppContainer extends React.Component {
 	}
 
 	render() {
-		const { errorMessage, sectionSelected } = this.state,
+		const { errorMessage, sectionSelected, currentChannel } = this.state,
 			self = this;
 
 		var selectedSectionMarkup = null;
@@ -49,7 +50,7 @@ class MainAppContainer extends React.Component {
 				selectedSectionMarkup = <ChatComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />;
 				break;
 			case UserListComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <UserListComponent {...this.state} channelName={'friendly_devil'} />;
+				selectedSectionMarkup = <UserListComponent {...this.state} channelName={currentChannel} />;
 				break;
 			case SettingsComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (

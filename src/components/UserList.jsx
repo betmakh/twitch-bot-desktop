@@ -9,6 +9,7 @@ import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
 import IconButton from 'material-ui/IconButton';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import { CircularProgress } from 'material-ui/Progress';
 import MoreVertIcon from 'material-ui-icons/MoreVert';
 
 import { USER_LIST_COMPONENT } from '../utils/constants.js';
@@ -19,6 +20,9 @@ const stylesLocal = theme =>
 	Object.assign(styles(theme), {
 		searchFieldContainer: {
 			padding: '0.5em'
+		},
+		textCenter: {
+			textAlign: 'center'
 		}
 	});
 
@@ -61,28 +65,26 @@ class UserListComponent extends React.Component {
 		classes: PropTypes.object.isRequired
 	};
 
-	constructor(props) {
-		super(props);
-		this.state = {
-			searchCriteria: '',
-			optionsMenu: {},
-			users: {
-				// "moderators": [
-				//     "betmanenko",
-				//     "betmanenkobot"
-				// ],
-				// "staff": ["staff1", "dura"],
-				// "admins": ["uber228", "jeka iz zheka", 'nigga1337'],
-				// "global_mods": ["uber228", "jeka iz zheka", 'nigga1337', "staff1", "dura"],
-				// "viewers": ["jeka iz zheka", 'nigga1337', "staff1", "dura"]
-			}
-		};
-	}
+	// constructor(props) {
+	// 	super(props);
+	// 	this.state = {
+	// 		searchCriteria: '',
+	// 		optionsMenu: {},
+	// 		users: {},
+	// 		loading: true
+	// 	};
+	// }
 
 	componentWillMount() {
 		var self = this;
+		this.setState({
+			searchCriteria: '',
+			optionsMenu: {},
+			users: {},
+			loading: true
+		});
 		API.getViewers(this.props.channelName).then(json => {
-			self.setState({ users: json.chatters });
+			self.setState({ users: json.chatters, loading: false });
 		});
 	}
 
@@ -110,14 +112,14 @@ class UserListComponent extends React.Component {
 
 	render() {
 		const { drawerWidth, classes, channelName } = this.props,
-			{ users, searchCriteria } = this.state,
+			{ users, searchCriteria, loading } = this.state,
 			optionsMenuID = 'user-options',
 			options = ['ban', 'timeout', 'mod'];
 
 		var groupsMarkup = [];
 
 		for (let group in users) {
-			if (users[group].length) {
+			if (users[group].length && !loading) {
 				groupsMarkup.push(
 					<UserGroupList
 						onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
@@ -155,14 +157,25 @@ class UserListComponent extends React.Component {
 						</Typography>
 					</Toolbar>
 				</AppBar>
-				<Grid container spacing={0} className={classes.chatBody}>
-					<Grid item xs={12} className={classes.searchFieldContainer}>
-						<TextField placeholder="Filter users" onChange={this.filterUserList.bind(this)} fullWidth />
+
+				{loading ? (
+					<Grid container spacing={0} className={classes.chatBody}>
+						<Grid item xs={12}>
+							<div className={classes.textCenter}>
+								<CircularProgress size={100} color="accent" />
+							</div>
+						</Grid>
 					</Grid>
-					<Grid item xs={12}>
-						{groupsMarkup}
+				) : (
+					<Grid container spacing={0} className={classes.chatBody}>
+						<Grid item xs={12} className={classes.searchFieldContainer}>
+							<TextField placeholder="Filter users" onChange={this.filterUserList.bind(this)} fullWidth />
+						</Grid>
+						<Grid item xs={12}>
+							{groupsMarkup}
+						</Grid>
 					</Grid>
-				</Grid>
+				)}
 			</div>
 		);
 	}

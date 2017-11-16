@@ -10,7 +10,7 @@ import url from 'url';
 import { ipcMain } from 'electron';
 
 import auth from './utils/auth.js';
-import Settings from './utils/settings.js';
+import './utils/settings.js';
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -20,7 +20,7 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({ width: 900, height: 600 });
 
   auth.init(app);
-  Settings.init(ipcMain);
+  // Settings.init(ipcMain);
 
   // and load the index.html of the app.
   mainWindow.loadURL(

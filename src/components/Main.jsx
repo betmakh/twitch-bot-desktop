@@ -4,6 +4,7 @@ import Snackbar from 'material-ui/Snackbar';
 import Slide from 'material-ui/transitions/Slide';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
+import { ipcRenderer } from 'electron';
 
 import MainMenu from './MainMenu.jsx';
 import TwitchClient from '../utils/main';
@@ -11,52 +12,56 @@ import ChatComponent from './Chat.jsx';
 import UserListComponent from './UserList.jsx';
 import SettingsComponent from './Settings.jsx';
 
-const drawerWidth = 240;
-
 class MainAppContainer extends React.Component {
 	state = {
 		connected: true,
 		maxMessages: 50,
-		drawerWidth,
-		channels: ['dreadztv', 'letofski'],
+		drawerWidth: 240,
+		channels: [],
 		errorMessage: '',
 		commentsAutoplay: true,
-		currentChannel: 'dreadztv',
+		currentChannel: '',
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient
 	};
 
-	// handleToggleAutoplay() {
-	// 	this.setState({ commentsAutoplay: !this.state.commentsAutoplay });
-	// }
-
-	constructor(props) {
-		super(props);
-		console.log('props', props);
-		this.state.TwitchClient.connect();
-	}
-
 	saveSettings(settings) {
 		this.setState(settings);
 		var { channels, commentsAutoplay, currentChannel } = this.state;
-		this.props.onSettingsSave({ channels, commentsAutoplay, currentChannel, ...settings });
+		//send settings to main proccess
+		ipcRenderer.send('settings-save', { channels, commentsAutoplay, currentChannel, ...settings });
+	}
+
+	componentWillMount() {
+		var self = this;
+
+		// request initial settings
+		ipcRenderer.send('settings-request');
+		ipcRenderer.on('settings-updated', (event, data) => {
+			self.setState(data);
+		});
+
+		ipcRenderer.on('error', (event, data) => {
+			console.log('error', data);
+		});
 	}
 
 	render() {
-		const { errorMessage, sectionSelected, currentChannel } = this.state,
+		const { errorMessage, sectionSelected, currentChannel, channels, drawerWidth } = this.state,
+			propsTopPass = { drawerWidth, channels, currentChannel },
 			self = this;
 
 		var selectedSectionMarkup = null;
 		switch (sectionSelected) {
 			case ChatComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <ChatComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />;
+				selectedSectionMarkup = <ChatComponent {...propsTopPass} saveSettings={this.saveSettings.bind(this)} />;
 				break;
 			case UserListComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <UserListComponent {...this.state} channelName={currentChannel} />;
+				selectedSectionMarkup = <UserListComponent {...propsTopPass} channelName={currentChannel} />;
 				break;
 			case SettingsComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
-					<SettingsComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />
+					<SettingsComponent {...propsTopPass} saveSettings={this.saveSettings.bind(this)} />
 				);
 				break;
 		}

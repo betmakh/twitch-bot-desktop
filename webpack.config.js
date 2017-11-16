@@ -1,5 +1,5 @@
 const path = require('path');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+// const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 let distFolder = path.resolve(__dirname, 'dist');
 
@@ -24,6 +24,5 @@ module.exports = {
                 loader: 'babel-loader'
             }
         ]
-    },
-    plugins: [new CleanWebpackPlugin([distFolder])]
+    }
 };

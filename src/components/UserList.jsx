@@ -11,6 +11,9 @@ import IconButton from 'material-ui/IconButton';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import { CircularProgress } from 'material-ui/Progress';
 import MoreVertIcon from 'material-ui-icons/MoreVert';
+import Tooltip from 'material-ui/Tooltip';
+
+import RefreshIcon from 'material-ui-icons/Refresh';
 
 import { USER_LIST_COMPONENT } from '../utils/constants.js';
 import { API } from '../utils/chatUtils.js';
@@ -65,27 +68,20 @@ class UserListComponent extends React.Component {
 		classes: PropTypes.object.isRequired
 	};
 
-	// constructor(props) {
-	// 	super(props);
-	// 	this.state = {
-	// 		searchCriteria: '',
-	// 		optionsMenu: {},
-	// 		users: {},
-	// 		loading: true
-	// 	};
-	// }
-
 	componentWillMount() {
 		var self = this;
 		this.setState({
 			searchCriteria: '',
 			optionsMenu: {},
-			users: {},
-			loading: true
+			users: {}
 		});
-		API.getViewers(this.props.channelName).then(json => {
-			self.setState({ users: json.chatters, loading: false });
-		});
+		this._isMounted = true;
+		this.refreshList();
+	}
+
+	// indicate component removed to stop handle async events
+	componentWillUnmount() {
+		this._isMounted = false;
 	}
 
 	openUserOptionsMenu(userName) {
@@ -104,10 +100,21 @@ class UserListComponent extends React.Component {
 	}
 
 	closeUserOptionsMenu(action, event) {
-		console.log('action', action);
 		var options = this.state.optionsMenu;
 		options.anchor = null;
 		this.setState({ optionsMenu: options });
+	}
+
+	refreshList() {
+		var self = this;
+		self.setState({
+			loading: true
+		});
+		API.getViewers(this.props.channelName).then(json => {
+			if (self._isMounted) {
+				self.setState({ users: json.chatters, loading: false });
+			}
+		});
 	}
 
 	render() {
@@ -155,6 +162,11 @@ class UserListComponent extends React.Component {
 						<Typography type="title" color="inherit">
 							{`Users list (${channelName} channel)`}
 						</Typography>
+						<IconButton onClick={this.refreshList.bind(this)}>
+							<Tooltip id="tooltip-right" title="Refresh" placement="right">
+								<RefreshIcon />
+							</Tooltip>
+						</IconButton>
 					</Toolbar>
 				</AppBar>
 

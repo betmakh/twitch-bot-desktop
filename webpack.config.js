@@ -5,6 +5,7 @@ let distFolder = path.resolve(__dirname, 'dist');
 
 module.exports = {
     entry: './src/app.js',
+    target: 'electron-renderer',
     output: {
         filename: 'app.js',
         path: distFolder

@@ -4,7 +4,9 @@
   "description": "twitch bot with UI",
   "main": "main.js",
   "scripts": {
-    "start": "electron bin/dev"
+    "start": "electron bin/dev --inspect=5858",
+    "format": "node_modules/.bin/prettier.cmd --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
+    "build": "node_modules/.bin/babel.cmd srcMain -d dist"
   },
   "author": "mmeshcheriakov@gmail.com",
   "license": "MIT",
@@ -14,8 +16,8 @@
     "babel-preset-react": "^6.24.1",
     "electron": "^1.7.9",
     "electron-prebuilt": "^1.4.13",
-    "electron-reload": "^1.2.2",
     "google-tts-api": "0.0.2",
+    "jsonfile": "^4.0.0",
     "lodash": "^4.17.4",
     "material-ui": "^1.0.0-beta.20",
     "material-ui-icons": "^1.0.0-beta.17",
@@ -36,7 +38,10 @@
     "babel-preset-stage-2": "^6.24.1",
     "babel-register": "^6.26.0",
     "clean-webpack-plugin": "^0.1.17",
+    "electron-log": "^2.2.11",
+    "electron-reload": "^1.2.2",
     "nodemon": "^1.12.1",
+    "prettier": "1.8.2",
     "webpack": "^3.8.1"
   }
 }

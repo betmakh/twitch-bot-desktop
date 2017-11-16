@@ -53,9 +53,10 @@ class SettingsComponent extends React.Component {
 		this.setState({ channels });
 	}
 
-	saveSettings() {
-		console.log(this.state);
-	}
+	// saveSettings() {
+	// 	var { commentsAutoplay, channels } = this.state;
+	// 	this.props.saveSettings({ commentsAutoplay, channels })
+	// }
 
 	render() {
 		const { drawerWidth, classes, saveSettings } = this.props,
@@ -116,7 +117,8 @@ class SettingsComponent extends React.Component {
 											inputRef={ref => (this.ChatAutoplay = ref)}
 											checked={commentsAutoplay}
 											onChange={event =>
-												this.setState({ commentsAutoplay: event.target.checked })}
+												this.setState({ commentsAutoplay: event.target.checked })
+											}
 											value="checkedA"
 										/>
 									}

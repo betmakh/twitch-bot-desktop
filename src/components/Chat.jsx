@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
@@ -8,6 +9,7 @@ import Toolbar from 'material-ui/Toolbar';
 import Sound from 'react-sound';
 import IconButton from 'material-ui/IconButton';
 import { MenuItem } from 'material-ui/Menu';
+import Tooltip from 'material-ui/Tooltip';
 import Select from 'material-ui/Select';
 
 // icons
@@ -157,6 +159,14 @@ class ChatComponent extends React.Component {
 		});
 	}
 
+	scrollToBottom(node) {
+		if (node) {
+			node = ReactDOM.findDOMNode(node);
+			console.log('node', node);
+			node.scrollIntoView({ behavior: 'smooth' });
+		}
+	}
+
 	render() {
 		const { classes, drawerWidth, commentsAutoplay, channels, currentChannel, saveSettings } = this.props;
 		const { audioQueue, messages } = this.state;
@@ -171,12 +181,12 @@ class ChatComponent extends React.Component {
 						onFinishedPlaying={this.onFinishPlayingCallback.bind(this)}
 					/>
 				) : null}
-				<AppBar position="static" color="accent" className={classes.header}>
+				<AppBar position="static" color="primary" className={classes.header}>
 					<Toolbar>
-						{/*						<Typography type="title" color="inherit">
-							{channels.join(',')}
-						</Typography>*/}
-						<Select
+						<Typography type="title" color="inherit">
+							{currentChannel}
+						</Typography>
+						{/*						<Select
 							autoWidth={true}
 							value={currentChannel}
 							onChange={event => saveSettings({ currentChannel: event.target.value })}
@@ -186,20 +196,30 @@ class ChatComponent extends React.Component {
 									{channel}
 								</MenuItem>
 							))}
-						</Select>
+						</Select>*/}
+
 						<IconButton onClick={this.toggleAutoplay.bind(this)}>
 							{!commentsAutoplay ? (
-								<VolumeOffIcon title="turn off sound" />
+								<Tooltip title="Unmute" placement="right">
+									<VolumeOffIcon />
+								</Tooltip>
 							) : (
-								<VolumeUpIcon title="turn on sound" />
+								<Tooltip title="Mute" placement="right">
+									<VolumeUpIcon />
+								</Tooltip>
 							)}
 						</IconButton>
 					</Toolbar>
 				</AppBar>
-				<Grid container spacing={0} className={classes.chatBody}>
+				<Grid container spacing={0} className={classes.chatBody} ref>
 					{messages.length ? (
-						messages.map(msg => (
-							<Grid item xs={12} key={msg.id}>
+						messages.map((msg, index) => (
+							<Grid
+								item
+								xs={12}
+								key={msg.id}
+								ref={index === messages.length - 1 ? this.scrollToBottom : null}
+							>
 								<Paper className={classes.card}>
 									<Typography type="title" gutterBottom>
 										{msg.user.username}

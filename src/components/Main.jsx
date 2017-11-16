@@ -18,10 +18,10 @@ class MainAppContainer extends React.Component {
 		connected: true,
 		maxMessages: 50,
 		drawerWidth,
-		channels: ['betmanenko', 'letofski'],
+		channels: ['dreadztv', 'letofski'],
 		errorMessage: '',
 		commentsAutoplay: true,
-		currentChannel: 'letofski',
+		currentChannel: 'dreadztv',
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient
 	};
@@ -32,12 +32,14 @@ class MainAppContainer extends React.Component {
 
 	constructor(props) {
 		super(props);
+		console.log('props', props);
 		this.state.TwitchClient.connect();
 	}
 
 	saveSettings(settings) {
-		console.log('settings', settings);
 		this.setState(settings);
+		var { channels, commentsAutoplay, currentChannel } = this.state;
+		this.props.onSettingsSave({ channels, commentsAutoplay, currentChannel, ...settings });
 	}
 
 	render() {

@@ -15,4 +15,4 @@ const watching = compiler.watch({
   // Print watch/build result here...
 });
 
-require('../main');
+require('../src/main/main');

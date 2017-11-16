@@ -7,10 +7,10 @@ const BrowserWindow = electron.BrowserWindow;
 
 import path from 'path';
 import url from 'url';
+import { ipcMain } from 'electron';
 
-// const path = require('path')
-// const url = require('url')
-
+// import auth from './auth.js';
+import Settings from './utils/settings.js';
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;
@@ -19,10 +19,13 @@ const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({ width: 900, height: 600 });
 
+  // auth.init(app);
+  Settings.init(ipcMain);
+
   // and load the index.html of the app.
   mainWindow.loadURL(
     url.format({
-      pathname: path.join(__dirname, 'index.html'),
+      pathname: path.resolve('index.html'),
       protocol: 'file:',
       slashes: true
     })
@@ -62,5 +65,4 @@ app.on('activate', function() {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+export default app;

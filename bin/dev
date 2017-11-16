@@ -1,6 +1,7 @@
 require('babel-register');
 const path = require('path');
-require('electron-reload')(path.resolve('../'), {
+    console.log("path.resolve('./src')", path.resolve('./src'));
+require('electron-reload')(path.resolve('./src'), {
   electron: require('electron')
 });
 

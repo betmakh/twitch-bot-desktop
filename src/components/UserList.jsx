@@ -64,7 +64,7 @@ const UserGroupList = withStyles(stylesLocal)(props => {
 class UserListComponent extends React.Component {
 	static COMPONENT_NAME = USER_LIST_COMPONENT;
 	static propTypes = {
-		channelName: PropTypes.string.isRequired,
+		currentChannel: PropTypes.string.isRequired,
 		classes: PropTypes.object.isRequired
 	};
 
@@ -105,20 +105,26 @@ class UserListComponent extends React.Component {
 		this.setState({ optionsMenu: options });
 	}
 
-	refreshList() {
+	refreshList(channel = this.props.currentChannel) {
 		var self = this;
 		self.setState({
 			loading: true
 		});
-		API.getViewers(this.props.channelName).then(json => {
+		API.getViewers(channel).then(json => {
 			if (self._isMounted) {
 				self.setState({ users: json.chatters, loading: false });
 			}
 		});
 	}
 
+	componentWillReceiveProps(nextProps) {
+		if (this.props.currentChannel !== nextProps.currentChannel) {
+			this.refreshList(nextProps.currentChannel);
+		}
+	}
+
 	render() {
-		const { drawerWidth, classes, channelName } = this.props,
+		const { drawerWidth, classes, currentChannel } = this.props,
 			{ users, searchCriteria, loading } = this.state,
 			optionsMenuID = 'user-options',
 			options = ['ban', 'timeout', 'mod'];
@@ -160,7 +166,7 @@ class UserListComponent extends React.Component {
 				<AppBar position="static" color="primary" className={classes.header}>
 					<Toolbar>
 						<Typography type="title" color="inherit">
-							{`Users list (${channelName} channel)`}
+							{`Users list (${currentChannel} channel)`}
 						</Typography>
 						<IconButton onClick={this.refreshList.bind(this)}>
 							<Tooltip id="tooltip-right" title="Refresh" placement="right">

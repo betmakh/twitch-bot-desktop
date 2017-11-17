@@ -23,3 +23,4 @@ ipcMain.on('settings-save', (event, data) => {
 		}
 	});
 });
+

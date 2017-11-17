@@ -6,6 +6,7 @@ import SettingsIcon from 'material-ui-icons/Settings';
 import ChatIcon from 'material-ui-icons/Chat';
 import CastIcon from 'material-ui-icons/Cast';
 import Drawer from 'material-ui/Drawer';
+import Select from 'material-ui/Select';
 import ViewListIcon from 'material-ui-icons/ViewList';
 import { withStyles } from 'material-ui/styles';
 
@@ -18,22 +19,19 @@ const styles = theme => ({
 });
 
 class MainMenu extends React.Component {
-	constructor(props) {
-		super(props);
-	}
-
 	handleSectionSelect(sectionName) {
 		this.props.selectSection(sectionName);
 	}
 
 	render() {
-		const { classes, sectionSelected } = this.props;
+		const { classes, sectionSelected, channels, currentChannel, saveSettings } = this.props;
 		return (
 			<Drawer type="permanent">
 				<MenuList style={{ width: this.props.drawerWidth }}>
 					<MenuItem
 						onClick={this.handleSectionSelect.bind(this, CHAT_COMPONENT)}
-						selected={sectionSelected === CHAT_COMPONENT}>
+						selected={sectionSelected === CHAT_COMPONENT}
+					>
 						<ListItemIcon>
 							<ChatIcon />
 						</ListItemIcon>Chat
@@ -51,11 +49,30 @@ class MainMenu extends React.Component {
 							<CastIcon />
 						</ListItemIcon>Stream settings
 					</MenuItem>
-					<MenuItem onClick={this.handleSectionSelect.bind(this, SETTINGS_COMPONENT)}
-						selected={sectionSelected === SETTINGS_COMPONENT}>
+					<MenuItem
+						onClick={this.handleSectionSelect.bind(this, SETTINGS_COMPONENT)}
+						selected={sectionSelected === SETTINGS_COMPONENT}
+					>
 						<ListItemIcon>
 							<SettingsIcon />
 						</ListItemIcon>Setting
+					</MenuItem>
+					<MenuItem>
+						<Select
+							value={currentChannel}
+							fullWidth
+							onChange={event => {
+								saveSettings({ currentChannel: event.target.value });
+								console.log('event.target', event.target.value);
+							}}
+							className={classes.selectEmpty}
+						>
+							{channels.map(channel => (
+								<MenuItem key={channel} value={channel}>
+									{channel}
+								</MenuItem>
+							))}
+						</Select>
 					</MenuItem>
 				</MenuList>
 			</Drawer>

@@ -5,6 +5,7 @@ import Slide from 'material-ui/transitions/Slide';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import { ipcRenderer } from 'electron';
+import tmi from 'tmi.js';
 
 import MainMenu from './MainMenu.jsx';
 import TwitchClient from '../utils/main';
@@ -14,7 +15,6 @@ import SettingsComponent from './Settings.jsx';
 
 class MainAppContainer extends React.Component {
 	state = {
-		connected: true,
 		maxMessages: 50,
 		drawerWidth: 240,
 		channels: [],
@@ -22,14 +22,22 @@ class MainAppContainer extends React.Component {
 		commentsAutoplay: true,
 		currentChannel: '',
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
-		TwitchClient
+		TwitchClient: null
 	};
 
 	saveSettings(settings) {
 		this.setState(settings);
-		var { channels, commentsAutoplay, currentChannel } = this.state;
+		var { channels, commentsAutoplay, currentChannel, PASS, USER, TOKEN } = this.state;
 		//send settings to main proccess
-		ipcRenderer.send('settings-save', { channels, commentsAutoplay, currentChannel, ...settings });
+		ipcRenderer.send('settings-save', {
+			channels,
+			commentsAutoplay,
+			currentChannel,
+			PASS,
+			USER,
+			TOKEN,
+			...settings
+		});
 	}
 
 	componentWillMount() {
@@ -37,8 +45,12 @@ class MainAppContainer extends React.Component {
 
 		// request initial settings
 		ipcRenderer.send('settings-request');
+
 		ipcRenderer.on('settings-updated', (event, data) => {
-			self.setState(data);
+			this.setState(data);
+			// this.forceUpdate();
+			console.log('this.state', this.state);
+			// self.setState(data);
 		});
 
 		ipcRenderer.on('error', (event, data) => {
@@ -47,8 +59,8 @@ class MainAppContainer extends React.Component {
 	}
 
 	render() {
-		const { errorMessage, sectionSelected, currentChannel, channels, drawerWidth } = this.state,
-			propsTopPass = { drawerWidth, channels, currentChannel },
+		const { errorMessage, sectionSelected, currentChannel, channels, drawerWidth, commentsAutoplay } = this.state,
+			propsTopPass = { drawerWidth, channels, currentChannel, commentsAutoplay },
 			self = this;
 
 		var selectedSectionMarkup = null;
@@ -57,7 +69,7 @@ class MainAppContainer extends React.Component {
 				selectedSectionMarkup = <ChatComponent {...propsTopPass} saveSettings={this.saveSettings.bind(this)} />;
 				break;
 			case UserListComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <UserListComponent {...propsTopPass} channelName={currentChannel} />;
+				selectedSectionMarkup = <UserListComponent {...propsTopPass} />;
 				break;
 			case SettingsComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
@@ -69,6 +81,7 @@ class MainAppContainer extends React.Component {
 			<Grid container>
 				<MainMenu
 					{...this.state}
+					saveSettings={this.saveSettings.bind(this)}
 					selectSection={sectionSelectedName => self.setState({ sectionSelected: sectionSelectedName })}
 				/>
 

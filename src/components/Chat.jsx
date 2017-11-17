@@ -10,7 +10,6 @@ import Sound from 'react-sound';
 import IconButton from 'material-ui/IconButton';
 import { MenuItem } from 'material-ui/Menu';
 import Tooltip from 'material-ui/Tooltip';
-import Select from 'material-ui/Select';
 
 // icons
 import PlayIcon from 'material-ui-icons/PlayCircleOutline';

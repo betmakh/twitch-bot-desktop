@@ -10,7 +10,7 @@ import url from 'url';
 import { ipcMain } from 'electron';
 
 import auth from './utils/auth.js';
-import './utils/settings.js';
+import './utils/events.js';
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow;

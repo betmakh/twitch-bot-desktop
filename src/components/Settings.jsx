@@ -26,16 +26,15 @@ const stylesLocal = theme =>
 class SettingsComponent extends React.Component {
 	static COMPONENT_NAME = SETTINGS_COMPONENT;
 
-	// state = {
-	// 	channels: ['betmanenko'],
-	// 	commentsAutoplay: false
-	// };
+	state = {
+		channels: []
+	};
 
-	constructor(props) {
-		super(props);
-		var { channels, commentsAutoplay } = props;
-		this.state = { channels, commentsAutoplay };
-	}
+	// constructor(props) {
+	// 	super(props);
+	// 	var { channels, commentsAutoplay } = props;
+	// 	this.state = { channels, commentsAutoplay };
+	// }
 	addChannel(event) {
 		var { channels } = this.state,
 			ChannelNameValue = this.ChannelNameField.value;
@@ -59,8 +58,7 @@ class SettingsComponent extends React.Component {
 	// }
 
 	render() {
-		const { drawerWidth, classes, saveSettings } = this.props,
-			{ channels, commentsAutoplay } = this.state;
+		const { drawerWidth, classes, saveSettings, channels, commentsAutoplay } = this.props;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -119,7 +117,6 @@ class SettingsComponent extends React.Component {
 											onChange={event =>
 												this.setState({ commentsAutoplay: event.target.checked })
 											}
-											value="checkedA"
 										/>
 									}
 									label="Translate text to speach"

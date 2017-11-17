@@ -9,13 +9,15 @@ import Drawer from 'material-ui/Drawer';
 import Select from 'material-ui/Select';
 import ViewListIcon from 'material-ui-icons/ViewList';
 import { withStyles } from 'material-ui/styles';
+import Divider from 'material-ui/Divider';
 
 import { CHAT_COMPONENT, USER_LIST_COMPONENT, SETTINGS_COMPONENT } from '../utils/constants.js';
 
 const styles = theme => ({
 	itemActive: {
 		background: theme.palette.common.faintBlack
-	}
+	},
+	drawerHeader: theme.mixins.toolbar
 });
 
 class MainMenu extends React.Component {
@@ -27,6 +29,24 @@ class MainMenu extends React.Component {
 		const { classes, sectionSelected, channels, currentChannel, saveSettings } = this.props;
 		return (
 			<Drawer type="permanent">
+				<MenuItem className={classes.drawerHeader}>
+					<Select
+						value={currentChannel}
+						fullWidth
+						onChange={event => {
+							saveSettings({ currentChannel: event.target.value });
+							console.log('event.target', event.target.value);
+						}}
+						className={classes.selectEmpty}
+					>
+						{channels.map(channel => (
+							<MenuItem key={channel} value={channel}>
+								{channel}
+							</MenuItem>
+						))}
+					</Select>
+				</MenuItem>
+				<Divider />
 				<MenuList style={{ width: this.props.drawerWidth }}>
 					<MenuItem
 						onClick={this.handleSectionSelect.bind(this, CHAT_COMPONENT)}
@@ -56,23 +76,6 @@ class MainMenu extends React.Component {
 						<ListItemIcon>
 							<SettingsIcon />
 						</ListItemIcon>Setting
-					</MenuItem>
-					<MenuItem>
-						<Select
-							value={currentChannel}
-							fullWidth
-							onChange={event => {
-								saveSettings({ currentChannel: event.target.value });
-								console.log('event.target', event.target.value);
-							}}
-							className={classes.selectEmpty}
-						>
-							{channels.map(channel => (
-								<MenuItem key={channel} value={channel}>
-									{channel}
-								</MenuItem>
-							))}
-						</Select>
 					</MenuItem>
 				</MenuList>
 			</Drawer>

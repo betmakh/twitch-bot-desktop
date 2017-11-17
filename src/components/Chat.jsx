@@ -53,7 +53,6 @@ class ChatComponent extends React.Component {
 
 		this.state = {
 			audioQueue: [],
-			lastAutoPlayedMsgID: null,
 			messages: [],
 			channels: [],
 			currentChannel: ''
@@ -64,11 +63,7 @@ class ChatComponent extends React.Component {
 		var queue = this.state.audioQueue,
 			playedMsg = queue.shift();
 
-		if (playedMsg.isAutoplay) {
-			this.setState({ audioQueue: queue, lastAutoPlayedMsgID: playedMsg.id });
-		} else {
-			this.setState({ audioQueue: queue });
-		}
+		this.setState({ audioQueue: queue });
 	}
 
 	// queue audio message to TTS
@@ -91,7 +86,6 @@ class ChatComponent extends React.Component {
 		// clear TTS queue
 		if (messages.length) {
 			this.setState({
-				lastAutoPlayedMsgID: messages[messages.length - 1].id,
 				audioQueue: []
 			});
 		}
@@ -157,7 +151,6 @@ class ChatComponent extends React.Component {
 	scrollToBottom(node) {
 		if (node) {
 			node = ReactDOM.findDOMNode(node);
-			console.log('node', node);
 			node.scrollIntoView({ behavior: 'smooth' });
 		}
 	}
@@ -181,17 +174,6 @@ class ChatComponent extends React.Component {
 						<Typography type="title" color="inherit">
 							{currentChannel}
 						</Typography>
-						{/*						<Select
-							autoWidth={true}
-							value={currentChannel}
-							onChange={event => saveSettings({ currentChannel: event.target.value })}
-						>
-							{channels.map(channel => (
-								<MenuItem key={channel} value={channel}>
-									{channel}
-								</MenuItem>
-							))}
-						</Select>*/}
 
 						<IconButton onClick={this.toggleAutoplay.bind(this)}>
 							{!commentsAutoplay ? (

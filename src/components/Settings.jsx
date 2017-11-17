@@ -40,6 +40,17 @@ class SettingsComponent extends React.Component {
 		}
 	}
 
+	// componentWillMount() {
+	// 	const { channels, commentsAutoplay } = this.props;
+	// 	console.log('commentsAutoplay', commentsAutoplay);
+	// 	console.log('channels', channels);
+	// }
+
+	componentWillReceiveProps(nextProps) {
+		const { channels, commentsAutoplay } = nextProps;
+		this.setState({ channels, commentsAutoplay });
+	}
+
 	removeChannel(event) {
 		var channelToRemove = event.currentTarget.getAttribute('aria-label'),
 			{ channels } = this.state;
@@ -48,7 +59,8 @@ class SettingsComponent extends React.Component {
 	}
 
 	render() {
-		const { drawerWidth, classes, saveSettings, channels, commentsAutoplay } = this.props;
+		const { drawerWidth, classes, saveSettings } = this.props,
+			{ channels, commentsAutoplay } = this.state;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>

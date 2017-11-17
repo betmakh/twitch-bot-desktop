@@ -52,27 +52,30 @@ class MainAppContainer extends React.Component {
 
 		ipcRenderer.on('settings-updated', (event, data) => {
 			if (data.PASS && data.USER) {
+				if (self.state.TwitchClient) {
+					self.state.TwitchClient.disconnect();
+				}
 				var TwitchClient = new tmi.client({
+					options: {
+						debug: true
+					},
 					connection: {
 						reconnect: true
 					},
 					identity: {
 						username: data.USER,
 						password: data.PASS
-					}
+					},
+					channels: [data.currentChannel]
 				});
-				self.setState({ TwitchClient });
-				// .connect()
-				// .then(data => {
-				// 	console.log('data', data);
-				// 	TwitchClient.then(clientPromise => {
-				// 		console.log('clientPromise', clientPromise);
-				// 	});
-				// 	console.log('TwitchClient', TwitchClient);
-				// })
-				// .catch(err => {
-				// 	console.log('err', err);
-				// });
+				TwitchClient.connect()
+					.then(data => {
+						console.log('data', data);
+						self.setState({ TwitchClient });
+					})
+					.catch(err => {
+						console.log('err', err);
+					});
 			}
 			this.setState(data);
 			// this.forceUpdate();

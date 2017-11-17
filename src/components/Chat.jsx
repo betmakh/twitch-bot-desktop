@@ -134,35 +134,24 @@ class ChatComponent extends React.Component {
 		}
 	}
 
-	componentWillMount() {
+	componentWillReceiveProps(nextProps) {
 		const self = this,
-			{ TwitchClient, currentChannel } = this.props;
+			{ TwitchClient, currentChannel } = nextProps;
 
-		console.log('TwitchClient', TwitchClient);
 		if (TwitchClient) {
-			TwitchClient.connect().then(() => {
-				TwitchClient.join(currentChannel).then(data => {
-					console.log('data', data);
+			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
+				console.log('channel', channel);
+				// if (currentChannel === channel.substring(1)) {
+				self.messageReceived({
+					user: userstate,
+					text: message,
+					id: Date.now(),
+					byOwn
 				});
-				TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
-					console.log('channel', channel);
-					if (currentChannel === channel.substring(1)) {
-						self.messageReceived({
-							user: userstate,
-							text: message,
-							id: Date.now(),
-							byOwn
-						});
-					}
-				});
+				// }
 			});
+			// });
 		}
-
-		// this.setState({channels})
-
-		// TwitchClient.on('connected', function(address, port) {
-		// 	self.setState({ channels: TwitchClient.getOptions().channels });
-		// });
 	}
 
 	scrollToBottom(node) {

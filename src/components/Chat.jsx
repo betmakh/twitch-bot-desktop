@@ -16,7 +16,7 @@ import PlayIcon from 'material-ui-icons/PlayCircleOutline';
 import VolumeOffIcon from 'material-ui-icons/VolumeOff';
 import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 
-import { SoundStatus, GetMessageAudio } from '../utils/ChatUtils.js';
+import { GetMessageAudio } from '../utils/ChatUtils.js';
 import { CHAT_COMPONENT } from '../utils/constants.js';
 
 export const styles = theme => ({
@@ -165,7 +165,7 @@ class ChatComponent extends React.Component {
 				{audioQueue.length ? (
 					<Sound
 						url={audioQueue[0].audioSrc}
-						playStatus={SoundStatus.PLAYING}
+						playStatus={Sound.status.PLAYING}
 						onFinishedPlaying={this.onFinishPlayingCallback.bind(this)}
 					/>
 				) : null}

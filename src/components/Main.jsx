@@ -12,6 +12,7 @@ import MainMenu from './MainMenu.jsx';
 import ChatComponent from './Chat.jsx';
 import UserListComponent from './UserList.jsx';
 import SettingsComponent from './Settings.jsx';
+import FollowersListComponent from './FollowersList.jsx';
 
 class MainAppContainer extends React.Component {
 	state = {
@@ -113,6 +114,9 @@ class MainAppContainer extends React.Component {
 				selectedSectionMarkup = (
 					<SettingsComponent {...propsTopPass} saveSettings={this.saveSettings.bind(this)} />
 				);
+				break;
+			case FollowersListComponent.COMPONENT_NAME:
+				selectedSectionMarkup = <FollowersListComponent {...propsTopPass} />;
 				break;
 		}
 		return (

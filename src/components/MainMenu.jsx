@@ -11,7 +11,12 @@ import ViewListIcon from 'material-ui-icons/ViewList';
 import { withStyles } from 'material-ui/styles';
 import Divider from 'material-ui/Divider';
 
-import { CHAT_COMPONENT, USER_LIST_COMPONENT, SETTINGS_COMPONENT } from '../utils/constants.js';
+import {
+	CHAT_COMPONENT,
+	USER_LIST_COMPONENT,
+	SETTINGS_COMPONENT,
+	FOLLOWERS_LIST_COMPONENT
+} from '../utils/constants.js';
 
 const styles = theme => ({
 	itemActive: {
@@ -64,10 +69,13 @@ class MainMenu extends React.Component {
 							<ViewListIcon />
 						</ListItemIcon>List of watchers
 					</MenuItem>
-					<MenuItem disabled={1}>
+					<MenuItem
+						onClick={this.handleSectionSelect.bind(this, FOLLOWERS_LIST_COMPONENT)}
+						selected={sectionSelected === FOLLOWERS_LIST_COMPONENT}
+					>
 						<ListItemIcon>
 							<CastIcon />
-						</ListItemIcon>Stream settings
+						</ListItemIcon>Followers list
 					</MenuItem>
 					<MenuItem
 						onClick={this.handleSectionSelect.bind(this, SETTINGS_COMPONENT)}

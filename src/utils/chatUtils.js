@@ -1,5 +1,6 @@
 import googleTTS from 'google-tts-api';
-import Sound from 'react-sound';
+
+import { KRAKEN_PREFIX_URL, TOKEN } from './constants.js';
 
 /**
  * Gets audio url with  generated voice
@@ -15,9 +16,22 @@ export const GetMessageAudio = text => {
 	return googleTTS(text, lang);
 };
 
-export const SoundStatus = Object.assign(Sound.status, { QUEUED: 'QUEUED' });
-
 export const API = {
+	getFollowersList: channel => {
+		console.log('KRAKEN_PREFIX_URL', KRAKEN_PREFIX_URL);
+		console.log('TOKEN', TOKEN);
+		return fetch(KRAKEN_PREFIX_URL + 'channels/' + channel + '/follows', {
+			headers: {
+				'Client-ID': TOKEN
+			}
+		}).then(res => {
+			if (res.status === 200) {
+				return res.json();
+			} else {
+				return null;
+			}
+		});
+	},
 	getViewers: channel =>
 		fetch(`https://tmi.twitch.tv/group/user/${channel}/chatters`).then(response => response.json())
 	//  timeoutUser: (client, user, time, channel) => {

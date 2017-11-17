@@ -19,7 +19,7 @@ import { USER_LIST_COMPONENT } from '../utils/constants.js';
 import { API } from '../utils/chatUtils.js';
 import { styles } from './Chat.jsx';
 
-const stylesLocal = theme =>
+export const stylesLocal = theme =>
 	Object.assign(styles(theme), {
 		searchFieldContainer: {
 			padding: '0.5em'
@@ -69,7 +69,7 @@ class UserListComponent extends React.Component {
 	};
 
 	componentWillMount() {
-		var self = this;
+		console.log('mounted');
 		this.setState({
 			searchCriteria: '',
 			optionsMenu: {},
@@ -77,6 +77,7 @@ class UserListComponent extends React.Component {
 		});
 		this._isMounted = true;
 		this.refreshList();
+		console.log('this.refreshList', this.refreshList);
 	}
 
 	// indicate component removed to stop handle async events
@@ -168,7 +169,7 @@ class UserListComponent extends React.Component {
 						<Typography type="title" color="inherit">
 							{`Users list (${currentChannel} channel)`}
 						</Typography>
-						<IconButton onClick={this.refreshList.bind(this)}>
+						<IconButton onClick={event => this.refreshList()}>
 							<Tooltip id="tooltip-right" title="Refresh" placement="right">
 								<RefreshIcon />
 							</Tooltip>
@@ -198,5 +199,7 @@ class UserListComponent extends React.Component {
 		);
 	}
 }
+
+export const BasicUserComponent = UserListComponent;
 
 export default withStyles(stylesLocal)(UserListComponent);

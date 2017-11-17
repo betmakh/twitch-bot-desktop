@@ -8,7 +8,7 @@ import { ipcRenderer } from 'electron';
 import tmi from 'tmi.js';
 
 import MainMenu from './MainMenu.jsx';
-import TwitchClient from '../utils/main';
+// import TwitchClient from '../utils/main';
 import ChatComponent from './Chat.jsx';
 import UserListComponent from './UserList.jsx';
 import SettingsComponent from './Settings.jsx';
@@ -24,6 +24,11 @@ class MainAppContainer extends React.Component {
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient: null
 	};
+
+	// constructor(props) {
+	// 	super(props);
+	// 	this.state.TwitchClient = new
+	// }
 
 	saveSettings(settings) {
 		this.setState(settings);
@@ -42,14 +47,36 @@ class MainAppContainer extends React.Component {
 
 	componentWillMount() {
 		var self = this;
-
 		// request initial settings
 		ipcRenderer.send('settings-request');
 
 		ipcRenderer.on('settings-updated', (event, data) => {
+			if (data.PASS && data.USER) {
+				var TwitchClient = new tmi.client({
+					connection: {
+						reconnect: true
+					},
+					identity: {
+						username: data.USER,
+						password: data.PASS
+					}
+				});
+				self.setState({ TwitchClient });
+				// .connect()
+				// .then(data => {
+				// 	console.log('data', data);
+				// 	TwitchClient.then(clientPromise => {
+				// 		console.log('clientPromise', clientPromise);
+				// 	});
+				// 	console.log('TwitchClient', TwitchClient);
+				// })
+				// .catch(err => {
+				// 	console.log('err', err);
+				// });
+			}
 			this.setState(data);
 			// this.forceUpdate();
-			console.log('this.state', this.state);
+
 			// self.setState(data);
 		});
 
@@ -59,8 +86,16 @@ class MainAppContainer extends React.Component {
 	}
 
 	render() {
-		const { errorMessage, sectionSelected, currentChannel, channels, drawerWidth, commentsAutoplay } = this.state,
-			propsTopPass = { drawerWidth, channels, currentChannel, commentsAutoplay },
+		const {
+				errorMessage,
+				sectionSelected,
+				currentChannel,
+				channels,
+				drawerWidth,
+				commentsAutoplay,
+				TwitchClient
+			} = this.state,
+			propsTopPass = { drawerWidth, channels, currentChannel, commentsAutoplay, TwitchClient },
 			self = this;
 
 		var selectedSectionMarkup = null;

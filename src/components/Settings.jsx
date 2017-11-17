@@ -30,11 +30,6 @@ class SettingsComponent extends React.Component {
 		channels: []
 	};
 
-	// constructor(props) {
-	// 	super(props);
-	// 	var { channels, commentsAutoplay } = props;
-	// 	this.state = { channels, commentsAutoplay };
-	// }
 	addChannel(event) {
 		var { channels } = this.state,
 			ChannelNameValue = this.ChannelNameField.value;
@@ -51,11 +46,6 @@ class SettingsComponent extends React.Component {
 		channels = channels.filter(channelName => channelName !== channelToRemove);
 		this.setState({ channels });
 	}
-
-	// saveSettings() {
-	// 	var { commentsAutoplay, channels } = this.state;
-	// 	this.props.saveSettings({ commentsAutoplay, channels })
-	// }
 
 	render() {
 		const { drawerWidth, classes, saveSettings, channels, commentsAutoplay } = this.props;
@@ -74,7 +64,7 @@ class SettingsComponent extends React.Component {
 					<Grid item xs={12} className={classes.spacingBlock}>
 						<Paper className={classes.spacingBlock}>
 							<Grid container alignItems="baseline">
-								<Grid item xs={12} sm={12} md={10} className={classes.spacingBlock}>
+								<Grid item xs={12} sm={10} className={classes.spacingBlock}>
 									<TextField
 										id="channelNameField"
 										placeholder="Channel name"
@@ -85,9 +75,9 @@ class SettingsComponent extends React.Component {
 									/>
 								</Grid>
 
-								<Grid item xs={12} sm={12} md={2} className={classes.spacingBlock}>
+								<Grid item xs={12} sm={2} className={classes.spacingBlock}>
 									<Button style={{ width: '100%' }} onClick={this.addChannel.bind(this)}>
-										Add channel
+										Add
 									</Button>
 								</Grid>
 							</Grid>

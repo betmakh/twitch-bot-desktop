@@ -1,5 +1,4 @@
 import googleTTS from 'google-tts-api';
-import _ from 'lodash';
 
 import { KRAKEN_PREFIX_URL, TOKEN } from './constants.js';
 

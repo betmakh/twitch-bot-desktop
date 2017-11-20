@@ -12,8 +12,10 @@ import DeleteIcon from 'material-ui-icons/Delete';
 import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import Checkbox from 'material-ui/Checkbox';
 import List, { ListItem, ListItemAvatar, ListItemIcon, ListItemSecondaryAction, ListItemText } from 'material-ui/List';
+import UrlUtils from 'url';
+import querystring from 'querystring';
 
-import { SETTINGS_COMPONENT } from '../utils/constants.js';
+import { SETTINGS_COMPONENT, AUTH_URL } from '../utils/constants.js';
 import { styles } from './Chat.jsx';
 
 const stylesLocal = theme =>
@@ -40,9 +42,19 @@ class SettingsComponent extends React.Component {
 		}
 	}
 
-	componentWillMount() {
+	login(event) {
+		console.log('event', event);
+		// window.open
+	}
+
+	componentDidMount() {
 		const { channels, commentsAutoplay } = this.props;
+		var self = this;
 		this.setState({ channels, commentsAutoplay });
+		this.webview.addEventListener('did-navigate', e => {
+			var url = UrlUtils.parse(e.url);
+			self.props.saveSettings({ PASS: 'oauth:' + querystring.parse(url.hash)['#access_token'] });
+		});
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -124,6 +136,20 @@ class SettingsComponent extends React.Component {
 								/>
 							</Grid>
 						</Paper>
+						<Paper>
+							<Grid item xs={12}>
+								<Button color="primary" onClick={this.login.bind(this)}>
+									Login
+								</Button>
+							</Grid>
+						</Paper>
+						<Grid item xs={12}>
+							<webview
+								ref={el => (this.webview = el)}
+								src={'https://twitchapps.com/tmi/'}
+								style={{ height: '500px' }}
+							/>
+						</Grid>
 					</Grid>
 					<Grid item xs={12} className={classes.spacingBlock}>
 						<br />

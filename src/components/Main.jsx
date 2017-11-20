@@ -48,7 +48,7 @@ class MainAppContainer extends React.Component {
 		ipcRenderer.on('settings-updated', (event, data) => {
 			console.log('data', data);
 			const { currentChannel } = self.state;
-			if (data.PASS && data.USER && currentChannel !== data.currentChannel) {
+			if (data.PASS && currentChannel !== data.currentChannel) {
 				console.log('data.currentChannel', data.currentChannel);
 				// update connection if selected channel has changed
 				if (self.state.TwitchClient) {
@@ -62,7 +62,6 @@ class MainAppContainer extends React.Component {
 						reconnect: true
 					},
 					identity: {
-						username: data.USER,
 						password: data.PASS
 					},
 					channels: [data.currentChannel]

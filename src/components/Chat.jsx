@@ -16,7 +16,7 @@ import PlayIcon from 'material-ui-icons/PlayCircleOutline';
 import VolumeOffIcon from 'material-ui-icons/VolumeOff';
 import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 
-import { GetMessageAudio } from '../utils/ChatUtils.js';
+import { API } from '../utils/ChatUtils.js';
 import { CHAT_COMPONENT } from '../utils/constants.js';
 
 export const styles = theme => ({
@@ -112,7 +112,7 @@ class ChatComponent extends React.Component {
 		};
 
 		if (commentsAutoplay) {
-			GetMessageAudio(msg.text)
+			API.GetMessageAudio(msg.text)
 				.then(url => {
 					msg.audioSrc = url;
 					addMsg(msg);
@@ -128,13 +128,27 @@ class ChatComponent extends React.Component {
 		}
 	}
 
+	componentWillMount() {
+		const self = this,
+			{ TwitchClient, currentChannel } = this.props;
+
+		if (TwitchClient) {
+			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
+				self.messageReceived({
+					user: userstate,
+					text: message,
+					id: Date.now(),
+					byOwn
+				});
+			});
+		}
+	}
 	componentWillReceiveProps(nextProps) {
 		const self = this,
 			{ TwitchClient, currentChannel } = nextProps;
 
 		if (TwitchClient) {
 			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
-				console.log('channel', channel);
 				// if (currentChannel === channel.substring(1)) {
 				self.messageReceived({
 					user: userstate,

@@ -40,11 +40,10 @@ class SettingsComponent extends React.Component {
 		}
 	}
 
-	// componentWillMount() {
-	// 	const { channels, commentsAutoplay } = this.props;
-	// 	console.log('commentsAutoplay', commentsAutoplay);
-	// 	console.log('channels', channels);
-	// }
+	componentWillMount() {
+		const { channels, commentsAutoplay } = this.props;
+		this.setState({ channels, commentsAutoplay });
+	}
 
 	componentWillReceiveProps(nextProps) {
 		const { channels, commentsAutoplay } = nextProps;

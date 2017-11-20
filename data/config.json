@@ -1,7 +1,1 @@
-{
-	"PASS": "oauth:ngqsibig939or6zhc2ak6lt1p3h8y5",
-	"USER": "betmanenkobot",
-	"channels": ["dreadztv", "letofski", "penis", "batia", "betmanenko", "honeymad"],
-	"commentsAutoplay": true,
-	"currentChannel": "betmanenko"
-}
+{"PASS":"oauth:ngqsibig939or6zhc2ak6lt1p3h8y5","USER":"betmanenkobot","channels":["dreadztv","letofski","betmanenko","honeymad","faraazkhan","silvername"],"commentsAutoplay":false,"currentChannel":"betmanenko"}

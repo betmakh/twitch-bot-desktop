@@ -13,6 +13,7 @@ import ChatComponent from './Chat.jsx';
 import UserListComponent from './UserList.jsx';
 import SettingsComponent from './Settings.jsx';
 import FollowersListComponent from './FollowersList.jsx';
+import { FollowersWatcher } from '../utils/ChatUtils.js';
 
 class MainAppContainer extends React.Component {
 	state = {
@@ -23,18 +24,11 @@ class MainAppContainer extends React.Component {
 		commentsAutoplay: true,
 		currentChannel: '',
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
-		TwitchClient: null
+		TwitchClient: null,
+		FollowersWatcher
 	};
-
-	// constructor(props) {
-	// 	super(props);
-	// 	this.state.TwitchClient = new
-	// }
-
 	saveSettings(settings) {
-		this.setState(settings);
 		var { channels, commentsAutoplay, currentChannel, PASS, USER, TOKEN } = this.state;
-		//send settings to main proccess
 		ipcRenderer.send('settings-save', {
 			channels,
 			commentsAutoplay,
@@ -52,7 +46,11 @@ class MainAppContainer extends React.Component {
 		ipcRenderer.send('settings-request');
 
 		ipcRenderer.on('settings-updated', (event, data) => {
-			if (data.PASS && data.USER) {
+			console.log('data', data);
+			const { currentChannel } = self.state;
+			if (data.PASS && data.USER && currentChannel !== data.currentChannel) {
+				console.log('data.currentChannel', data.currentChannel);
+				// update connection if selected channel has changed
 				if (self.state.TwitchClient) {
 					self.state.TwitchClient.disconnect();
 				}
@@ -69,19 +67,19 @@ class MainAppContainer extends React.Component {
 					},
 					channels: [data.currentChannel]
 				});
+
 				TwitchClient.connect()
-					.then(data => {
-						console.log('data', data);
+					.then(connectData => {
+						self.state.FollowersWatcher.start(data.currentChannel, diff => {
+							console.log('diff', diff);
+						});
 						self.setState({ TwitchClient });
 					})
 					.catch(err => {
 						console.log('err', err);
 					});
 			}
-			this.setState(data);
-			// this.forceUpdate();
-
-			// self.setState(data);
+			self.setState(data);
 		});
 
 		ipcRenderer.on('error', (event, data) => {

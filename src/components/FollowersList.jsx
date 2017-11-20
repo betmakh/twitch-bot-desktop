@@ -12,7 +12,6 @@ class FollowersListComponent extends BasicUserComponent {
 		super(params);
 	}
 	refreshList(channel = this.props.currentChannel) {
-		console.log('channel', channel);
 		var self = this;
 		self.setState({
 			loading: true

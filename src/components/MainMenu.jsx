@@ -4,6 +4,7 @@ import Paper from 'material-ui/Paper';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import SettingsIcon from 'material-ui-icons/Settings';
 import ChatIcon from 'material-ui-icons/Chat';
+import Grid from 'material-ui/Grid';
 import CastIcon from 'material-ui-icons/Cast';
 import Drawer from 'material-ui/Drawer';
 import Select from 'material-ui/Select';
@@ -22,6 +23,10 @@ const styles = theme => ({
 	itemActive: {
 		background: theme.palette.common.faintBlack
 	},
+	logo: {
+		paddingRight: theme.spacing.unit,
+		maxWidth: theme.spacing.unit * 5
+	},
 	drawerHeader: theme.mixins.toolbar
 });
 
@@ -31,10 +36,11 @@ class MainMenu extends React.Component {
 	}
 
 	render() {
-		const { classes, sectionSelected, channels, currentChannel, saveSettings } = this.props;
+		const { classes, sectionSelected, channels, currentChannel, saveSettings, channelData } = this.props;
 		return (
 			<Drawer type="permanent">
 				<MenuItem className={classes.drawerHeader}>
+					{channelData && <img className={classes.logo} src={channelData.logo} alt="" />}
 					<Select
 						value={currentChannel}
 						fullWidth

@@ -52,8 +52,11 @@ class SettingsComponent extends React.Component {
 		var self = this;
 		this.setState({ channels, commentsAutoplay });
 		this.webview.addEventListener('did-navigate', e => {
-			var url = UrlUtils.parse(e.url);
-			self.props.saveSettings({ PASS: 'oauth:' + querystring.parse(url.hash)['#access_token'] });
+			var url = UrlUtils.parse(e.url),
+				authKey = querystring.parse(url.hash)['#access_token'];
+			if (authKey) {
+				self.props.saveSettings({ PASS: 'oauth:' + authKey });
+			}
 		});
 	}
 

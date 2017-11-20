@@ -14,6 +14,7 @@ import UserListComponent from './UserList.jsx';
 import SettingsComponent from './Settings.jsx';
 import FollowersListComponent from './FollowersList.jsx';
 import { FollowersWatcher } from '../utils/ChatUtils.js';
+import { API } from '../utils/ChatUtils.js';
 
 class MainAppContainer extends React.Component {
 	state = {
@@ -25,7 +26,8 @@ class MainAppContainer extends React.Component {
 		currentChannel: '',
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient: null,
-		FollowersWatcher
+		FollowersWatcher,
+		channelData: null
 	};
 	saveSettings(settings) {
 		var { channels, commentsAutoplay, currentChannel, PASS, USER, TOKEN } = this.state;
@@ -69,6 +71,10 @@ class MainAppContainer extends React.Component {
 
 				TwitchClient.connect()
 					.then(connectData => {
+						API.getChannelInfo(data.currentChannel).then(resp => {
+							console.log('resp', resp);
+							self.setState({ channelData: resp });
+						});
 						self.state.FollowersWatcher.start(data.currentChannel, diff => {
 							console.log('diff', diff);
 						});
@@ -94,7 +100,8 @@ class MainAppContainer extends React.Component {
 				channels,
 				drawerWidth,
 				commentsAutoplay,
-				TwitchClient
+				TwitchClient,
+				channelData
 			} = this.state,
 			propsTopPass = { drawerWidth, channels, currentChannel, commentsAutoplay, TwitchClient },
 			self = this;

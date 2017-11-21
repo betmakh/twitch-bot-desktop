@@ -51,14 +51,13 @@ class MainAppContainer extends React.Component {
 			console.log('data', data);
 			const { currentChannel } = self.state;
 			if (data.PASS && currentChannel !== data.currentChannel) {
-				console.log('data.currentChannel', data.currentChannel);
 				// update connection if selected channel has changed
 				if (self.state.TwitchClient) {
 					self.state.TwitchClient.disconnect();
 				}
 				var TwitchClient = new tmi.client({
 					options: {
-						debug: true
+						debug: false
 					},
 					connection: {
 						reconnect: true
@@ -70,15 +69,11 @@ class MainAppContainer extends React.Component {
 					channels: [data.currentChannel]
 				});
 
+				API.getChannelInfo(data.currentChannel).then(resp => {
+					self.setState({ channelData: resp });
+				});
 				TwitchClient.connect()
 					.then(connectData => {
-						API.getChannelInfo(data.currentChannel).then(resp => {
-							console.log('resp', resp);
-							self.setState({ channelData: resp });
-						});
-						// self.state.FollowersWatcher.start(data.currentChannel, diff => {
-						// 	console.log('diff', diff);
-						// });
 						self.setState({ TwitchClient });
 					})
 					.catch(err => {

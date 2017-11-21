@@ -11,6 +11,7 @@ import Select from 'material-ui/Select';
 import ViewListIcon from 'material-ui-icons/ViewList';
 import { withStyles } from 'material-ui/styles';
 import Divider from 'material-ui/Divider';
+import Avatar from 'material-ui/Avatar';
 
 import {
 	CHAT_COMPONENT,
@@ -24,7 +25,7 @@ const styles = theme => ({
 		background: theme.palette.common.faintBlack
 	},
 	logo: {
-		paddingRight: theme.spacing.unit,
+		marginRight: theme.spacing.unit,
 		maxWidth: theme.spacing.unit * 5
 	},
 	drawerHeader: theme.mixins.toolbar
@@ -40,7 +41,7 @@ class MainMenu extends React.Component {
 		return (
 			<Drawer type="permanent">
 				<MenuItem className={classes.drawerHeader}>
-					{channelData && <img className={classes.logo} src={channelData.logo} alt="" />}
+					{channelData && <Avatar alt="Remy Sharp" src={channelData.logo} className={classes.logo} />}
 					<Select
 						value={currentChannel}
 						fullWidth

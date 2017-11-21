@@ -111,7 +111,7 @@ class ChatComponent extends React.Component {
 			});
 		};
 
-		if (commentsAutoplay && !msg.byOwn) {
+		if (commentsAutoplay) {
 			API.GetMessageAudio(msg.text)
 				.then(url => {
 					msg.audioSrc = url;
@@ -124,10 +124,10 @@ class ChatComponent extends React.Component {
 					addMsg(msg);
 				});
 		} else {
-			if (!msg.byOwn) {
-				BOT(TwitchClient, msg.text);
-			}
 			addMsg(msg);
+		}
+		if (!msg.byOwn) {
+			BOT(TwitchClient, msg.text);
 		}
 	}
 

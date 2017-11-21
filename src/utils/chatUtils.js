@@ -1,5 +1,5 @@
 import googleTTS from 'google-tts-api';
-import 'moment';
+import moment from 'moment';
 
 import { KRAKEN_PREFIX_URL, TOKEN } from './constants.js';
 
@@ -59,7 +59,9 @@ export const API = {
 		});
 	},
 	sendMsg: function(client, msg, channel) {
-		client.say(channel, ' : ' + msg);
+		if (msg && msg.length) {
+			client.say(channel, msg);
+		}
 	}
 };
 
@@ -145,9 +147,10 @@ export const BOT = (client, message, channel) => {
 		if (args[1]) {
 			msg = (args[1].indexOf(config.god) == -1 ? args[1] : userstate.username) + ', ты пидор!';
 		}
-	} else if (message.indexOf(config.USER) != -1) {
-		msg = _.sample(config.messages.ascorbinka);
 	}
+	// else if (message.indexOf(config.USER) != -1) {
+	// 	msg = _.sample(config.messages.ascorbinka);
+	// }
 	API.sendMsg(client, msg, channel);
 
 	return;

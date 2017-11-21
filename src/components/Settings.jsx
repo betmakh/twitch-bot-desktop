@@ -15,13 +15,17 @@ import List, { ListItem, ListItemAvatar, ListItemIcon, ListItemSecondaryAction, 
 import UrlUtils from 'url';
 import querystring from 'querystring';
 
-import { SETTINGS_COMPONENT, AUTH_URL } from '../utils/constants.js';
+import { SETTINGS_COMPONENT, AUTH_URL, TOKEN } from '../utils/constants.js';
 import { styles } from './Chat.jsx';
+import { API } from '../utils/ChatUtils.js';
 
 const stylesLocal = theme =>
 	Object.assign(styles(theme), {
 		spacingBlock: {
 			padding: `0 ${theme.spacing.unit}px`
+		},
+		hidden: {
+			display: 'none'
 		}
 	});
 
@@ -29,7 +33,10 @@ class SettingsComponent extends React.Component {
 	static COMPONENT_NAME = SETTINGS_COMPONENT;
 
 	state = {
-		channels: []
+		channels: [],
+		showLoginPage: false,
+		channelData: null,
+		loginUrl: 'https://twitchapps.com/tmi/'
 	};
 
 	addChannel(event) {
@@ -43,26 +50,41 @@ class SettingsComponent extends React.Component {
 	}
 
 	login(event) {
-		console.log('event', event);
-		// window.open
+		this.setState({ showLoginPage: !this.state.showLoginPage });
+	}
+
+	fetchChannelData(TwitchClient) {
+		if (!TwitchClient) return;
+		var self = this,
+			user = TwitchClient.getUsername();
+		API.getChannelInfo(user).then(resp => {
+			self.setState({ channelData: resp });
+		});
 	}
 
 	componentDidMount() {
-		const { channels, commentsAutoplay } = this.props;
+		const { channels, commentsAutoplay, TwitchClient } = this.props;
 		var self = this;
 		this.setState({ channels, commentsAutoplay });
+		// API.getUserInfo(this.props.PASS).then(resp => {
+		// 	console.log('resp', resp);
+		// });
+		this.fetchChannelData(TwitchClient);
 		this.webview.addEventListener('did-navigate', e => {
 			var url = UrlUtils.parse(e.url),
 				authKey = querystring.parse(url.hash)['#access_token'];
+
 			if (authKey) {
+				self.setState({ showLoginPage: false });
 				self.props.saveSettings({ PASS: 'oauth:' + authKey });
 			}
 		});
 	}
 
 	componentWillReceiveProps(nextProps) {
-		const { channels, commentsAutoplay } = nextProps;
+		const { channels, commentsAutoplay, TwitchClient } = nextProps;
 		this.setState({ channels, commentsAutoplay });
+		this.fetchChannelData(TwitchClient);
 	}
 
 	removeChannel(event) {
@@ -74,7 +96,7 @@ class SettingsComponent extends React.Component {
 
 	render() {
 		const { drawerWidth, classes, saveSettings } = this.props,
-			{ channels, commentsAutoplay } = this.state;
+			{ channels, commentsAutoplay, showLoginPage, channelData, loginUrl } = this.state;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -89,70 +111,98 @@ class SettingsComponent extends React.Component {
 					{/*<Grid container spacing={0} alignItems={baseline}></Grid>*/}
 					<Grid item xs={12} className={classes.spacingBlock}>
 						<Paper className={classes.spacingBlock}>
-							<Grid container alignItems="baseline">
-								<Grid item xs={12} sm={10} className={classes.spacingBlock}>
-									<TextField
-										id="channelNameField"
-										placeholder="Channel name"
-										className={classes.textField}
-										inputRef={ref => (this.ChannelNameField = ref)}
-										margin="normal"
-										fullWidth
+							<Grid container>
+								<Grid md={6} xs={12} item lg={4}>
+									<Typography type="headline" gutterBottom>
+										Channels list
+									</Typography>
+									<Grid container alignItems="baseline">
+										<Grid item xs={12} sm={10} className={classes.spacingBlock}>
+											<TextField
+												id="channelNameField"
+												placeholder="Channel name"
+												className={classes.textField}
+												inputRef={ref => (this.ChannelNameField = ref)}
+												margin="normal"
+												fullWidth
+											/>
+										</Grid>
+
+										<Grid item xs={12} sm={2} className={classes.spacingBlock}>
+											<Button style={{ width: '100%' }} onClick={this.addChannel.bind(this)}>
+												Add
+											</Button>
+										</Grid>
+									</Grid>
+									<List dense>
+										{channels.map(channelName => (
+											<ListItem key={channelName} button>
+												<ListItemText primary={channelName} />
+												<ListItemSecondaryAction>
+													<IconButton aria-label={channelName} onClick={this.removeChannel.bind(this)}>
+														<DeleteIcon />
+													</IconButton>
+												</ListItemSecondaryAction>
+											</ListItem>
+										))}
+									</List>
+								</Grid>
+								<Grid md={6} xs={12} item lg={4}>
+									<FormControlLabel
+										control={
+											<Checkbox
+												inputRef={ref => (this.ChatAutoplay = ref)}
+												checked={commentsAutoplay}
+												onChange={event => this.setState({ commentsAutoplay: event.target.checked })}
+											/>
+										}
+										label="Translate text to speach"
 									/>
 								</Grid>
+								<Grid md={6} xs={12} item lg={4}>
+									{channelData &&
+										!showLoginPage && (
+											<div>
+												<Typography align="center" type="title" gutterBottom>
+													<img src={channelData.logo} style={{ maxWidth: '100%' }} alt="" />
+													<br />
+													{channelData.display_name}
+												</Typography>
+											</div>
+										)}
+									{!showLoginPage && (
+										<Button color="primary" onClick={this.login.bind(this)}>
+											{channelData ? 'Change login' : 'Login'}
+										</Button>
+									)}
+								</Grid>
+								<Grid item xs={12}>
+									{showLoginPage && (
+										<Button color="primary" onClick={this.login.bind(this)}>
+											Back
+										</Button>
+									)}
 
-								<Grid item xs={12} sm={2} className={classes.spacingBlock}>
-									<Button style={{ width: '100%' }} onClick={this.addChannel.bind(this)}>
-										Add
-									</Button>
+									<webview
+										className={!showLoginPage ? classes.hidden : ''}
+										ref={el => (this.webview = el)}
+										src={loginUrl}
+										style={{ height: '500px' }}
+									/>
 								</Grid>
 							</Grid>
-							<Grid md={6} xs={12} item lg={4}>
-								<List dense>
-									{channels.map(channelName => (
-										<ListItem key={channelName} button>
-											<ListItemText primary={channelName} />
-											<ListItemSecondaryAction>
-												<IconButton
-													aria-label={channelName}
-													onClick={this.removeChannel.bind(this)}
-												>
-													<DeleteIcon />
-												</IconButton>
-											</ListItemSecondaryAction>
-										</ListItem>
-									))}
-								</List>
-							</Grid>
-							<Grid md={6} xs={12} item lg={4}>
-								<FormControlLabel
-									control={
-										<Checkbox
-											inputRef={ref => (this.ChatAutoplay = ref)}
-											checked={commentsAutoplay}
-											onChange={event =>
-												this.setState({ commentsAutoplay: event.target.checked })
-											}
-										/>
-									}
-									label="Translate text to speach"
+						</Paper>
+						<br />
+						<Paper>
+							<Grid item xs={12}>
+								<webview
+									className={!showLoginPage ? classes.hidden : ''}
+									ref={el => (this.webview = el)}
+									src={loginUrl}
+									style={{ height: '500px' }}
 								/>
 							</Grid>
 						</Paper>
-						<Paper>
-							<Grid item xs={12}>
-								<Button color="primary" onClick={this.login.bind(this)}>
-									Login
-								</Button>
-							</Grid>
-						</Paper>
-						<Grid item xs={12}>
-							<webview
-								ref={el => (this.webview = el)}
-								src={'https://twitchapps.com/tmi/'}
-								style={{ height: '500px' }}
-							/>
-						</Grid>
 					</Grid>
 					<Grid item xs={12} className={classes.spacingBlock}>
 						<br />

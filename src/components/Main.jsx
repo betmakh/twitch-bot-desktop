@@ -64,7 +64,8 @@ class MainAppContainer extends React.Component {
 						reconnect: true
 					},
 					identity: {
-						password: data.PASS
+						password: data.PASS,
+						username: 'null'
 					},
 					channels: [data.currentChannel]
 				});
@@ -75,9 +76,9 @@ class MainAppContainer extends React.Component {
 							console.log('resp', resp);
 							self.setState({ channelData: resp });
 						});
-						self.state.FollowersWatcher.start(data.currentChannel, diff => {
-							console.log('diff', diff);
-						});
+						// self.state.FollowersWatcher.start(data.currentChannel, diff => {
+						// 	console.log('diff', diff);
+						// });
 						self.setState({ TwitchClient });
 					})
 					.catch(err => {
@@ -101,9 +102,10 @@ class MainAppContainer extends React.Component {
 				drawerWidth,
 				commentsAutoplay,
 				TwitchClient,
-				channelData
+				channelData,
+				PASS
 			} = this.state,
-			propsTopPass = { drawerWidth, channels, currentChannel, commentsAutoplay, TwitchClient },
+			propsTopPass = { drawerWidth, channels, currentChannel, commentsAutoplay, TwitchClient, channelData, PASS },
 			self = this;
 
 		var selectedSectionMarkup = null;
@@ -115,9 +117,7 @@ class MainAppContainer extends React.Component {
 				selectedSectionMarkup = <UserListComponent {...propsTopPass} />;
 				break;
 			case SettingsComponent.COMPONENT_NAME:
-				selectedSectionMarkup = (
-					<SettingsComponent {...propsTopPass} saveSettings={this.saveSettings.bind(this)} />
-				);
+				selectedSectionMarkup = <SettingsComponent {...propsTopPass} saveSettings={this.saveSettings.bind(this)} />;
 				break;
 			case FollowersListComponent.COMPONENT_NAME:
 				selectedSectionMarkup = <FollowersListComponent {...propsTopPass} />;

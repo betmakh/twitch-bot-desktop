@@ -16,7 +16,7 @@ import PlayIcon from 'material-ui-icons/PlayCircleOutline';
 import VolumeOffIcon from 'material-ui-icons/VolumeOff';
 import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 
-import { API } from '../utils/ChatUtils.js';
+import { API, BOT } from '../utils/ChatUtils.js';
 import { CHAT_COMPONENT } from '../utils/constants.js';
 
 export const styles = theme => ({
@@ -94,7 +94,7 @@ class ChatComponent extends React.Component {
 
 	messageReceived(msg) {
 		var { messages, audioQueue } = this.state,
-			{ commentsAutoplay, maxMessages } = this.props,
+			{ commentsAutoplay, maxMessages, TwitchClient } = this.props,
 			self = this;
 
 		var addMsg = msg => {
@@ -111,7 +111,7 @@ class ChatComponent extends React.Component {
 			});
 		};
 
-		if (commentsAutoplay) {
+		if (commentsAutoplay && !msg.byOwn) {
 			API.GetMessageAudio(msg.text)
 				.then(url => {
 					msg.audioSrc = url;
@@ -124,6 +124,9 @@ class ChatComponent extends React.Component {
 					addMsg(msg);
 				});
 		} else {
+			if (!msg.byOwn) {
+				BOT(TwitchClient, msg.text);
+			}
 			addMsg(msg);
 		}
 	}
@@ -147,8 +150,9 @@ class ChatComponent extends React.Component {
 		const self = this,
 			{ TwitchClient, currentChannel } = nextProps;
 
-		if (TwitchClient) {
+		if (TwitchClient !== this.props.TwitchClient) {
 			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
+				console.log('message', message);
 				// if (currentChannel === channel.substring(1)) {
 				self.messageReceived({
 					user: userstate,
@@ -170,7 +174,7 @@ class ChatComponent extends React.Component {
 	}
 
 	render() {
-		const { classes, drawerWidth, commentsAutoplay, channels, currentChannel, saveSettings } = this.props;
+		const { classes, drawerWidth, commentsAutoplay, channels, currentChannel, saveSettings, channelData } = this.props;
 		const { audioQueue, messages } = this.state;
 
 		return (
@@ -186,7 +190,7 @@ class ChatComponent extends React.Component {
 				<AppBar position="static" color="primary" className={classes.header}>
 					<Toolbar>
 						<Typography type="title" color="inherit">
-							{currentChannel}
+							{channelData ? channelData.status : 'Connecting...'}
 						</Typography>
 
 						<IconButton onClick={this.toggleAutoplay.bind(this)}>
@@ -205,22 +209,14 @@ class ChatComponent extends React.Component {
 				<Grid container spacing={0} className={classes.chatBody} ref>
 					{messages.length ? (
 						messages.map((msg, index) => (
-							<Grid
-								item
-								xs={12}
-								key={msg.id}
-								ref={index === messages.length - 1 ? this.scrollToBottom : null}
-							>
+							<Grid item xs={12} key={msg.id} ref={index === messages.length - 1 ? this.scrollToBottom : null}>
 								<Paper className={classes.card}>
 									<Typography type="title" gutterBottom>
 										{msg.user.username}
 									</Typography>
 									<Typography gutterBottom>{msg.text}</Typography>
 									{msg.audioSrc ? (
-										<IconButton
-											className={classes.playButton}
-											onClick={this.queueMsg.bind(this, msg, false)}
-										>
+										<IconButton className={classes.playButton} onClick={this.queueMsg.bind(this, msg, false)}>
 											<PlayIcon />
 										</IconButton>
 									) : null}

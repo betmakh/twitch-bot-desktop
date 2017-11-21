@@ -77,7 +77,6 @@ class UserListComponent extends React.Component {
 		});
 		this._isMounted = true;
 		this.refreshList();
-		console.log('this.refreshList', this.refreshList);
 	}
 
 	// indicate component removed to stop handle async events

@@ -131,11 +131,19 @@ class ChatComponent extends React.Component {
 		}
 	}
 
+	componentWillUnmount() {
+		var { TwitchClient } = this.props;
+		if (TwitchClient) {
+			TwitchClient.disconnect();
+		}
+	}
 	componentWillMount() {
 		const self = this,
 			{ TwitchClient, currentChannel } = this.props;
 
 		if (TwitchClient) {
+			TwitchClient.connect();
+
 			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
 				self.messageReceived({
 					user: userstate,
@@ -151,6 +159,8 @@ class ChatComponent extends React.Component {
 			{ TwitchClient, currentChannel } = nextProps;
 
 		if (TwitchClient !== this.props.TwitchClient) {
+			TwitchClient.connect();
+
 			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
 				console.log('message', message);
 				// if (currentChannel === channel.substring(1)) {

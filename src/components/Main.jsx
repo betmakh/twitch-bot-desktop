@@ -48,16 +48,12 @@ class MainAppContainer extends React.Component {
 		ipcRenderer.send('settings-request');
 
 		ipcRenderer.on('settings-updated', (event, data) => {
-			console.log('data', data);
 			const { currentChannel } = self.state;
 			if (data.PASS && currentChannel !== data.currentChannel) {
 				// update connection if selected channel has changed
-				if (self.state.TwitchClient) {
-					self.state.TwitchClient.disconnect();
-				}
 				var TwitchClient = new tmi.client({
 					options: {
-						debug: false
+						debug: true
 					},
 					connection: {
 						reconnect: true
@@ -69,17 +65,11 @@ class MainAppContainer extends React.Component {
 					channels: [data.currentChannel]
 				});
 
-				API.getChannelInfo(data.currentChannel).then(resp => {
-					self.setState({ channelData: resp });
-				});
-				TwitchClient.connect()
-					.then(connectData => {
-						self.setState({ TwitchClient });
-					})
-					.catch(err => {
-						console.log('err', err);
-					});
+				self.setState({ TwitchClient });
 			}
+			API.getChannelInfo(data.currentChannel).then(resp => {
+				self.setState({ channelData: resp });
+			});
 			self.setState(data);
 		});
 

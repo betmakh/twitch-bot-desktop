@@ -58,15 +58,23 @@ class SettingsComponent extends React.Component {
 		var { showLoginPage, loginUrl } = this.state,
 			{ PASS } = this.props,
 			self = this;
+
 		if (!showLoginPage) {
-			if (PASS && PASS.length) {
-				self.props.saveSettings({ PASS: null });
-				API.revokeUserAccess(PASS).then(resp => {
-					this.setState({ showLoginPage: !showLoginPage });
+			fetch(AUTH_URL).then(resp => {
+				this.setState({
+					loginUrl: resp.url,
+					showLoginPage: true
 				});
-			} else {
-				this.setState({ showLoginPage: !showLoginPage });
-			}
+				console.log('resp', resp.url);
+			});
+			// if (PASS && PASS.length) {
+			// 	self.props.saveSettings({ PASS: null });
+			// 	API.revokeUserAccess(PASS).then(resp => {
+			// 		this.setState({ showLoginPage: !showLoginPage });
+			// 	});
+			// } else {
+			// 	this.setState({ showLoginPage: !showLoginPage });
+			// }
 		} else {
 			this.setState({ showLoginPage: !showLoginPage });
 		}
@@ -105,18 +113,12 @@ class SettingsComponent extends React.Component {
 	webViewListener(webView) {
 		var self = this;
 		if (!webView) return;
-		webView.src = this.state.loginUrl + '&state=' + Date.now();
-		console.log('webView', webView.src);
-		webView.addEventListener('did-navigate', e => {
+
+		webView.addEventListener('did-get-redirect-request', e => {
 			console.log('e', e);
-		});
-		webView.addEventListener('did-start-loading', e => {
-			console.log('e', e);
-		});
-		webView.addEventListener('will-navigate', e => {
-			var url = UrlUtils.parse(e.url),
-				authKey = querystring.parse(url.hash)['#access_token'];
-			console.log('url', url);
+			var url = UrlUtils.parse(e.newURL),
+				hash = url.hash && url.hash.substr(1),
+				authKey = hash && querystring.parse(hash)['access_token'];
 
 			if (authKey) {
 				self.setState({ showLoginPage: false });
@@ -206,7 +208,7 @@ class SettingsComponent extends React.Component {
 					</Grid>
 					{showLoginPage && (
 						<div>
-							<webview ref={el => this.webViewListener(el)} style={{ height: '500px' }} />
+							<webview src={loginUrl} ref={el => this.webViewListener(el)} style={{ height: '500px' }} />
 						</div>
 					)}
 				</div>

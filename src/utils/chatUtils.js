@@ -1,7 +1,8 @@
 import googleTTS from 'google-tts-api';
 import moment from 'moment';
+import querystring from 'querystring';
 
-import { KRAKEN_PREFIX_URL, TOKEN } from './constants.js';
+import { KRAKEN_PREFIX_URL, TOKEN, TWITCH_API_PREFIX_URL } from './constants.js';
 
 export const API = {
 	/**
@@ -62,7 +63,24 @@ export const API = {
 		if (msg && msg.length) {
 			client.say(channel, msg);
 		}
-	}
+	},
+	revokeUserAccess: token =>
+		fetch(
+			`${KRAKEN_PREFIX_URL}oauth2/revoke?${querystring.stringify({
+				client_id: TOKEN,
+				token
+			})}`,
+			{
+				method: 'POST'
+			}
+		),
+	getUserInfo: token =>
+		fetch(`${TWITCH_API_PREFIX_URL}users`, {
+			headers: {
+				'Client-ID': TOKEN,
+				Authorization: `Bearer ${token}`
+			}
+		}).then(resp => resp.json())
 };
 
 export const FollowersWatcher = (() => {

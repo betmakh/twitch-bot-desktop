@@ -8,6 +8,7 @@ import Paper from 'material-ui/Paper';
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
 import IconButton from 'material-ui/IconButton';
+import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import DeleteIcon from 'material-ui-icons/Delete';
 import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import Checkbox from 'material-ui/Checkbox';
@@ -22,10 +23,14 @@ import { API } from '../utils/ChatUtils.js';
 const stylesLocal = theme =>
 	Object.assign(styles(theme), {
 		spacingBlock: {
-			padding: `0 ${theme.spacing.unit}px`
+			paddingRight: theme.spacing.unit,
+			paddingLeft: theme.spacing.unit
 		},
 		hidden: {
 			display: 'none'
+		},
+		media: {
+			height: 200
 		}
 	});
 
@@ -35,8 +40,8 @@ class SettingsComponent extends React.Component {
 	state = {
 		channels: [],
 		showLoginPage: false,
-		channelData: null,
-		loginUrl: 'https://twitchapps.com/tmi/'
+		userData: null,
+		loginUrl: AUTH_URL
 	};
 
 	addChannel(event) {
@@ -50,41 +55,82 @@ class SettingsComponent extends React.Component {
 	}
 
 	login(event) {
-		this.setState({ showLoginPage: !this.state.showLoginPage });
+		var { showLoginPage, loginUrl } = this.state,
+			{ PASS } = this.props,
+			self = this;
+		if (!showLoginPage) {
+			if (PASS && PASS.length) {
+				self.props.saveSettings({ PASS: null });
+				API.revokeUserAccess(PASS).then(resp => {
+					this.setState({ showLoginPage: !showLoginPage });
+				});
+			} else {
+				this.setState({ showLoginPage: !showLoginPage });
+			}
+		} else {
+			this.setState({ showLoginPage: !showLoginPage });
+		}
 	}
 
-	fetchChannelData(TwitchClient) {
-		if (!TwitchClient) return;
-		var self = this,
-			user = TwitchClient.getUsername();
-		API.getChannelInfo(user).then(resp => {
-			self.setState({ channelData: resp });
+	fetchuserData(token) {
+		if (!token) return;
+		var self = this;
+		API.getUserInfo(token).then(resp => {
+			if (resp.data[0]) {
+				self.setState({ userData: resp.data[0] });
+			}
 		});
 	}
 
 	componentDidMount() {
-		const { channels, commentsAutoplay, TwitchClient } = this.props;
+		const { channels, commentsAutoplay, PASS } = this.props;
 		var self = this;
 		this.setState({ channels, commentsAutoplay });
 		// API.getUserInfo(this.props.PASS).then(resp => {
 		// 	console.log('resp', resp);
 		// });
-		this.fetchChannelData(TwitchClient);
-		this.webview.addEventListener('did-navigate', e => {
+		this.fetchuserData(PASS);
+		// this.webview.addEventListener('will-navigate', e => {
+		// 	var url = UrlUtils.parse(e.url),
+		// 		authKey = querystring.parse(url.hash)['#access_token'];
+		// 	console.log('url', url);
+
+		// 	if (authKey) {
+		// 		self.setState({ showLoginPage: false });
+		// 		self.props.saveSettings({ PASS: authKey });
+		// 	}
+		// });
+	}
+
+	webViewListener(webView) {
+		var self = this;
+		if (!webView) return;
+		webView.src = this.state.loginUrl + '&state=' + Date.now();
+		console.log('webView', webView.src);
+		webView.addEventListener('did-navigate', e => {
+			console.log('e', e);
+		});
+		webView.addEventListener('did-start-loading', e => {
+			console.log('e', e);
+		});
+		webView.addEventListener('will-navigate', e => {
 			var url = UrlUtils.parse(e.url),
 				authKey = querystring.parse(url.hash)['#access_token'];
+			console.log('url', url);
 
 			if (authKey) {
 				self.setState({ showLoginPage: false });
-				self.props.saveSettings({ PASS: 'oauth:' + authKey });
+				self.props.saveSettings({ PASS: authKey });
 			}
 		});
 	}
 
 	componentWillReceiveProps(nextProps) {
-		const { channels, commentsAutoplay, TwitchClient } = nextProps;
+		const { channels, commentsAutoplay, PASS } = nextProps;
 		this.setState({ channels, commentsAutoplay });
-		this.fetchChannelData(TwitchClient);
+		if (this.props.PASS !== PASS) {
+			this.fetchuserData(PASS);
+		}
 	}
 
 	removeChannel(event) {
@@ -96,7 +142,7 @@ class SettingsComponent extends React.Component {
 
 	render() {
 		const { drawerWidth, classes, saveSettings } = this.props,
-			{ channels, commentsAutoplay, showLoginPage, channelData, loginUrl } = this.state;
+			{ channels, commentsAutoplay, showLoginPage, userData, loginUrl } = this.state;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -107,8 +153,65 @@ class SettingsComponent extends React.Component {
 						</Typography>
 					</Toolbar>
 				</AppBar>
-				<Grid container spacing={0} className={classes.chatBody}>
-					{/*<Grid container spacing={0} alignItems={baseline}></Grid>*/}
+				<div className={classes.chatBody + ' ' + classes.spacingBlock} style={{ width: '100%' }}>
+					<Grid container>
+						<Grid md={6} xs={12} item lg={4}>
+							<Card>
+								{userData && (
+									<CardMedia
+										className={classes.media}
+										image={userData.profile_image_url}
+										title={userData.display_name}
+									/>
+								)}
+								<CardContent>
+									{userData && (
+										<Typography type="headline" component="h2">
+											{userData.display_name}
+										</Typography>
+									)}
+									<Typography component="p">Your bot is going to send messages from this account</Typography>
+								</CardContent>
+								<CardActions>
+									<Button color="primary" onClick={this.login.bind(this)}>
+										{userData ? 'Change login' : 'Login'}
+									</Button>
+								</CardActions>
+							</Card>
+						</Grid>
+						<Grid md={6} xs={12} item lg={4}>
+							<Card>
+								{userData && (
+									<CardMedia
+										className={classes.media}
+										image={userData.profile_image_url}
+										title={userData.display_name}
+									/>
+								)}
+								<CardContent>
+									{userData && (
+										<Typography type="headline" component="h2">
+											{userData.display_name}
+										</Typography>
+									)}
+									<Typography component="p">Your bot is going to send messages from this account</Typography>
+								</CardContent>
+								<CardActions>
+									<Button color="primary" onClick={this.login.bind(this)}>
+										{userData ? 'Change login' : 'Login'}
+									</Button>
+								</CardActions>
+							</Card>
+						</Grid>
+					</Grid>
+					{showLoginPage && (
+						<div>
+							<webview ref={el => this.webViewListener(el)} style={{ height: '500px' }} />
+						</div>
+					)}
+				</div>
+				{/*				<Grid container spacing={0} className={classes.chatBody}>
+					{/*<Grid container spacing={0} alignItems={baseline}></Grid>
 					<Grid item xs={12} className={classes.spacingBlock}>
 						<Paper className={classes.spacingBlock}>
 							<Grid container>
@@ -193,6 +296,24 @@ class SettingsComponent extends React.Component {
 							</Grid>
 						</Paper>
 						<br />
+						{channelData && (
+							<div>
+								<Card>
+									<CardMedia className={classes.media} image={channelData.logo} title={channelData.display_name} />
+									<CardContent>
+										<Typography type="headline" component="h2">
+											{channelData.display_name}
+										</Typography>
+										<Typography component="p">Your bot is going to send messages from this account</Typography>
+									</CardContent>
+									<CardActions>
+										<Button color="primary" onClick={this.login.bind(this)}>
+											{channelData ? 'Change login' : 'Login'}
+										</Button>
+									</CardActions>
+								</Card>
+							</div>
+						)}
 						<Paper>
 							<Grid item xs={12}>
 								<webview
@@ -215,7 +336,7 @@ class SettingsComponent extends React.Component {
 							Save
 						</Button>
 					</Grid>
-				</Grid>
+				</Grid>*/}
 			</div>
 		);
 	}

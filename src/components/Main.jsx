@@ -49,8 +49,11 @@ class MainAppContainer extends React.Component {
 
 		ipcRenderer.on('settings-updated', (event, data) => {
 			const { currentChannel } = self.state;
-			if (data.PASS && currentChannel !== data.currentChannel) {
+			if (data.PASS && (currentChannel !== data.currentChannel || !self.state.TwitchClient)) {
 				// update connection if selected channel has changed
+				if (self.state.TwitchClient) {
+					self.state.TwitchClient.disconnect();
+				}
 				var TwitchClient = new tmi.client({
 					options: {
 						debug: true
@@ -59,7 +62,7 @@ class MainAppContainer extends React.Component {
 						reconnect: true
 					},
 					identity: {
-						password: data.PASS,
+						password: `oauth:${data.PASS}`,
 						username: 'null'
 					},
 					channels: [data.currentChannel]

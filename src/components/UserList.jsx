@@ -12,6 +12,7 @@ import Menu, { MenuItem } from 'material-ui/Menu';
 import { CircularProgress } from 'material-ui/Progress';
 import MoreVertIcon from 'material-ui-icons/MoreVert';
 import Tooltip from 'material-ui/Tooltip';
+import Divider from 'material-ui/Divider';
 
 import RefreshIcon from 'material-ui-icons/Refresh';
 
@@ -23,6 +24,9 @@ export const stylesLocal = theme =>
 	Object.assign(styles(theme), {
 		searchFieldContainer: {
 			padding: '0.5em'
+		},
+		listItem: {
+			position: 'relative'
 		},
 		textCenter: {
 			textAlign: 'center'
@@ -39,22 +43,21 @@ const UserGroupList = withStyles(stylesLocal)(props => {
 				</Typography>
 			</Grid>
 			{users.map(username => (
-				<Grid key={username} item xs={12} sm={6}>
-					<Paper className={classes.card}>
-						<br />
-						<Typography type="title" gutterBottom>
-							{username}
-						</Typography>
-						<IconButton
-							className={classes.playButton}
-							aria-label="More"
-							aria-owns={open ? 'long-menu' : null}
-							aria-haspopup="true"
-							onClick={onUserOptionsOpen(username)}
-						>
-							<MoreVertIcon />
-						</IconButton>
-					</Paper>
+				<Grid key={username} item xs={12} sm={6} className={classes.listItem}>
+					<Divider />
+					<br />
+					<Typography type="title" gutterBottom>
+						{username}
+					</Typography>
+					<IconButton
+						className={classes.playButton}
+						aria-label="More"
+						aria-owns={open ? 'long-menu' : null}
+						aria-haspopup="true"
+						onClick={onUserOptionsOpen(username)}
+					>
+						<MoreVertIcon />
+					</IconButton>
 				</Grid>
 			))}
 		</Grid>

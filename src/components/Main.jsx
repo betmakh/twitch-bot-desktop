@@ -27,17 +27,19 @@ class MainAppContainer extends React.Component {
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient: null,
 		FollowersWatcher,
-		channelData: null
+		channelData: null,
+		followersNotification: true
 	};
 	saveSettings(settings) {
-		var { channels, commentsAutoplay, currentChannel, PASS, USER, TOKEN } = this.state;
+		var { channels, commentsAutoplay, currentChannel, botEnabled, PASS, TOKEN, followersNotification } = this.state;
 		ipcRenderer.send('settings-save', {
 			channels,
 			commentsAutoplay,
 			currentChannel,
 			PASS,
-			USER,
 			TOKEN,
+			botEnabled,
+			followersNotification,
 			...settings
 		});
 	}
@@ -48,7 +50,15 @@ class MainAppContainer extends React.Component {
 		ipcRenderer.send('settings-request');
 
 		ipcRenderer.on('settings-updated', (event, data) => {
-			const { currentChannel } = self.state;
+			console.log('data', data);
+			const { currentChannel, FollowersWatcher } = self.state;
+			if (!data.followersNotification) {
+				FollowersWatcher.stop();
+			} else {
+				FollowersWatcher.start(data.currentChannel, follows => {
+					console.log('follows', follows);
+				});
+			}
 			if (data.PASS && (currentChannel !== data.currentChannel || !self.state.TwitchClient)) {
 				// update connection if selected channel has changed
 				if (self.state.TwitchClient) {
@@ -91,21 +101,31 @@ class MainAppContainer extends React.Component {
 				commentsAutoplay,
 				TwitchClient,
 				channelData,
-				PASS
+				PASS,
+				followersNotification
 			} = this.state,
-			propsTopPass = { drawerWidth, channels, currentChannel, commentsAutoplay, TwitchClient, channelData, PASS },
+			propsTopPass = {
+				drawerWidth,
+				channels,
+				currentChannel,
+				commentsAutoplay,
+				TwitchClient,
+				channelData,
+				PASS,
+				followersNotification
+			},
 			self = this;
 
 		var selectedSectionMarkup = null;
 		switch (sectionSelected) {
 			case ChatComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <ChatComponent {...propsTopPass} saveSettings={this.saveSettings.bind(this)} />;
+				selectedSectionMarkup = <ChatComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />;
 				break;
 			case UserListComponent.COMPONENT_NAME:
 				selectedSectionMarkup = <UserListComponent {...propsTopPass} />;
 				break;
 			case SettingsComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <SettingsComponent {...propsTopPass} saveSettings={this.saveSettings.bind(this)} />;
+				selectedSectionMarkup = <SettingsComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />;
 				break;
 			case FollowersListComponent.COMPONENT_NAME:
 				selectedSectionMarkup = <FollowersListComponent {...propsTopPass} />;

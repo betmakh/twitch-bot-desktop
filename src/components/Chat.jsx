@@ -94,9 +94,10 @@ class ChatComponent extends React.Component {
 
 	messageReceived(msg) {
 		var { messages, audioQueue } = this.state,
-			{ commentsAutoplay, maxMessages, TwitchClient } = this.props,
+			{ commentsAutoplay, maxMessages, TwitchClient, botEnabled } = this.props,
 			self = this;
 
+		console.log('botEnabled', botEnabled);
 		var addMsg = msg => {
 			messages.push(msg);
 			if (commentsAutoplay) {
@@ -111,7 +112,7 @@ class ChatComponent extends React.Component {
 			});
 		};
 
-		if (commentsAutoplay) {
+		if (commentsAutoplay && !msg.byOwn) {
 			API.GetMessageAudio(msg.text)
 				.then(url => {
 					msg.audioSrc = url;
@@ -126,14 +127,15 @@ class ChatComponent extends React.Component {
 		} else {
 			addMsg(msg);
 		}
-		if (!msg.byOwn) {
-			BOT(TwitchClient, msg.text);
+		if (!msg.byOwn && this.props.botEnabled) {
+			BOT(TwitchClient, msg.text, msg.user);
 		}
 	}
 
 	componentWillUnmount() {
 		var { TwitchClient } = this.props;
 		if (TwitchClient) {
+			TwitchClient.removeAllListeners('chat');
 			TwitchClient.disconnect();
 		}
 	}
@@ -144,7 +146,6 @@ class ChatComponent extends React.Component {
 
 		if (TwitchClient) {
 			TwitchClient.connect();
-
 			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
 				self.messageReceived({
 					user: userstate,
@@ -164,6 +165,9 @@ class ChatComponent extends React.Component {
 		const { TwitchClient } = nextProps;
 
 		if (TwitchClient !== this.props.TwitchClient) {
+			if (this.props.TwitchClient) {
+				this.props.TwitchClient.removeAllListeners('chat');
+			}
 			this.addChatListener(nextProps);
 		}
 	}

@@ -38,19 +38,18 @@ class SettingsComponent extends React.Component {
 	static COMPONENT_NAME = SETTINGS_COMPONENT;
 
 	state = {
-		channels: [],
 		showLoginPage: false,
 		userData: null,
 		loginUrl: AUTH_URL
 	};
 
 	addChannel(event) {
-		var { channels } = this.state,
+		var { channels, saveSettings } = this.props,
 			ChannelNameValue = this.ChannelNameField.value;
 		if (ChannelNameValue.length && !~channels.indexOf(ChannelNameValue.toLowerCase())) {
 			channels.push(ChannelNameValue.toLowerCase());
 			this.ChannelNameField.value = '';
-			this.setState({ channels });
+			saveSettings({ channels });
 		}
 	}
 
@@ -65,49 +64,32 @@ class SettingsComponent extends React.Component {
 					loginUrl: resp.url,
 					showLoginPage: true
 				});
-				console.log('resp', resp.url);
 			});
-			// if (PASS && PASS.length) {
-			// 	self.props.saveSettings({ PASS: null });
-			// 	API.revokeUserAccess(PASS).then(resp => {
-			// 		this.setState({ showLoginPage: !showLoginPage });
-			// 	});
-			// } else {
-			// 	this.setState({ showLoginPage: !showLoginPage });
-			// }
 		} else {
 			this.setState({ showLoginPage: !showLoginPage });
 		}
 	}
 
+	logout() {
+		this.props.saveSettings({ PASS: null });
+	}
+
 	fetchuserData(token) {
-		if (!token) return;
-		var self = this;
-		API.getUserInfo(token).then(resp => {
-			if (resp.data[0]) {
-				self.setState({ userData: resp.data[0] });
-			}
-		});
+		if (!token) {
+			this.setState({ userData: null });
+		} else {
+			var self = this;
+			API.getUserInfo(token).then(resp => {
+				if (resp.data[0]) {
+					self.setState({ userData: resp.data[0] });
+				}
+			});
+		}
 	}
 
 	componentDidMount() {
-		const { channels, commentsAutoplay, PASS } = this.props;
-		var self = this;
-		this.setState({ channels, commentsAutoplay });
-		// API.getUserInfo(this.props.PASS).then(resp => {
-		// 	console.log('resp', resp);
-		// });
+		const { PASS } = this.props;
 		this.fetchuserData(PASS);
-		// this.webview.addEventListener('will-navigate', e => {
-		// 	var url = UrlUtils.parse(e.url),
-		// 		authKey = querystring.parse(url.hash)['#access_token'];
-		// 	console.log('url', url);
-
-		// 	if (authKey) {
-		// 		self.setState({ showLoginPage: false });
-		// 		self.props.saveSettings({ PASS: authKey });
-		// 	}
-		// });
 	}
 
 	webViewListener(webView) {
@@ -143,8 +125,16 @@ class SettingsComponent extends React.Component {
 	}
 
 	render() {
-		const { drawerWidth, classes, saveSettings } = this.props,
-			{ channels, commentsAutoplay, showLoginPage, userData, loginUrl } = this.state;
+		const {
+				channels,
+				drawerWidth,
+				classes,
+				botEnabled,
+				saveSettings,
+				followersNotification,
+				commentsAutoplay
+			} = this.props,
+			{ showLoginPage, userData, loginUrl } = this.state;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -178,31 +168,87 @@ class SettingsComponent extends React.Component {
 									<Button color="primary" onClick={this.login.bind(this)}>
 										{userData ? 'Change login' : 'Login'}
 									</Button>
+									{userData ? (
+										<Button color="primary" onClick={this.logout.bind(this)}>
+											Logout
+										</Button>
+									) : null}
 								</CardActions>
 							</Card>
 						</Grid>
 						<Grid md={6} xs={12} item lg={4}>
 							<Card>
-								{userData && (
-									<CardMedia
-										className={classes.media}
-										image={userData.profile_image_url}
-										title={userData.display_name}
-									/>
-								)}
 								<CardContent>
-									{userData && (
-										<Typography type="headline" component="h2">
-											{userData.display_name}
-										</Typography>
-									)}
-									<Typography component="p">Your bot is going to send messages from this account</Typography>
+									<Typography type="headline" gutterBottom>
+										Channels list
+									</Typography>
+									<Grid container alignItems="baseline">
+										<Grid item xs={12} sm={8} className={classes.spacingBlock}>
+											<TextField
+												id="channelNameField"
+												placeholder="Channel name"
+												className={classes.textField}
+												inputRef={ref => (this.ChannelNameField = ref)}
+												margin="normal"
+												fullWidth
+											/>
+										</Grid>
+
+										<Grid item xs={12} sm={4} className={classes.spacingBlock}>
+											<Button style={{ width: '100%' }} onClick={this.addChannel.bind(this)}>
+												Add
+											</Button>
+										</Grid>
+									</Grid>
+									<List dense>
+										{channels.map(channelName => (
+											<ListItem key={channelName} button>
+												<ListItemText primary={channelName} />
+												<ListItemSecondaryAction>
+													<IconButton aria-label={channelName} onClick={this.removeChannel.bind(this)}>
+														<DeleteIcon />
+													</IconButton>
+												</ListItemSecondaryAction>
+											</ListItem>
+										))}
+									</List>
 								</CardContent>
-								<CardActions>
-									<Button color="primary" onClick={this.login.bind(this)}>
-										{userData ? 'Change login' : 'Login'}
-									</Button>
-								</CardActions>
+							</Card>
+						</Grid>
+						<Grid md={6} xs={12} item lg={4}>
+							<Card>
+								<CardContent>
+									<Typography type="headline" gutterBottom>
+										Chat settings
+									</Typography>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={commentsAutoplay}
+												onChange={event => saveSettings({ commentsAutoplay: event.target.checked })}
+											/>
+										}
+										label="Translate text to speach"
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={followersNotification}
+												onChange={event => saveSettings({ followersNotification: event.target.checked })}
+											/>
+										}
+										label="Show new followers notifiations"
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={botEnabled}
+												onChange={event => saveSettings({ botEnabled: event.target.checked })}
+											/>
+										}
+										label="Enable bot commands"
+									/>
+								</CardContent>
 							</Card>
 						</Grid>
 					</Grid>

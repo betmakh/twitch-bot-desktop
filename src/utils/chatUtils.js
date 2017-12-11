@@ -1,8 +1,13 @@
 import googleTTS from 'google-tts-api';
 import moment from 'moment';
 import querystring from 'querystring';
+import _ from 'lodash';
 
 import { KRAKEN_PREFIX_URL, TOKEN, TWITCH_API_PREFIX_URL } from './constants.js';
+
+const Messages = {
+	answers: ['Да', 'Нет', 'Ты конч такие вопросы задавать?', 'Определенно нет', 'Базарю, инфа сотка']
+};
 
 export const API = {
 	/**
@@ -18,6 +23,14 @@ export const API = {
 
 		return googleTTS(text, lang);
 	},
+	getJoke: () =>
+		fetch('http://umorili.herokuapp.com/api/random?num=1').then(function(resp) {
+			if (resp.status === 200) {
+				return resp.json();
+			} else {
+				return null;
+			}
+		}),
 	getChannelInfo: channel => {
 		return fetch(KRAKEN_PREFIX_URL + 'channels/' + channel, {
 			headers: {
@@ -80,7 +93,12 @@ export const API = {
 				'Client-ID': TOKEN,
 				Authorization: `Bearer ${token}`
 			}
-		}).then(resp => resp.json())
+		}).then(resp => resp.json()),
+	timeoutUser: (client, user, time, channel) => {
+		if (channel) {
+			client.timeout(channel, user, time);
+		}
+	}
 };
 
 export const FollowersWatcher = (() => {
@@ -113,11 +131,9 @@ export const FollowersWatcher = (() => {
 	};
 })();
 
-export const BOT = (client, message, channel) => {
+export const BOT = (client, message, userstate, channel) => {
 	channel = channel || client.getChannels()[0];
 	var msg;
-	console.log('message', message);
-	console.log('channel', channel);
 	if (message.indexOf('!uptime') === 0) {
 		API.getStreamInfo(channel.slice('1')).then(function(resp) {
 			console.log('resp', resp);
@@ -137,23 +153,24 @@ export const BOT = (client, message, channel) => {
 		if (rand < 5) {
 			msg = '@' + userstate.username + ', повезло тебе, сучка!';
 		} else {
-			let banTime = Math.random() * 1000;
-			msg = '@' + userstate.username + ', поздравляю братан. Ты заработал бан(' + Math.round(banTime) + 's)';
+			let banTime = Math.round(Math.random() * 1000);
+			msg = '@' + userstate.username + ', поздравляю братан. Ты заработал бан(' + banTime + 's)';
 			API.timeoutUser(client, userstate.username, banTime, channel);
 		}
 	} else if (message.indexOf('!magicball') === 0) {
 		if (message.indexOf('?') < 0) {
 			msg = '@' + userstate.username + ', это не вопрос';
 		} else {
-			msg = '@' + userstate.username + ', ' + _.sample(config.messages.answers);
+			msg = '@' + userstate.username + ', ' + _.sample(Messages.answers);
 		}
 	} else if (message.indexOf('!joke') === 0) {
-		API.getJokes().then(
+		API.getJoke().then(
 			function(data) {
-				var joke = _.sample(data);
+				console.log('data', data);
+				var joke = data[0];
 				API.sendMsg(
 					client,
-					joke.elementPureHtml.replace(/<[A-Za-z ='"#0-9]+\/?>/g, '').replace(/&[A-Za-z]+;/g, ''),
+					joke.elementPureHtml.replace(/<\/?[A-Za-z ='"#0-9]+\/?>/g, '').replace(/&[A-Za-z]+;/g, ''),
 					channel
 				);
 			},
@@ -166,9 +183,6 @@ export const BOT = (client, message, channel) => {
 			msg = (args[1].indexOf(config.god) == -1 ? args[1] : userstate.username) + ', ты пидор!';
 		}
 	}
-	// else if (message.indexOf(config.USER) != -1) {
-	// 	msg = _.sample(config.messages.ascorbinka);
-	// }
 	API.sendMsg(client, msg, channel);
 
 	return;

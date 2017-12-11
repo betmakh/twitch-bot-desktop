@@ -21,14 +21,15 @@ class MainAppContainer extends React.Component {
 		maxMessages: 50,
 		drawerWidth: 240,
 		channels: [],
-		errorMessage: '',
+		notification: null,
 		commentsAutoplay: true,
 		currentChannel: '',
 		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient: null,
 		FollowersWatcher,
 		channelData: null,
-		followersNotification: true
+		followersNotification: true,
+		botEnabled: false
 	};
 	saveSettings(settings) {
 		var { channels, commentsAutoplay, currentChannel, botEnabled, PASS, TOKEN, followersNotification } = this.state;
@@ -44,18 +45,27 @@ class MainAppContainer extends React.Component {
 		});
 	}
 
+	showNotification(notification, delay = 3000) {
+		var that = this;
+		setTimeout(() => {
+			that.setState({ notification: null });
+		}, delay);
+		this.setState({ notification });
+	}
 	componentWillMount() {
 		var self = this;
 		// request initial settings
 		ipcRenderer.send('settings-request');
 
 		ipcRenderer.on('settings-updated', (event, data) => {
-			console.log('data', data);
 			const { currentChannel, FollowersWatcher } = self.state;
 			if (!data.followersNotification) {
 				FollowersWatcher.stop();
 			} else {
 				FollowersWatcher.start(data.currentChannel, follows => {
+					self.showNotification(
+						'New followers: ' + follows.reduce((res, val) => `${res}, ${val.user.display_name}`, '')
+					);
 					console.log('follows', follows);
 				});
 			}
@@ -102,7 +112,8 @@ class MainAppContainer extends React.Component {
 				TwitchClient,
 				channelData,
 				PASS,
-				followersNotification
+				followersNotification,
+				notification
 			} = this.state,
 			propsTopPass = {
 				drawerWidth,
@@ -141,12 +152,9 @@ class MainAppContainer extends React.Component {
 
 				{selectedSectionMarkup}
 				<Snackbar
-					open={errorMessage && errorMessage.length ? true : false}
+					open={!!notification}
 					transition={props => <Slide direction="up" {...props} />}
-					SnackbarContentProps={{
-						'aria-describedby': 'message-id'
-					}}
-					message={<span id="message-id">{errorMessage}</span>}
+					message={<span id="message-id">{notification}</span>}
 				/>
 			</Grid>
 		);

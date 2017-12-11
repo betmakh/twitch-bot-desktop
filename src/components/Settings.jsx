@@ -135,6 +135,7 @@ class SettingsComponent extends React.Component {
 				commentsAutoplay
 			} = this.props,
 			{ showLoginPage, userData, loginUrl } = this.state;
+		console.log('botEnabled', botEnabled);
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>

@@ -1,8 +1,7 @@
 import jsonfile from 'jsonfile';
 import { ipcMain } from 'electron';
 
-const configFilePath = './data/config.json',
-	connectionFilePath = './data/connection,json';
+const configFilePath = './data/config.json';
 
 ipcMain.on('settings-request', event => {
 	jsonfile.readFile(configFilePath, (err, data) => {
@@ -23,4 +22,3 @@ ipcMain.on('settings-save', (event, data) => {
 		}
 	});
 });
-

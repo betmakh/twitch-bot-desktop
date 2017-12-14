@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron bin/dev --inspect=5858",
-    "format": "node_modules/.bin/prettier.cmd --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
+    "format": "prettier --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
     "build": "node_modules/.bin/babel.cmd srcMain -d dist"
   },
   "author": "mmeshcheriakov@gmail.com",
@@ -44,6 +44,6 @@
     "electron-reload": "^1.2.2",
     "nodemon": "^1.12.1",
     "prettier": "1.8.2",
-    "webpack": "^3.8.1"
+    "webpack": "^3.10.0"
   }
 }

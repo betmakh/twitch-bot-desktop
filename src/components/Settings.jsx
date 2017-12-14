@@ -18,7 +18,7 @@ import querystring from 'querystring';
 
 import { SETTINGS_COMPONENT, AUTH_URL, TOKEN } from '../utils/constants.js';
 import { styles } from './Chat.jsx';
-import { API } from '../utils/ChatUtils.js';
+import { API } from '../utils/chatUtils.js';
 
 const stylesLocal = theme =>
 	Object.assign(styles(theme), {
@@ -163,7 +163,9 @@ class SettingsComponent extends React.Component {
 											{userData.display_name}
 										</Typography>
 									)}
-									<Typography component="p">Your bot is going to send messages from this account</Typography>
+									<Typography component="p">
+										Your bot is going to send messages from this account
+									</Typography>
 								</CardContent>
 								<CardActions>
 									<Button color="primary" onClick={this.login.bind(this)}>
@@ -206,7 +208,10 @@ class SettingsComponent extends React.Component {
 											<ListItem key={channelName} button>
 												<ListItemText primary={channelName} />
 												<ListItemSecondaryAction>
-													<IconButton aria-label={channelName} onClick={this.removeChannel.bind(this)}>
+													<IconButton
+														aria-label={channelName}
+														onClick={this.removeChannel.bind(this)}
+													>
 														<DeleteIcon />
 													</IconButton>
 												</ListItemSecondaryAction>
@@ -226,7 +231,9 @@ class SettingsComponent extends React.Component {
 										control={
 											<Checkbox
 												checked={commentsAutoplay}
-												onChange={event => saveSettings({ commentsAutoplay: event.target.checked })}
+												onChange={event =>
+													saveSettings({ commentsAutoplay: event.target.checked })
+												}
 											/>
 										}
 										label="Translate text to speach"
@@ -235,7 +242,9 @@ class SettingsComponent extends React.Component {
 										control={
 											<Checkbox
 												checked={followersNotification}
-												onChange={event => saveSettings({ followersNotification: event.target.checked })}
+												onChange={event =>
+													saveSettings({ followersNotification: event.target.checked })
+												}
 											/>
 										}
 										label="Show new followers notifiations"

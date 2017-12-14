@@ -11,12 +11,12 @@ import IconButton from 'material-ui/IconButton';
 import { MenuItem } from 'material-ui/Menu';
 import Tooltip from 'material-ui/Tooltip';
 
-// icons
+// iconsPcom
 import PlayIcon from 'material-ui-icons/PlayCircleOutline';
 import VolumeOffIcon from 'material-ui-icons/VolumeOff';
 import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 
-import { API, BOT } from '../utils/ChatUtils.js';
+import { API, BOT } from '../utils/chatUtils.js';
 import { CHAT_COMPONENT } from '../utils/constants.js';
 
 export const styles = theme => ({
@@ -180,7 +180,15 @@ class ChatComponent extends React.Component {
 	}
 
 	render() {
-		const { classes, drawerWidth, commentsAutoplay, channels, currentChannel, saveSettings, channelData } = this.props;
+		const {
+			classes,
+			drawerWidth,
+			commentsAutoplay,
+			channels,
+			currentChannel,
+			saveSettings,
+			channelData
+		} = this.props;
 		const { audioQueue, messages } = this.state;
 
 		return (
@@ -215,14 +223,22 @@ class ChatComponent extends React.Component {
 				<Grid container spacing={0} className={classes.chatBody} ref>
 					{messages.length ? (
 						messages.map((msg, index) => (
-							<Grid item xs={12} key={msg.id} ref={index === messages.length - 1 ? this.scrollToBottom : null}>
+							<Grid
+								item
+								xs={12}
+								key={msg.id}
+								ref={index === messages.length - 1 ? this.scrollToBottom : null}
+							>
 								<Paper className={classes.card}>
 									<Typography type="title" gutterBottom>
 										{msg.user.username}
 									</Typography>
 									<Typography gutterBottom>{msg.text}</Typography>
 									{msg.audioSrc ? (
-										<IconButton className={classes.playButton} onClick={this.queueMsg.bind(this, msg, false)}>
+										<IconButton
+											className={classes.playButton}
+											onClick={this.queueMsg.bind(this, msg, false)}
+										>
 											<PlayIcon />
 										</IconButton>
 									) : null}

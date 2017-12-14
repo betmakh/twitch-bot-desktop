@@ -13,8 +13,7 @@ import ChatComponent from './Chat.jsx';
 import UserListComponent from './UserList.jsx';
 import SettingsComponent from './Settings.jsx';
 import FollowersListComponent from './FollowersList.jsx';
-import { FollowersWatcher } from '../utils/ChatUtils.js';
-import { API } from '../utils/ChatUtils.js';
+import { FollowersWatcher, API } from '../utils/chatUtils.js';
 
 class MainAppContainer extends React.Component {
 	state = {
@@ -136,7 +135,9 @@ class MainAppContainer extends React.Component {
 				selectedSectionMarkup = <UserListComponent {...propsTopPass} />;
 				break;
 			case SettingsComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <SettingsComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />;
+				selectedSectionMarkup = (
+					<SettingsComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />
+				);
 				break;
 			case FollowersListComponent.COMPONENT_NAME:
 				selectedSectionMarkup = <FollowersListComponent {...propsTopPass} />;

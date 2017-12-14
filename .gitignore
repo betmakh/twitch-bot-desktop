@@ -48,4 +48,4 @@ node_modules
 sftp-config.json
 
 dist
-data/config.json
+data

@@ -43,24 +43,17 @@ export const stylesLocal = theme =>
 	});
 
 const UserGroupList = withStyles(stylesLocal)(props => {
-	const { groupTitle, users, classes, onUserOptionsOpen, usersData } = props;
+	const { groupTitle, users, classes, onUserOptionsOpen } = props;
 	return (
 		<GridList cellHeight={180} cols={3}>
 			<GridListTile key="Subheader" cols={3} style={{ height: 'auto' }}>
 				<Subheader component="div">{groupTitle}</Subheader>
 			</GridListTile>
-			{users.map(username => (
-				<GridListTile key={username}>
-					<img
-						src={
-							usersData && usersData.has(username)
-								? usersData.get(username).profile_image_url
-								: 'assets/GlitchIcon_purple.png'
-						}
-						alt={username}
-					/>
+			{users.map(user => (
+				<GridListTile key={user.login}>
+					<img src={user.profile_image_url || 'assets/GlitchIcon_purple.png'} alt={user.login} />
 					<GridListTileBar
-						title={username}
+						title={user.display_name}
 						actionIcon={
 							<IconButton>
 								<InfoIcon color="rgba(255, 255, 255, 0.54)" />
@@ -83,7 +76,8 @@ class UserListComponent extends React.Component {
 	state = {
 		searchCriteria: '',
 		optionsMenu: {},
-		users: {},
+		users: [],
+		totalUsersCount: 0,
 		usersData: new Map()
 	};
 
@@ -128,25 +122,8 @@ class UserListComponent extends React.Component {
 		ipcRenderer.send('chatters-get', channel);
 		ipcRenderer.on('chatters-received', (event, data) => {
 			console.log('data1', data);
-		});
-
-		API.getViewers(channel).then(json => {
-			var userlist = [];
-			// for (var i in json.chatters) {
-			// 	userlist = userlist.concat(json.chatters[i]);
-			// }
-			// API.getUserInfo(null, userlist).then(resp => {
-			// 	resp.data.forEach(el => {
-			// 		if (!usersData.has(el.login)) {
-			// 			usersData.set(el.login, el);
-			// 		}
-			// 	});
-			// 	if (self._isMounted) {
-			// 		self.setState({ usersData });
-			// 	}
-			// });
 			if (self._isMounted) {
-				self.setState({ users: json.chatters, loading: false });
+				self.setState({ users: data.users, totalUsersCount: data.totalUsersCount, loading: false });
 			}
 		});
 	}
@@ -165,39 +142,19 @@ class UserListComponent extends React.Component {
 
 		var groupsMarkup = [];
 
-		for (let group in users) {
-			if (users[group].length && !loading) {
-				let filtered = [];
-				console.time('filter');
-				filtered = users[group].filter(name => !!~name.toUpperCase().indexOf(searchCriteria.toUpperCase()));
-				console.timeEnd('filter');
-				filtered = [];
-				console.time('filterFor');
-				for (let i = 0; i < users[group].length; i++) {
-					if (!!~users[group][i].toUpperCase().indexOf(searchCriteria.toUpperCase())) {
-						filtered.push(users[group][i]);
-					}
-				}
-				console.timeEnd('filterFor');
-
-				console.time('regexp');
-				var testStr = users[group].join('\n');
-				var match = testStr.match(new RegExp(`(\\n|^)(\\w)*${searchCriteria}(\\w)*(\\n|$)`, 'ig'));
-				console.timeEnd('regexp');
-				console.log('match', match);
-				// /(\n|^)(w)*ni(w)*(\n|$)/gi
-
-				groupsMarkup.push(
-					<UserGroupList
-						onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
-						key={group}
-						groupTitle={group}
-						usersData={usersData}
-						users={filtered}
-					/>
-				);
-			}
-		}
+		// for (let group in users) {
+		// 	if (users[group].length && !loading) {
+		// 		groupsMarkup.push(
+		// 			<UserGroupList
+		// 				onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
+		// 				key={group}
+		// 				groupTitle={group}
+		// 				usersData={usersData}
+		// 				users={filtered}
+		// 			/>
+		// 		);
+		// 	}
+		// }
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -245,7 +202,12 @@ class UserListComponent extends React.Component {
 							<TextField placeholder="Filter users" onChange={this.filterUserList.bind(this)} fullWidth />
 						</Grid>
 						<Grid item xs={12}>
-							{groupsMarkup}
+							{' '}
+							<UserGroupList
+								onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
+								groupTitle={'All watchers'}
+								users={users}
+							/>
 						</Grid>
 					</Grid>
 				)}

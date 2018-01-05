@@ -103,6 +103,18 @@ class UserListComponent extends React.Component {
 	}
 
 	filterUserList(event) {
+		if (event.target.value.length >= 2) {
+			this.setState({
+				loading: true
+			});
+			ipcRenderer.send('chatters-filter', this.props.currentChannel, event.target.value);
+		} else if (event.target.value.length === 0) {
+			this.setState({
+				loading: true
+			});
+			ipcRenderer.send('chatters-get', this.props.currentChannel);
+		}
+
 		this.setState({ searchCriteria: event.target.value });
 	}
 
@@ -121,7 +133,6 @@ class UserListComponent extends React.Component {
 		});
 		ipcRenderer.send('chatters-get', channel);
 		ipcRenderer.on('chatters-received', (event, data) => {
-			console.log('data1', data);
 			if (self._isMounted) {
 				self.setState({ users: data.users, totalUsersCount: data.totalUsersCount, loading: false });
 			}
@@ -188,29 +199,26 @@ class UserListComponent extends React.Component {
 					</Toolbar>
 				</AppBar>
 
-				{loading ? (
-					<Grid container spacing={0} className={[classes.chatBody, classes.spacingBlock].join(' ')}>
+				<Grid container spacing={0} className={[classes.chatBody, classes.spacingBlock].join(' ')}>
+					<Grid item xs={12} className={classes.searchFieldContainer}>
+						<TextField placeholder="Filter users" onChange={this.filterUserList.bind(this)} fullWidth />
+					</Grid>
+					{loading ? (
 						<Grid item xs={12}>
 							<div className={classes.textCenter}>
 								<CircularProgress size={100} color="accent" />
 							</div>
 						</Grid>
-					</Grid>
-				) : (
-					<Grid container spacing={0} className={[classes.chatBody, classes.spacingBlock].join(' ')}>
-						<Grid item xs={12} className={classes.searchFieldContainer}>
-							<TextField placeholder="Filter users" onChange={this.filterUserList.bind(this)} fullWidth />
-						</Grid>
+					) : (
 						<Grid item xs={12}>
-							{' '}
 							<UserGroupList
 								onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
 								groupTitle={'All watchers'}
 								users={users}
 							/>
 						</Grid>
-					</Grid>
-				)}
+					)}
+				</Grid>
 			</div>
 		);
 	}

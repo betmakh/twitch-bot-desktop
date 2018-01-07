@@ -36,17 +36,24 @@ const updateUsersData = users => {
 		);
 		iterator += chattersPerRequest;
 	}
+
 	return Promise.all(requests).then(responses => {
-		responses.forEach(el => {
-			var dataToResolve = [];
-			if (el) {
-				for (let i = 0; i < el.data.length; i++) {
-					data.usersData.set(el.data[i].login, el.data[i]);
-					dataToResolve.push(el.data[i]);
-				}
-			}
+		return new Promise((resolve, reject) => {
+			process.nextTick(() => {
+				var dataToResolve = [];
+				responses.forEach(el => {
+					if (el) {
+						for (let i = 0; i < el.data.length; i++) {
+							data.usersData.set(el.data[i].login, el.data[i]);
+							dataToResolve.push(el.data[i]);
+						}
+					}
+				});
+				resolve(dataToResolve);
+			});
 		});
-		return Promise.resolve(dataToResolve);
+		
+		// return Promise.resolve(dataToResolve);
 	});
 };
 
@@ -59,23 +66,22 @@ ipcMain.on('chatters-get', (event, channel) => {
 				dataToResponse = [],
 				responseSize = resp.chatter_count >= chattersPerRequest ? chattersPerRequest : resp.chatter_count;
 			//detect users who requires data
-			setTimeout(() => {
-				for (var i in resp.chatters) {
-					resp.chatters[i].forEach(el => {
-						if (!data.usersData.has(el)) {
-							usersWithoutData.push(el);
-						} else if (dataToResponse.length < responseSize) {
-							dataToResponse.push(data.usersData.get(el));
-						}
-					});
-				}
-				data.channelsChatters.set(channel, resp);
+			for (var i in resp.chatters) {
+				resp.chatters[i].forEach(el => {
+					if (!data.usersData.has(el)) {
+						usersWithoutData.push(el);
+					} else if (dataToResponse.length < responseSize) {
+						dataToResponse.push(data.usersData.get(el));
+					}
+				});
+			}
+			data.channelsChatters.set(channel, resp);
+			process.nextTick(() => {
 				updateUsersData(usersWithoutData).then(users => {
-					while (dataToResponse.length < dataToResponse) {
+					while (dataToResponse.length < responseSize) {
 						let userName = usersWithoutData.shift();
 						dataToResponse.push(data.usersData.get(userName) || { login: userName });
 					}
-					console.log('dataToResponse.length', dataToResponse.length);
 
 					var dataToSend = {
 						users: dataToResponse,
@@ -83,7 +89,7 @@ ipcMain.on('chatters-get', (event, channel) => {
 					};
 					event.sender.send('chatters-received', dataToSend);
 				});
-			}, 1);
+			});
 		});
 });
 
@@ -94,7 +100,7 @@ ipcMain.on('chatters-filter', (event, channel, query) => {
 		var filtered = [],
 			dataToSend = [],
 			usersWithoutData = [];
-		setTimeout(() => {
+		process.nextTick(() => {
 			for (var i in resp.chatters) {
 				filtered = filtered.concat(
 					resp.chatters[i].filter(login => {
@@ -115,13 +121,14 @@ ipcMain.on('chatters-filter', (event, channel, query) => {
 				}
 			}
 			updateUsersData(usersWithoutData).then(users => {
+				
 				dataToSend = dataToSend.concat(users);
 				event.sender.send('chatters-received', {
 					users: dataToSend,
 					totalUsersCount: resp.chatter_count
 				});
 			});
-		}, 1);
+		});
 	} else {
 		event.sender.send('chatters-received', {
 			error: "Please refresh the users's list"

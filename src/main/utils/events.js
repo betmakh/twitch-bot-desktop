@@ -8,7 +8,7 @@ ipcMain.on('settings-request', event => {
 		if (!err) {
 			event.sender.send('settings-updated', data);
 		} else {
-			event.sender.send('error', err);
+			event.sender.send('settings-updated', {});
 		}
 	});
 });

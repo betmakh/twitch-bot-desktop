@@ -8,11 +8,16 @@ import Paper from 'material-ui/Paper';
 import TextField from 'material-ui/TextField';
 import { withStyles } from 'material-ui/styles';
 import IconButton from 'material-ui/IconButton';
+import { ipcRenderer } from 'electron';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import { CircularProgress } from 'material-ui/Progress';
 import MoreVertIcon from 'material-ui-icons/MoreVert';
+import Subheader from 'material-ui/List/ListSubheader';
+import InfoIcon from 'material-ui-icons/Info';
 import Tooltip from 'material-ui/Tooltip';
 import Divider from 'material-ui/Divider';
+import { GridList, GridListTile, GridListTileBar } from 'material-ui/GridList';
+import _ from 'lodash';
 
 import RefreshIcon from 'material-ui-icons/Refresh';
 
@@ -25,6 +30,10 @@ export const stylesLocal = theme =>
 		searchFieldContainer: {
 			padding: '0.5em'
 		},
+		spacingBlock: {
+			paddingRight: theme.spacing.unit,
+			paddingLeft: theme.spacing.unit
+		},
 		listItem: {
 			position: 'relative'
 		},
@@ -36,31 +45,24 @@ export const stylesLocal = theme =>
 const UserGroupList = withStyles(stylesLocal)(props => {
 	const { groupTitle, users, classes, onUserOptionsOpen } = props;
 	return (
-		<Grid container spacing={0}>
-			<Grid item xs={12}>
-				<Typography type="display1" className={classes.card}>
-					{groupTitle}
-				</Typography>
-			</Grid>
-			{users.map(username => (
-				<Grid key={username} item xs={12} sm={6} className={classes.listItem}>
-					<Divider />
-					<br />
-					<Typography type="title" gutterBottom>
-						{username}
-					</Typography>
-					<IconButton
-						className={classes.playButton}
-						aria-label="More"
-						aria-owns={open ? 'long-menu' : null}
-						aria-haspopup="true"
-						onClick={onUserOptionsOpen(username)}
-					>
-						<MoreVertIcon />
-					</IconButton>
-				</Grid>
+		<GridList cellHeight={180} cols={3}>
+			<GridListTile key="Subheader" cols={3} style={{ height: 'auto' }}>
+				<Subheader component="div">{groupTitle}</Subheader>
+			</GridListTile>
+			{users.map(user => (
+				<GridListTile key={user.login}>
+					<img src={user.profile_image_url || 'assets/GlitchIcon_purple.png'} alt={user.login} />
+					<GridListTileBar
+						title={user.display_name}
+						actionIcon={
+							<IconButton>
+								<InfoIcon color="rgba(255, 255, 255, 0.54)" />
+							</IconButton>
+						}
+					/>
+				</GridListTile>
 			))}
-		</Grid>
+		</GridList>
 	);
 });
 
@@ -71,13 +73,15 @@ class UserListComponent extends React.Component {
 		classes: PropTypes.object.isRequired
 	};
 
+	state = {
+		searchCriteria: '',
+		optionsMenu: {},
+		users: [],
+		totalUsersCount: 0,
+		usersData: new Map()
+	};
+
 	componentWillMount() {
-		console.log('mounted');
-		this.setState({
-			searchCriteria: '',
-			optionsMenu: {},
-			users: {}
-		});
 		this._isMounted = true;
 		this.refreshList();
 	}
@@ -99,6 +103,18 @@ class UserListComponent extends React.Component {
 	}
 
 	filterUserList(event) {
+		if (event.target.value.length >= 2) {
+			this.setState({
+				loading: true
+			});
+			ipcRenderer.send('chatters-filter', this.props.currentChannel, event.target.value);
+		} else if (event.target.value.length === 0) {
+			this.setState({
+				loading: true
+			});
+			ipcRenderer.send('chatters-get', this.props.currentChannel);
+		}
+
 		this.setState({ searchCriteria: event.target.value });
 	}
 
@@ -109,13 +125,16 @@ class UserListComponent extends React.Component {
 	}
 
 	refreshList(channel = this.props.currentChannel) {
-		var self = this;
+		var self = this,
+			usersData = this.state.usersData;
+
 		self.setState({
 			loading: true
 		});
-		API.getViewers(channel).then(json => {
+		ipcRenderer.send('chatters-get', channel);
+		ipcRenderer.on('chatters-received', (event, data) => {
 			if (self._isMounted) {
-				self.setState({ users: json.chatters, loading: false });
+				self.setState({ users: data.users, totalUsersCount: data.totalUsersCount, loading: false });
 			}
 		});
 	}
@@ -128,24 +147,25 @@ class UserListComponent extends React.Component {
 
 	render() {
 		const { drawerWidth, classes, currentChannel } = this.props,
-			{ users, searchCriteria, loading } = this.state,
+			{ users, searchCriteria, loading, usersData } = this.state,
 			optionsMenuID = 'user-options',
 			options = ['ban', 'timeout', 'mod'];
 
 		var groupsMarkup = [];
 
-		for (let group in users) {
-			if (users[group].length && !loading) {
-				groupsMarkup.push(
-					<UserGroupList
-						onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
-						key={group}
-						groupTitle={group}
-						users={users[group].filter(name => !!~name.toUpperCase().indexOf(searchCriteria.toUpperCase()))}
-					/>
-				);
-			}
-		}
+		// for (let group in users) {
+		// 	if (users[group].length && !loading) {
+		// 		groupsMarkup.push(
+		// 			<UserGroupList
+		// 				onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
+		// 				key={group}
+		// 				groupTitle={group}
+		// 				usersData={usersData}
+		// 				users={filtered}
+		// 			/>
+		// 		);
+		// 	}
+		// }
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -179,24 +199,26 @@ class UserListComponent extends React.Component {
 					</Toolbar>
 				</AppBar>
 
-				{loading ? (
-					<Grid container spacing={0} className={classes.chatBody}>
+				<Grid container spacing={0} className={[classes.chatBody, classes.spacingBlock].join(' ')}>
+					<Grid item xs={12} className={classes.searchFieldContainer}>
+						<TextField placeholder="Filter users" onChange={this.filterUserList.bind(this)} fullWidth />
+					</Grid>
+					{loading ? (
 						<Grid item xs={12}>
 							<div className={classes.textCenter}>
 								<CircularProgress size={100} color="accent" />
 							</div>
 						</Grid>
-					</Grid>
-				) : (
-					<Grid container spacing={0} className={classes.chatBody}>
-						<Grid item xs={12} className={classes.searchFieldContainer}>
-							<TextField placeholder="Filter users" onChange={this.filterUserList.bind(this)} fullWidth />
-						</Grid>
+					) : (
 						<Grid item xs={12}>
-							{groupsMarkup}
+							<UserGroupList
+								onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
+								groupTitle={'All watchers'}
+								users={users}
+							/>
 						</Grid>
-					</Grid>
-				)}
+					)}
+				</Grid>
 			</div>
 		);
 	}

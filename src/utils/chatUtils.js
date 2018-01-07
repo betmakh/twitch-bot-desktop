@@ -87,13 +87,44 @@ export const API = {
 				method: 'POST'
 			}
 		),
-	getUserInfo: token =>
-		fetch(`${TWITCH_API_PREFIX_URL}users`, {
-			headers: {
-				'Client-ID': TOKEN,
-				Authorization: `Bearer ${token}`
+	getUserInfo: (token, usernames = []) => {
+		var url = `${TWITCH_API_PREFIX_URL}users?`,
+			maxPerRequest = 100,
+			multiRequest = [];
+		if (usernames.length) {
+			if (usernames.length < maxPerRequest) {
+				url += `login=${usernames.join('&login=')}`;
+			} else {
+				let iterator = 0;
+				while (iterator < usernames.length) {
+					let current = usernames.slice(iterator, iterator + maxPerRequest);
+					multiRequest.push(
+						fetch(url + `login=${current.join('&login=')}`, {
+							headers: {
+								'Client-ID': TOKEN
+							}
+						}).then(resp => {
+							if (res.status === 200) {
+								return res.json();
+							} else {
+								return Promise.reject(resp);
+							}
+						})
+					);
+					iterator += maxPerRequest;
+				}
 			}
-		}).then(resp => resp.json()),
+		}
+
+		return usernames.length < maxPerRequest
+			? fetch(url, {
+					headers: {
+						'Client-ID': TOKEN,
+						Authorization: `Bearer ${token}`
+					}
+				}).then(resp => resp.json())
+			: multiRequest;
+	},
 	timeoutUser: (client, user, time, channel) => {
 		if (channel) {
 			client.timeout(channel, user, time);

@@ -16,8 +16,8 @@ class FollowersListComponent extends BasicUserComponent {
 		self.setState({
 			loading: true
 		});
+
 		API.getFollowersList(channel).then(json => {
-			console.log('json', json);
 			if (self._isMounted) {
 				self.setState({ users: { Followers: json.follows.map(follow => follow.user.name) }, loading: false });
 			}

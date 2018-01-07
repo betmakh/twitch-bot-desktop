@@ -119,9 +119,9 @@ class SettingsComponent extends React.Component {
 
 	removeChannel(event) {
 		var channelToRemove = event.currentTarget.getAttribute('aria-label'),
-			{ channels } = this.state;
+			{ channels } = this.props;
 		channels = channels.filter(channelName => channelName !== channelToRemove);
-		this.setState({ channels });
+		this.props.saveSettings({ channels });
 	}
 
 	render() {

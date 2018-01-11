@@ -125,9 +125,19 @@ export const API = {
 				}).then(resp => resp.json())
 			: multiRequest;
 	},
-	timeoutUser: (client, user, time, channel) => {
+	timeoutUser: (client, user, time = 300, channel, reason = 'Bad behavior') => {
 		if (channel) {
-			client.timeout(channel, user, time);
+			client.timeout(channel, user, time, reason);
+		}
+	},
+	modUser: (client, user, channel) => {
+		if (clinet && user && channel) {
+			return client.mod(channel, user);
+		}
+	},
+	banUser: (client, user, channel, reason = 'Very bad behaviour') => {
+		if (clinet && user && channel) {
+			return client.ban(channel, user, reason);
 		}
 	}
 };
@@ -169,7 +179,9 @@ export const BOT = (client, message, userstate, channel) => {
 		API.getStreamInfo(channel.slice('1')).then(function(resp) {
 			console.log('resp', resp);
 			if (resp.stream) {
-				msg = 'Стрим идет: ' + moment.utc(moment.utc().diff(moment.utc(resp.stream.created_at))).format('HH:mm:ss');
+				msg =
+					'Стрим идет: ' +
+					moment.utc(moment.utc().diff(moment.utc(resp.stream.created_at))).format('HH:mm:ss');
 			} else {
 				msg = 'Стрим оффлайн, братишки.';
 			}

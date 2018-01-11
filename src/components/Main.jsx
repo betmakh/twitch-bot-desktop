@@ -89,9 +89,11 @@ class MainAppContainer extends React.Component {
 
 				self.setState({ TwitchClient });
 			}
-			API.getChannelInfo(data.currentChannel).then(resp => {
-				self.setState({ channelData: resp });
-			});
+			if (data.currentChannel) {
+				API.getChannelInfo(data.currentChannel).then(resp => {
+					self.setState({ channelData: resp });
+				});
+			}
 			self.setState(data);
 		});
 

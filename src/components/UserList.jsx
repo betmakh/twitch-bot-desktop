@@ -11,6 +11,7 @@ import IconButton from 'material-ui/IconButton';
 import { ipcRenderer } from 'electron';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import { CircularProgress } from 'material-ui/Progress';
+import Modal from 'material-ui/Modal';
 import MoreVertIcon from 'material-ui-icons/MoreVert';
 import Subheader from 'material-ui/List/ListSubheader';
 import InfoIcon from 'material-ui-icons/Info';
@@ -39,6 +40,17 @@ export const stylesLocal = theme =>
 		},
 		textCenter: {
 			textAlign: 'center'
+		},
+		modal: {
+			position: 'absolute',
+			width: 8 * 50,
+			top: `50%`,
+			left: `50%`,
+			transform: `translate(-50%, -50%)`,
+			border: '1px solid #e5e5e5',
+			backgroundColor: '#fff',
+			boxShadow: '0 5px 15px rgba(0, 0, 0, .5)',
+			padding: 8 * 4
 		}
 	});
 
@@ -55,8 +67,8 @@ const UserGroupList = withStyles(stylesLocal)(props => {
 					<GridListTileBar
 						title={user.display_name}
 						actionIcon={
-							<IconButton>
-								<InfoIcon color="rgba(255, 255, 255, 0.54)" />
+							<IconButton onClick={onUserOptionsOpen(user.login)}>
+								<MoreVertIcon />
 							</IconButton>
 						}
 					/>
@@ -76,6 +88,11 @@ class UserListComponent extends React.Component {
 	state = {
 		searchCriteria: '',
 		optionsMenu: {},
+		detailsPopUp: {
+			open: false,
+			reason: false,
+			time: false
+		},
 		users: [],
 		totalUsersCount: 0,
 		usersData: new Map()
@@ -118,10 +135,43 @@ class UserListComponent extends React.Component {
 		this.setState({ searchCriteria: event.target.value });
 	}
 
+	handleUserAction(type = 'mod', user) {
+		var { detailsPopUp } = this.state;
+
+		switch (type) {
+			case 'mod':
+				API.modUser(this.props.TwitchClient, user);
+				detailsPopUp.open = false;
+
+				break;
+			case 'ban':
+				detailsPopUp.open = true;
+				detailsPopUp.user = user;
+				detailsPopUp.reason = true;
+				detailsPopUp.action = 'ban';
+
+				break;
+			case 'timeout':
+				detailsPopUp.user = user;
+				detailsPopUp.open = true;
+				detailsPopUp.reason = true;
+				detailsPopUp.action = 'timeout';
+				detailsPopUp.time = true;
+				break;
+		}
+		this.setState({ detailsPopUp });
+	}
+
 	closeUserOptionsMenu(action, event) {
+		var { optionsMenu, detailsPopUp } = this.state;
 		var options = this.state.optionsMenu;
-		options.anchor = null;
-		this.setState({ optionsMenu: options });
+		optionsMenu.anchor = null;
+		if (action) {
+			this.handleUserAction(action, options.user);
+		} else {
+			detailsPopUp.open = false;
+		}
+		this.setState({ optionsMenu, detailsPopUp });
 	}
 
 	refreshList(channel = this.props.currentChannel) {
@@ -147,7 +197,7 @@ class UserListComponent extends React.Component {
 
 	render() {
 		const { drawerWidth, classes, currentChannel } = this.props,
-			{ users, searchCriteria, loading, usersData } = this.state,
+			{ users, searchCriteria, loading, usersData, totalUsersCount, detailsPopUp } = this.state,
 			optionsMenuID = 'user-options',
 			options = ['ban', 'timeout', 'mod'];
 
@@ -173,7 +223,7 @@ class UserListComponent extends React.Component {
 					id={optionsMenuID}
 					anchorEl={this.state.optionsMenu.anchor}
 					open={!!this.state.optionsMenu.anchor}
-					onRequestClose={this.closeUserOptionsMenu.bind(this)}
+					onClose={this.closeUserOptionsMenu.bind(this, null)}
 					PaperProps={{
 						style: {
 							width: 200
@@ -186,14 +236,21 @@ class UserListComponent extends React.Component {
 						</MenuItem>
 					))}
 				</Menu>
+				<Modal open={detailsPopUp.open} onClose={this.closeUserOptionsMenu.bind(this, null)}>
+					<div className={classes.modal}>
+						<Typography type="title" id="modal-title">
+							{`Are you sure you wnat to ${detailsPopUp.action} ${detailsPopUp.user}?`}
+						</Typography>
+					</div>
+				</Modal>
 				<AppBar position="static" color="primary" className={classes.header}>
 					<Toolbar>
 						<Typography type="title" color="inherit">
-							{`Users list (${currentChannel} channel)`}
+							Chatters at {currentChannel} ({totalUsersCount})
 						</Typography>
 						<IconButton onClick={event => this.refreshList()}>
 							<Tooltip id="tooltip-right" title="Refresh" placement="right">
-								<RefreshIcon />
+								<RefreshIcon color="inherit" />
 							</Tooltip>
 						</IconButton>
 					</Toolbar>

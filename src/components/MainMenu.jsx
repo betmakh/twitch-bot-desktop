@@ -38,25 +38,31 @@ class MainMenu extends React.Component {
 
 	render() {
 		const { classes, sectionSelected, channels, currentChannel, saveSettings, channelData } = this.props;
+		// if (!currentChannel && channels) {
+		// 	saveSettings({ currentChannel: channels[0] });
+		// }
 		return (
 			<Drawer type="permanent">
 				<MenuItem className={classes.drawerHeader}>
 					{channelData && <Avatar alt="Remy Sharp" src={channelData.logo} className={classes.logo} />}
-					<Select
-						value={currentChannel}
-						fullWidth
-						onChange={event => {
-							saveSettings({ currentChannel: event.target.value });
-							console.log('event.target', event.target.value);
-						}}
-						className={classes.selectEmpty}
-					>
-						{channels.map(channel => (
-							<MenuItem key={channel} value={channel}>
-								{channel}
-							</MenuItem>
-						))}
-					</Select>
+					{channels && channels.length ? (
+						<Select
+							value={currentChannel.toString()}
+							fullWidth
+							onChange={event => {
+								saveSettings({ currentChannel: event.target.value });
+							}}
+							className={classes.selectEmpty}
+						>
+							{channels.map(channel => (
+								<MenuItem key={channel} value={channel}>
+									{channel}
+								</MenuItem>
+							))}
+						</Select>
+					) : (
+						'No channels configured'
+					)}
 				</MenuItem>
 				<Divider />
 				<MenuList style={{ width: this.props.drawerWidth }}>

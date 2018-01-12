@@ -28,7 +28,8 @@ class MainAppContainer extends React.Component {
 		FollowersWatcher,
 		channelData: null,
 		followersNotification: true,
-		botEnabled: false
+		botEnabled: false,
+		messages: []
 	};
 	saveSettings(settings) {
 		var { channels, commentsAutoplay, currentChannel, botEnabled, PASS, TOKEN, followersNotification } = this.state;
@@ -102,6 +103,10 @@ class MainAppContainer extends React.Component {
 		});
 	}
 
+	updateMessageList(messages) {
+		this.setState({ messages });
+	}
+
 	render() {
 		const {
 				errorMessage,
@@ -114,7 +119,8 @@ class MainAppContainer extends React.Component {
 				channelData,
 				PASS,
 				followersNotification,
-				notification
+				notification,
+				messages
 			} = this.state,
 			propsTopPass = {
 				drawerWidth,
@@ -124,14 +130,21 @@ class MainAppContainer extends React.Component {
 				TwitchClient,
 				channelData,
 				PASS,
-				followersNotification
+				followersNotification,
+				messages
 			},
 			self = this;
 
 		var selectedSectionMarkup = null;
 		switch (sectionSelected) {
 			case ChatComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <ChatComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />;
+				selectedSectionMarkup = (
+					<ChatComponent
+						{...this.state}
+						updateMessages={this.updateMessageList.bind(this)}
+						saveSettings={this.saveSettings.bind(this)}
+					/>
+				);
 				break;
 			case UserListComponent.COMPONENT_NAME:
 				selectedSectionMarkup = <UserListComponent {...propsTopPass} />;

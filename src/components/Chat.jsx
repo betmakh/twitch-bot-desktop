@@ -138,6 +138,7 @@ class ChatComponent extends React.Component {
 			TwitchClient.removeAllListeners('chat');
 			TwitchClient.disconnect();
 		}
+		this.props.updateMessages(this.state.messages);
 	}
 
 	addChatListener(props = this.props) {
@@ -158,6 +159,9 @@ class ChatComponent extends React.Component {
 	}
 
 	componentWillMount() {
+		this.setState({
+			messages: this.props.messages
+		});
 		this.addChatListener();
 	}
 

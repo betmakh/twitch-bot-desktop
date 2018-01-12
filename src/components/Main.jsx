@@ -23,7 +23,7 @@ class MainAppContainer extends React.Component {
 		notification: null,
 		commentsAutoplay: true,
 		currentChannel: '',
-		sectionSelected: SettingsComponent.COMPONENT_NAME,
+		sectionSelected: UserListComponent.COMPONENT_NAME,
 		TwitchClient: null,
 		FollowersWatcher,
 		channelData: null,

@@ -83,6 +83,7 @@ class MainMenu extends React.Component {
 						</ListItemIcon>List of watchers
 					</MenuItem>
 					<MenuItem
+						disabled
 						onClick={this.handleSectionSelect.bind(this, FOLLOWERS_LIST_COMPONENT)}
 						selected={sectionSelected === FOLLOWERS_LIST_COMPONENT}
 					>

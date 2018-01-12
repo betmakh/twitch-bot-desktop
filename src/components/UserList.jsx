@@ -18,13 +18,12 @@ import InfoIcon from 'material-ui-icons/Info';
 import Tooltip from 'material-ui/Tooltip';
 import Divider from 'material-ui/Divider';
 import { GridList, GridListTile, GridListTileBar } from 'material-ui/GridList';
-import _ from 'lodash';
-
 import RefreshIcon from 'material-ui-icons/Refresh';
 
 import { USER_LIST_COMPONENT } from '../utils/constants.js';
 import { API } from '../utils/chatUtils.js';
 import { styles } from './Chat.jsx';
+import UserDetails from './UserDetails.jsx';
 
 export const stylesLocal = theme =>
 	Object.assign(styles(theme), {
@@ -66,8 +65,9 @@ const UserGroupList = withStyles(stylesLocal)(props => {
 					<img src={user.profile_image_url || 'assets/GlitchIcon_purple.png'} alt={user.login} />
 					<GridListTileBar
 						title={user.display_name}
+						subtitle={`(${user.login})`}
 						actionIcon={
-							<IconButton onClick={onUserOptionsOpen(user.login)}>
+							<IconButton color="contrast" onClick={onUserOptionsOpen(user)}>
 								<MoreVertIcon />
 							</IconButton>
 						}
@@ -87,11 +87,9 @@ class UserListComponent extends React.Component {
 
 	state = {
 		searchCriteria: '',
-		optionsMenu: {},
 		detailsPopUp: {
 			open: false,
-			reason: false,
-			time: false
+			user: {}
 		},
 		users: [],
 		totalUsersCount: 0,
@@ -108,14 +106,15 @@ class UserListComponent extends React.Component {
 		this._isMounted = false;
 	}
 
-	openUserOptionsMenu(userName) {
+	openUserOptionsMenu(user) {
 		return event => {
-			var options = this.state.optionsMenu;
-			options = Object.assign(options, {
-				anchor: event.currentTarget,
-				user: userName
+			var { detailsPopUp } = this.state;
+
+			detailsPopUp = Object.assign(detailsPopUp, {
+				open: true,
+				user
 			});
-			this.setState({ optionsMenu: options });
+			this.setState({ detailsPopUp });
 		};
 	}
 
@@ -135,46 +134,20 @@ class UserListComponent extends React.Component {
 		this.setState({ searchCriteria: event.target.value });
 	}
 
-	handleUserAction(type = 'mod', user) {
+	closeUserOptionsMenu(action) {
 		var { detailsPopUp } = this.state;
-
-		switch (type) {
-			case 'mod':
-				API.modUser(this.props.TwitchClient, user);
-				detailsPopUp.open = false;
-
-				break;
-			case 'ban':
-				detailsPopUp.open = true;
-				detailsPopUp.user = user;
-				detailsPopUp.reason = true;
-				detailsPopUp.action = 'ban';
-
-				break;
-			case 'timeout':
-				detailsPopUp.user = user;
-				detailsPopUp.open = true;
-				detailsPopUp.reason = true;
-				detailsPopUp.action = 'timeout';
-				detailsPopUp.time = true;
-				break;
+		if (action) {
+			//TODO: actual actions
+			console.log('action', action);
+		} else {
+			detailsPopUp.open = false;
 		}
 		this.setState({ detailsPopUp });
 	}
 
-	closeUserOptionsMenu(action, event) {
-		var { optionsMenu, detailsPopUp } = this.state;
-		var options = this.state.optionsMenu;
-		optionsMenu.anchor = null;
-		if (action) {
-			this.handleUserAction(action, options.user);
-		} else {
-			detailsPopUp.open = false;
-		}
-		this.setState({ optionsMenu, detailsPopUp });
-	}
-
 	refreshList(channel = this.props.currentChannel) {
+		if (!channel) return;
+		console.log('refreshList');
 		var self = this,
 			usersData = this.state.usersData;
 
@@ -190,6 +163,7 @@ class UserListComponent extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
+		console.log('nextProps', nextProps);
 		if (this.props.currentChannel !== nextProps.currentChannel) {
 			this.refreshList(nextProps.currentChannel);
 		}
@@ -203,44 +177,11 @@ class UserListComponent extends React.Component {
 
 		var groupsMarkup = [];
 
-		// for (let group in users) {
-		// 	if (users[group].length && !loading) {
-		// 		groupsMarkup.push(
-		// 			<UserGroupList
-		// 				onUserOptionsOpen={this.openUserOptionsMenu.bind(this)}
-		// 				key={group}
-		// 				groupTitle={group}
-		// 				usersData={usersData}
-		// 				users={filtered}
-		// 			/>
-		// 		);
-		// 	}
-		// }
-
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
-				<Menu
-					id={optionsMenuID}
-					anchorEl={this.state.optionsMenu.anchor}
-					open={!!this.state.optionsMenu.anchor}
-					onClose={this.closeUserOptionsMenu.bind(this, null)}
-					PaperProps={{
-						style: {
-							width: 200
-						}
-					}}
-				>
-					{options.map(option => (
-						<MenuItem key={option} onClick={this.closeUserOptionsMenu.bind(this, option)}>
-							{option}
-						</MenuItem>
-					))}
-				</Menu>
 				<Modal open={detailsPopUp.open} onClose={this.closeUserOptionsMenu.bind(this, null)}>
 					<div className={classes.modal}>
-						<Typography type="title" id="modal-title">
-							{`Are you sure you wnat to ${detailsPopUp.action} ${detailsPopUp.user}?`}
-						</Typography>
+						<UserDetails user={detailsPopUp.user} actionHandler={this.closeUserOptionsMenu.bind(this)} />
 					</div>
 				</Modal>
 				<AppBar position="static" color="primary" className={classes.header}>

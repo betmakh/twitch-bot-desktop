@@ -45,7 +45,7 @@ class MainAppContainer extends React.Component {
 		});
 	}
 
-	showNotification(notification, delay = 3000) {
+	showNotification(notification, delay = 7000) {
 		var that = this;
 		setTimeout(() => {
 			that.setState({ notification: null });
@@ -147,7 +147,9 @@ class MainAppContainer extends React.Component {
 				);
 				break;
 			case UserListComponent.COMPONENT_NAME:
-				selectedSectionMarkup = <UserListComponent {...propsTopPass} />;
+				selectedSectionMarkup = (
+					<UserListComponent {...propsTopPass} showNotification={this.showNotification.bind(this)} />
+				);
 				break;
 			case SettingsComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (

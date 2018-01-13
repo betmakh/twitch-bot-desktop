@@ -125,19 +125,31 @@ export const API = {
 				}).then(resp => resp.json())
 			: multiRequest;
 	},
-	timeoutUser: (client, user, time = 300, channel, reason = 'Bad behavior') => {
-		if (channel) {
-			client.timeout(channel, user, time, reason);
+	timeoutUser: (client, user, channel, reason = 'Bad behavior', time = 300) => {
+		if (client && user && channel) {
+			if (client.readyState() !== 'OPEN') {
+				return client.connect().then(data => client.timeout(channel, user, time, reason));
+			} else {
+				return client.timeout(channel, user, time, reason);
+			}
 		}
 	},
 	modUser: (client, user, channel) => {
-		if (clinet && user && channel) {
-			return client.mod(channel, user);
+		if (client && user && channel) {
+			if (client.readyState() !== 'OPEN') {
+				return client.connect().then(data => client.mod(channel, user));
+			} else {
+				return client.mod(channel, user);
+			}
 		}
 	},
 	banUser: (client, user, channel, reason = 'Very bad behaviour') => {
-		if (clinet && user && channel) {
-			return client.ban(channel, user, reason);
+		if (client && user && channel) {
+			if (client.readyState() !== 'OPEN') {
+				return client.connect().then(data => client.ban(channel, user, reason));
+			} else {
+				return client.ban(channel, user, reason);
+			}
 		}
 	}
 };

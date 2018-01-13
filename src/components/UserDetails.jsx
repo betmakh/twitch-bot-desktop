@@ -6,27 +6,8 @@ import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import TextField from 'material-ui/TextField';
 import Input from 'material-ui/Input';
-import NumberFormat from 'react-number-format';
 import Radio, { RadioGroup } from 'material-ui/Radio';
 import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
-
-class TimeFormatCustom extends React.Component {
-	render() {
-		return (
-			<NumberFormat
-				{...this.props}
-				onValueChange={values => {
-					this.props.onChange({
-						target: {
-							value: values.value
-						}
-					});
-				}}
-				suffix="sec"
-			/>
-		);
-	}
-}
 
 class UserDetails extends React.Component {
 	static propTypes = {
@@ -96,8 +77,6 @@ class UserDetails extends React.Component {
 							<TextField
 								onChange={this.handleChange.bind(this)}
 								label="Time(in seconds)"
-								min="1"
-								max="6000"
 								name="time"
 								fullWidth
 								value={this.state.time}
@@ -107,7 +86,10 @@ class UserDetails extends React.Component {
 					)}
 
 					<Grid item xs={12}>
-						<Button color="primary" onClick={() => this.props.actionHandler({ actionType, reason, time })}>
+						<Button
+							color="primary"
+							onClick={() => this.props.actionHandler({ actionType, reason, time, user: user.login })}
+						>
 							Apply
 						</Button>
 						<Button onClick={() => this.props.actionHandler()}>Cancel</Button>

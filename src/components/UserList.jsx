@@ -135,19 +135,24 @@ class UserListComponent extends React.Component {
 	}
 
 	closeUserOptionsMenu(action) {
-		var { detailsPopUp } = this.state;
+		var { detailsPopUp } = this.state,
+			{ TwitchClient, currentChannel, showNotification } = this.props;
 		if (action) {
-			//TODO: actual actions
-			console.log('action', action);
-		} else {
-			detailsPopUp.open = false;
+			// TwitchClient[action.actionType](currentChannel, action.user);
+			API[`${action.actionType}User`](TwitchClient, action.user, currentChannel, action.reason, action.time)
+				.then(resp => {
+					showNotification(`Success: ${resp}`);
+				})
+				.catch(err => {
+					showNotification(`Error: ${err}`);
+				});
 		}
+		detailsPopUp.open = false;
 		this.setState({ detailsPopUp });
 	}
 
 	refreshList(channel = this.props.currentChannel) {
 		if (!channel) return;
-		console.log('refreshList');
 		var self = this,
 			usersData = this.state.usersData;
 
@@ -163,7 +168,6 @@ class UserListComponent extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		console.log('nextProps', nextProps);
 		if (this.props.currentChannel !== nextProps.currentChannel) {
 			this.refreshList(nextProps.currentChannel);
 		}

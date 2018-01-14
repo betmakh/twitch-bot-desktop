@@ -47,6 +47,7 @@ class MainAppContainer extends React.Component {
 
 	showNotification(notification, delay = 7000) {
 		var that = this;
+		this.state.TwitchClient.action(this.state.currentChannel, notification);
 		setTimeout(() => {
 			that.setState({ notification: null });
 		}, delay);
@@ -64,9 +65,8 @@ class MainAppContainer extends React.Component {
 			} else {
 				FollowersWatcher.start(data.currentChannel, follows => {
 					self.showNotification(
-						'New followers: ' + follows.reduce((res, val) => `${res}, ${val.user.display_name}`, '')
+						'New followers: ' + follows.map(follow => follow.user.display_name).join(', ')
 					);
-					console.log('follows', follows);
 				});
 			}
 			if (data.PASS && (currentChannel !== data.currentChannel || !self.state.TwitchClient)) {
@@ -98,9 +98,7 @@ class MainAppContainer extends React.Component {
 			self.setState(data);
 		});
 
-		ipcRenderer.on('error', (event, data) => {
-			console.log('error', data);
-		});
+		ipcRenderer.on('error', (event, data) => {});
 	}
 
 	updateMessageList(messages) {

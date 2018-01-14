@@ -73,7 +73,7 @@ export const API = {
 		});
 	},
 	sendMsg: function(client, msg, channel) {
-		if (msg && msg.length) {
+		if (msg && msg.length && client && channel) {
 			client.say(channel, msg);
 		}
 	},

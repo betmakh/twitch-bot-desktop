@@ -1,4 +1,7 @@
-import { KRAKEN_PREFIX_URL, TOKEN, TWITCH_API_PREFIX_URL } from '../../utils/constants.js';
+const KRAKEN_PREFIX_URL = 'https://api.twitch.tv/kraken/';
+const TWITCH_API_PREFIX_URL = 'https://api.twitch.tv/helix/';
+const TOKEN = 'o9gnnqnx1sxt6twajj6h7u4w7ko6bhj';
+
 import { ipcMain } from 'electron';
 import fetch from 'node-fetch';
 
@@ -52,7 +55,7 @@ const updateUsersData = users => {
 				resolve(dataToResolve);
 			});
 		});
-		
+
 		// return Promise.resolve(dataToResolve);
 	});
 };
@@ -121,7 +124,6 @@ ipcMain.on('chatters-filter', (event, channel, query) => {
 				}
 			}
 			updateUsersData(usersWithoutData).then(users => {
-				
 				dataToSend = dataToSend.concat(users);
 				event.sender.send('chatters-received', {
 					users: dataToSend,

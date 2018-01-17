@@ -5,9 +5,11 @@ require('electron-reload')(path.resolve('./dist'), {
   electron: require('electron')
 });
 
-const webpack = require("webpack");
 
-const compiler = webpack(require('../webpack.config'));
+const webpack = require("webpack"),
+	webpackConfig = require('../webpack.config');
+
+const compiler = webpack(typeof webpackConfig === 'object' ? webpackConfig : webpackConfig());
 
 const watching = compiler.watch({
   aggregateTimeout: 300,

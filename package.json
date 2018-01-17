@@ -7,7 +7,8 @@
     "start": "electron bin/dev --inspect=5858",
     "format": "prettier --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
     "build": "./node_modules/.bin/webpack --env.prod true && babel src/main -d dist ",
-    "prod": "NODE_ENV=production && yarn build && electron dist/main.js"
+    "prod": "NODE_ENV=production && yarn build && electron dist/main.js",
+    "prodWin": "set NODE_ENV=production && yarn build && electron dist/main.js"
   },
   "author": "mmeshcheriakov@gmail.com",
   "license": "MIT",

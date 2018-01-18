@@ -17,7 +17,7 @@ let mainWindow;
 
 const createWindow = () => {
   // Create the browser window.
-  mainWindow = new BrowserWindow({ width: 900, height: 600 });
+  mainWindow = new BrowserWindow({ width: 900, height: 600, icon: path.resolve('assets/GlitchIcon_purple.png') });
 
   // auth.init(app);
   // Settings.init(ipcMain);

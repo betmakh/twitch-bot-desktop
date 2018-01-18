@@ -1,14 +1,24 @@
 {
-  "name": "twitch-bot-desktop",
-  "version": "1.0.0",
-  "description": "twitch bot with UI",
+  "name": "TwitchBot",
+  "version": "0.0.1",
+  "description": "Crossplatform Twitch bot application ",
   "main": "main.js",
   "scripts": {
     "start": "electron bin/dev --inspect=5858",
     "format": "prettier --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
-    "build": "./node_modules/.bin/webpack --env.prod true && babel src/main -d dist ",
-    "prod": "NODE_ENV=production && yarn build && electron dist/main.js"
+    "prebuild": "./node_modules/.bin/webpack --env.prod true && babel src/main -d ./dist ",
+    "prodPrebuild": "NODE_ENV=production && yarn prebuild",
+    "create-linux":
+      "yarn prodPrebuild && electron-packager ./ TwitchBot --platform linux --out packed --overwrite --ignore src --ignore bin --asar",
+    "create-win":
+      "yarn prodPrebuild && electron-packager ./  TwitchBot --platform win32 --out packed --overwrite --ignore src --ignore bin --asar"
   },
+  "build": {
+    "appId": "com.electron.twitchBot",
+    "productName": "Twitch-Bot-beta",
+    "copyright": "Copyright © 2018 year Mykyta Meshcheriakov"
+  },
+  "productName": "Twitch-Bot-beta",
   "author": "mmeshcheriakov@gmail.com",
   "license": "MIT",
   "dependencies": {
@@ -43,6 +53,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "babel-register": "^6.26.0",
     "clean-webpack-plugin": "^0.1.17",
+    "electron-builder": "^19.54.0",
     "electron-log": "^2.2.11",
     "electron-reload": "^1.2.2",
     "nodemon": "^1.12.1",

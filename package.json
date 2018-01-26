@@ -11,7 +11,7 @@
     "create-linux":
       "yarn prodPrebuild && electron-packager ./ TwitchBot --platform linux --out release-builds --overwrite --ignore src --ignore bin",
     "create-win":
-      "yarn prodPrebuild && electron-packager ./ TwitchBot --platform win32 --out packed --overwrite --ignore src --ignore bin --icon static/icons/icon.ico"
+      "yarn prodPrebuild && electron-packager ./ TwitchBot --platform win32 --out packed --overwrite --ignore src --ignore bin --icon=static/icons/icon.ico --asar"
   },
   "build": {
     "appId": "com.electron.twitchBot",

@@ -6,10 +6,12 @@
   "scripts": {
     "start": "electron bin/dev --inspect=5858",
     "format": "prettier --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
-    "prebuild": "./node_modules/.bin/webpack --env.prod true && babel src/main -d ./dist ",
-    "prodPrebuild": "set NODE_ENV=production && yarn prebuild",
-    "create-linux": "yarn prodPrebuild && electron-packager ./ TwitchBot --platform linux --out release-builds --overwrite --ignore src --ignore bin",
-    "create-win": "yarn prodPrebuild && electron-packager ./ TwitchBot --platform win32 --out packed --overwrite --ignore src --ignore bin --asar"
+    "prebuild": "webpack --env.prod true",
+    "prodPrebuild": "set NODE_ENV=production && webpack --env.prod true",
+    "create-linux":
+      "yarn prodPrebuild && electron-packager ./ TwitchBot --platform linux --out release-builds --overwrite --ignore src --ignore bin",
+    "create-win":
+      "yarn prodPrebuild && electron-packager ./ TwitchBot --platform win32 --out packed --overwrite --ignore src --ignore bin --icon static/icons/icon.ico"
   },
   "build": {
     "appId": "com.electron.twitchBot",
@@ -25,9 +27,9 @@
   },
   "productName": "Twitch-Bot-beta",
   "author": {
-    "email":"mmeshcheriakov@gmail.com",
+    "email": "mmeshcheriakov@gmail.com",
     "name": "Mykyta Meshcheriakov",
-    "url" : "https://www.linkedin.com/in/mykyta-meshcheriakov-603233a2/"
+    "url": "https://www.linkedin.com/in/mykyta-meshcheriakov-603233a2/"
   },
   "license": "MIT",
   "dependencies": {
@@ -60,7 +62,6 @@
     "clean-webpack-plugin": "^0.1.17",
     "electron": "^1.7.9",
     "electron-builder": "^19.54.0",
-    "electron-installer-debian": "^0.8.0",
     "electron-log": "^2.2.11",
     "electron-packager": "^10.1.1",
     "electron-prebuilt": "^1.4.13",

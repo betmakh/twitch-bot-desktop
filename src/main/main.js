@@ -17,7 +17,7 @@ let mainWindow;
 
 const createWindow = () => {
   // Create the browser window.
-  mainWindow = new BrowserWindow({ width: 900, height: 600, icon: path.resolve('assets/GlitchIcon_purple.png') });
+  mainWindow = new BrowserWindow({ width: 900, height: 600, icon: path.resolve(__dirname, 'static/icons/icon.png') });
 
   // auth.init(app);
   // Settings.init(ipcMain);
@@ -25,14 +25,14 @@ const createWindow = () => {
   // and load the index.html of the app.
   mainWindow.loadURL(
     url.format({
-      pathname: path.resolve('index.html'),
+      pathname: path.resolve(__dirname, 'index.html'),
       protocol: 'file:',
       slashes: true
     })
   );
 
   // Open the DevTools.
-  if (!process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV !== 'production') {
     mainWindow.webContents.openDevTools();
   }
 

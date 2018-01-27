@@ -1,9 +1,5 @@
-require('babel-register');
 const path = require('path');
-    console.log("path.resolve('./src')", path.resolve('./src'));
-require('electron-reload')(path.resolve('./dist'), {
-  electron: require('electron')
-});
+
 
 
 const webpack = require("webpack"),
@@ -11,11 +7,14 @@ const webpack = require("webpack"),
 
 const compiler = webpack(typeof webpackConfig === 'object' ? webpackConfig : webpackConfig());
 
+require('electron-reload')(path.resolve('./dist'), {
+  electron: require('electron')
+});
 const watching = compiler.watch({
   aggregateTimeout: 300,
   poll: 1000
 }, (err, stats) => {
   // Print watch/build result here...
 });
+	require('../main.js')
 
-require('../src/main/main');

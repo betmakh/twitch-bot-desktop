@@ -1,8 +1,11 @@
 const path = require('path');
 
-const webpack = require("webpack");
 
-const compiler = webpack(require('../webpack.config')());
+
+const webpack = require("webpack"),
+	webpackConfig = require('../webpack.config');
+
+const compiler = webpack(typeof webpackConfig === 'object' ? webpackConfig : webpackConfig());
 
 require('electron-reload')(path.resolve('./dist'), {
   electron: require('electron')

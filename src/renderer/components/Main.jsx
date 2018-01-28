@@ -57,7 +57,8 @@ class MainAppContainer extends React.Component {
 		this.setState({ notification });
 	}
 	componentWillMount() {
-		var self = this;
+		var self = this,
+			{ TwitchClient } = this.state;
 		// request initial settings
 		ipcRenderer.send('settings-request');
 
@@ -71,6 +72,15 @@ class MainAppContainer extends React.Component {
 						'New followers: ' + follows.map(follow => follow.user.display_name).join(', ')
 					);
 				});
+			}
+			if (TwitchClient) {
+				if (data.watchersNotification) {
+					TwitchClient.on('join', (channel, username, byOwn) => {
+						self.showNotification(`New watcher. Cheers for @${username}`);
+					});
+				} else {
+					TwitchClient.removeAllListeners('join');
+				}
 			}
 			if (data.PASS && (currentChannel !== data.currentChannel || !self.state.TwitchClient)) {
 				// update connection if selected channel has changed
@@ -121,6 +131,7 @@ class MainAppContainer extends React.Component {
 				PASS,
 				followersNotification,
 				notification,
+				watchersNotification,
 				messages
 			} = this.state,
 			propsTopPass = {
@@ -132,7 +143,8 @@ class MainAppContainer extends React.Component {
 				channelData,
 				PASS,
 				followersNotification,
-				messages
+				messages,
+				watchersNotification
 			},
 			self = this;
 

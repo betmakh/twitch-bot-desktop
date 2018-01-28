@@ -14,6 +14,7 @@ import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import Checkbox from 'material-ui/Checkbox';
 import List, { ListItem, ListItemAvatar, ListItemIcon, ListItemSecondaryAction, ListItemText } from 'material-ui/List';
 import UrlUtils from 'url';
+import { CircularProgress } from 'material-ui/Progress';
 import querystring from 'querystring';
 
 import { SETTINGS_COMPONENT, AUTH_URL, TOKEN } from '../utils/constants.js';
@@ -31,6 +32,9 @@ const stylesLocal = theme =>
 		},
 		media: {
 			height: 200
+		},
+		textCenter: {
+			textAlign: 'center'
 		}
 	});
 
@@ -79,11 +83,20 @@ class SettingsComponent extends React.Component {
 			this.setState({ userData: null });
 		} else {
 			var self = this;
-			API.getUserInfo(token).then(resp => {
-				if (resp.data[0]) {
-					self.setState({ userData: resp.data[0] });
-				}
+
+			this.setState({
+				userDataLoading: true
 			});
+			API.getUserInfo(token)
+				.then(resp => {
+					if (resp.data[0]) {
+						self.setState({ userData: resp.data[0], userDataLoading: false });
+					}
+				})
+				.catch(err => {
+					self.props.showNotification("Can't receive account data");
+					self.setState({ userDataLoading: false });
+				});
 		}
 	}
 
@@ -137,9 +150,10 @@ class SettingsComponent extends React.Component {
 				botEnabled,
 				saveSettings,
 				followersNotification,
-				commentsAutoplay
+				commentsAutoplay,
+				watchersNotification
 			} = this.props,
-			{ showLoginPage, userData, loginUrl } = this.state;
+			{ showLoginPage, userData, loginUrl, userDataLoading } = this.state;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -153,35 +167,41 @@ class SettingsComponent extends React.Component {
 				<div className={classes.chatBody + ' ' + classes.spacingBlock} style={{ width: '100%' }}>
 					<Grid container>
 						<Grid md={6} xs={12} item lg={4}>
-							<Card>
-								{userData && (
-									<CardMedia
-										className={classes.media}
-										image={userData.profile_image_url}
-										title={userData.display_name}
-									/>
-								)}
-								<CardContent>
+							{userDataLoading ? (
+								<div className={classes.textCenter}>
+									<CircularProgress size={100} color="accent" />
+								</div>
+							) : (
+								<Card>
 									{userData && (
-										<Typography type="headline" component="h2">
-											{userData.display_name}
-										</Typography>
+										<CardMedia
+											className={classes.media}
+											image={userData.profile_image_url}
+											title={userData.display_name}
+										/>
 									)}
-									<Typography component="p">
-										Your bot is going to send messages from this account
-									</Typography>
-								</CardContent>
-								<CardActions>
-									<Button color="primary" onClick={this.login.bind(this)}>
-										{userData ? 'Change login' : 'Login'}
-									</Button>
-									{userData ? (
-										<Button color="primary" onClick={this.logout.bind(this)}>
-											Logout
+									<CardContent>
+										{userData && (
+											<Typography type="headline" component="h2">
+												{userData.display_name}
+											</Typography>
+										)}
+										<Typography component="p">
+											Your bot is going to send messages from this account
+										</Typography>
+									</CardContent>
+									<CardActions>
+										<Button color="primary" onClick={this.login.bind(this)}>
+											{userData ? 'Change login' : 'Login'}
 										</Button>
-									) : null}
-								</CardActions>
-							</Card>
+										{userData ? (
+											<Button color="primary" onClick={this.logout.bind(this)}>
+												Logout
+											</Button>
+										) : null}
+									</CardActions>
+								</Card>
+							)}
 						</Grid>
 						<Grid md={6} xs={12} item lg={4}>
 							<Card>
@@ -261,6 +281,17 @@ class SettingsComponent extends React.Component {
 											/>
 										}
 										label="Enable bot commands"
+									/>
+									<FormControlLabel
+										control={
+											<Checkbox
+												checked={watchersNotification}
+												onChange={event =>
+													saveSettings({ watchersNotification: event.target.checked })
+												}
+											/>
+										}
+										label="Enable new watchers notification"
 									/>
 								</CardContent>
 							</Card>

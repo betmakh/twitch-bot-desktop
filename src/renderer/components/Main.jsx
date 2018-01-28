@@ -23,16 +23,26 @@ class MainAppContainer extends React.Component {
 		notification: null,
 		commentsAutoplay: true,
 		currentChannel: '',
-		sectionSelected: UserListComponent.COMPONENT_NAME,
+		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient: null,
 		FollowersWatcher,
 		channelData: null,
 		followersNotification: true,
+		commands: [],
 		botEnabled: false,
 		messages: []
 	};
 	saveSettings(settings) {
-		var { channels, commentsAutoplay, currentChannel, botEnabled, PASS, TOKEN, followersNotification } = this.state;
+		var {
+			channels,
+			commentsAutoplay,
+			commands,
+			currentChannel,
+			botEnabled,
+			PASS,
+			TOKEN,
+			followersNotification
+		} = this.state;
 		ipcRenderer.send('settings-save', {
 			channels,
 			commentsAutoplay,
@@ -41,6 +51,7 @@ class MainAppContainer extends React.Component {
 			TOKEN,
 			botEnabled,
 			followersNotification,
+			commands,
 			...settings
 		});
 	}
@@ -132,7 +143,8 @@ class MainAppContainer extends React.Component {
 				followersNotification,
 				notification,
 				watchersNotification,
-				messages
+				messages,
+				commands
 			} = this.state,
 			propsTopPass = {
 				drawerWidth,
@@ -144,7 +156,8 @@ class MainAppContainer extends React.Component {
 				PASS,
 				followersNotification,
 				messages,
-				watchersNotification
+				watchersNotification,
+				commands
 			},
 			self = this;
 

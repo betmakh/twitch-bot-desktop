@@ -1,5 +1,4 @@
 import React from 'react';
-import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import PropTypes from 'prop-types';
 import Button from 'material-ui/Button';
@@ -22,9 +21,6 @@ class UserDetails extends React.Component {
 		actionType: ''
 	};
 
-	handleButton(actionType) {
-		return event => {};
-	}
 	handleChange(event, value) {
 		console.log('event', event);
 		if (value) {

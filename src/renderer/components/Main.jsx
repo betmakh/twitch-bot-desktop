@@ -46,8 +46,11 @@ class MainAppContainer extends React.Component {
 	}
 
 	showNotification(notification, delay = 7000) {
-		var that = this;
-		this.state.TwitchClient.action(this.state.currentChannel, notification);
+		var that = this,
+			{ TwitchClient } = this.state;
+		if (TwitchClient) {
+			TwitchClient.action(this.state.currentChannel, notification);
+		}
 		setTimeout(() => {
 			that.setState({ notification: null });
 		}, delay);
@@ -151,7 +154,11 @@ class MainAppContainer extends React.Component {
 				break;
 			case SettingsComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
-					<SettingsComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />
+					<SettingsComponent
+						{...this.state}
+						saveSettings={this.saveSettings.bind(this)}
+						showNotification={this.showNotification.bind(this)}
+					/>
 				);
 				break;
 			case FollowersListComponent.COMPONENT_NAME:

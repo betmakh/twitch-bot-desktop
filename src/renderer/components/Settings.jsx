@@ -100,11 +100,16 @@ class SettingsComponent extends React.Component {
 			console.log('e', e);
 			var url = UrlUtils.parse(e.newURL),
 				hash = url.hash && url.hash.substr(1),
-				authKey = hash && querystring.parse(hash)['access_token'];
+				urlParams = hash && querystring.parse(hash),
+				error = urlParams && urlParams['error_description'],
+				authKey = urlParams && urlParams['access_token'];
 
 			if (authKey) {
 				self.setState({ showLoginPage: false });
 				self.props.saveSettings({ PASS: authKey });
+			} else if (error) {
+				self.setState({ showLoginPage: false });
+				self.props.showNotification(error);
 			}
 		});
 	}
@@ -267,133 +272,6 @@ class SettingsComponent extends React.Component {
 						</div>
 					)}
 				</div>
-				{/*				<Grid container spacing={0} className={classes.chatBody}>
-					{/*<Grid container spacing={0} alignItems={baseline}></Grid>
-					<Grid item xs={12} className={classes.spacingBlock}>
-						<Paper className={classes.spacingBlock}>
-							<Grid container>
-								<Grid md={6} xs={12} item lg={4}>
-									<Typography type="headline" gutterBottom>
-										Channels list
-									</Typography>
-									<Grid container alignItems="baseline">
-										<Grid item xs={12} sm={10} className={classes.spacingBlock}>
-											<TextField
-												id="channelNameField"
-												placeholder="Channel name"
-												className={classes.textField}
-												inputRef={ref => (this.ChannelNameField = ref)}
-												margin="normal"
-												fullWidth
-											/>
-										</Grid>
-
-										<Grid item xs={12} sm={2} className={classes.spacingBlock}>
-											<Button style={{ width: '100%' }} onClick={this.addChannel.bind(this)}>
-												Add
-											</Button>
-										</Grid>
-									</Grid>
-									<List dense>
-										{channels.map(channelName => (
-											<ListItem key={channelName} button>
-												<ListItemText primary={channelName} />
-												<ListItemSecondaryAction>
-													<IconButton aria-label={channelName} onClick={this.removeChannel.bind(this)}>
-														<DeleteIcon />
-													</IconButton>
-												</ListItemSecondaryAction>
-											</ListItem>
-										))}
-									</List>
-								</Grid>
-								<Grid md={6} xs={12} item lg={4}>
-									<FormControlLabel
-										control={
-											<Checkbox
-												inputRef={ref => (this.ChatAutoplay = ref)}
-												checked={commentsAutoplay}
-												onChange={event => this.setState({ commentsAutoplay: event.target.checked })}
-											/>
-										}
-										label="Translate text to speach"
-									/>
-								</Grid>
-								<Grid md={6} xs={12} item lg={4}>
-									{channelData &&
-										!showLoginPage && (
-											<div>
-												<Typography align="center" type="title" gutterBottom>
-													<img src={channelData.logo} style={{ maxWidth: '100%' }} alt="" />
-													<br />
-													{channelData.display_name}
-												</Typography>
-											</div>
-										)}
-									{!showLoginPage && (
-										<Button color="primary" onClick={this.login.bind(this)}>
-											{channelData ? 'Change login' : 'Login'}
-										</Button>
-									)}
-								</Grid>
-								<Grid item xs={12}>
-									{showLoginPage && (
-										<Button color="primary" onClick={this.login.bind(this)}>
-											Back
-										</Button>
-									)}
-
-									<webview
-										className={!showLoginPage ? classes.hidden : ''}
-										ref={el => (this.webview = el)}
-										src={loginUrl}
-										style={{ height: '500px' }}
-									/>
-								</Grid>
-							</Grid>
-						</Paper>
-						<br />
-						{channelData && (
-							<div>
-								<Card>
-									<CardMedia className={classes.media} image={channelData.logo} title={channelData.display_name} />
-									<CardContent>
-										<Typography type="headline" component="h2">
-											{channelData.display_name}
-										</Typography>
-										<Typography component="p">Your bot is going to send messages from this account</Typography>
-									</CardContent>
-									<CardActions>
-										<Button color="primary" onClick={this.login.bind(this)}>
-											{channelData ? 'Change login' : 'Login'}
-										</Button>
-									</CardActions>
-								</Card>
-							</div>
-						)}
-						<Paper>
-							<Grid item xs={12}>
-								<webview
-									className={!showLoginPage ? classes.hidden : ''}
-									ref={el => (this.webview = el)}
-									src={loginUrl}
-									style={{ height: '500px' }}
-								/>
-							</Grid>
-						</Paper>
-					</Grid>
-					<Grid item xs={12} className={classes.spacingBlock}>
-						<br />
-						<Button
-							raised
-							color="primary"
-							onClick={event => saveSettings({ commentsAutoplay, channels })}
-							style={{ width: '100%' }}
-						>
-							Save
-						</Button>
-					</Grid>
-				</Grid>*/}
 			</div>
 		);
 	}

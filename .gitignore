@@ -48,5 +48,5 @@ node_modules
 sftp-config.json
 
 dist
-data
+static/data/config.json
 main.js

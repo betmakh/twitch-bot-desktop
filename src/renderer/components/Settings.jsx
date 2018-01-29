@@ -242,9 +242,13 @@ class SettingsComponent extends React.Component {
 										/>
 									)}
 									<CardContent>
-										{userData && (
+										{userData ? (
 											<Typography type="headline" component="h2">
 												{userData.display_name}
+											</Typography>
+										) : (
+											<Typography type="headline" gutterBottom>
+												Authorize your bot account
 											</Typography>
 										)}
 										<Typography component="p">
@@ -266,6 +270,7 @@ class SettingsComponent extends React.Component {
 									<Typography type="headline" gutterBottom>
 										Channels list
 									</Typography>
+									<Typography component="p">Add channels to which you want connect to</Typography>
 									<Grid container alignItems="baseline">
 										<Grid item xs={12} sm={8} className={classes.spacingBlock}>
 											<TextField

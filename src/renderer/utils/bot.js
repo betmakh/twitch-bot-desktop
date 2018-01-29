@@ -3,18 +3,24 @@ import moment from 'moment';
 import { API } from './chatUtils';
 
 const placeholders = {
+	'%game%': channel => {
+		return API.getStreamInfo(channel).then(resp => {
+			return Promise.resolve((resp.stream && resp.stream.game) || 'unknown');
+		});
+	},
+	'%username': (channel, username) => username,
 	'%uptime%': channel => {
-		var time = 'Offline';
-		API.getStreamInfo(channel).then(resp => {
+		var time = 'offline';
+		return API.getStreamInfo(channel).then(resp => {
 			if (resp.stream) {
 				time = moment.utc(moment.utc().diff(moment.utc(resp.stream.created_at))).format('HH:mm:ss');
 			}
-			return Promise.resolve(msg);
+			return Promise.resolve(time);
 		});
 	}
 };
 
-export const BOT = (() => {
+const BOT = (() => {
 	var commands = [],
 		client;
 	return {
@@ -24,25 +30,30 @@ export const BOT = (() => {
 		},
 		handleMessage(msg, user) {
 			var command = commands.find(el => el.command === msg),
-				matchesPromises = [];
+				matchesPromises = [],
+				channel = client.getChannels()[0].slice(1),
+				text;
 			if (command) {
-				let text = command.text,
-					matches = text.match(/%(\w)+%/gi);
+				text = command.text;
+				let matches = text.match(/%(\w)+%/gi);
 
 				if (matches) {
 					matches.forEach(match => {
 						if (placeholders[match]) {
-							let promise = placeholders[match](clinet.getChannels()[0]).then(data => {
-								text.replace(match, data);
-							});
-							matchesPromises.push(promise);
+							matchesPromises.push(
+								placeholders[match](channel, user).then(data => {
+									text = text.replace(match, data);
+								})
+							);
 						}
 					});
 				}
 			}
-			return Promise.all(matchesPromises).then(data => {
-				Proise.resolve(text);
-			});
+			return Promise.all(matchesPromises).then(() =>
+				Promise.all([API.sendAction(client, text, channel), Promise.resolve(text)])
+			);
 		}
 	};
 })();
+
+export default BOT;

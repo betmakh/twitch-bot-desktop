@@ -16,7 +16,8 @@ import PlayIcon from 'material-ui-icons/PlayCircleOutline';
 import VolumeOffIcon from 'material-ui-icons/VolumeOff';
 import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 
-import { API, BOT } from '../utils/chatUtils.js';
+import { API } from '../utils/chatUtils.js';
+import BOT from '../utils/bot.js';
 import { CHAT_COMPONENT } from '../utils/constants.js';
 
 export const styles = theme => ({
@@ -97,7 +98,6 @@ class ChatComponent extends React.Component {
 			{ commentsAutoplay, maxMessages, TwitchClient, botEnabled } = this.props,
 			self = this;
 
-		console.log('botEnabled', botEnabled);
 		var addMsg = msg => {
 			messages.push(msg);
 			if (commentsAutoplay) {
@@ -128,7 +128,7 @@ class ChatComponent extends React.Component {
 			addMsg(msg);
 		}
 		if (!msg.byOwn && this.props.botEnabled) {
-			BOT(TwitchClient, msg.text, msg.user);
+			BOT.handleMessage(msg.text, msg.user);
 		}
 	}
 
@@ -142,10 +142,13 @@ class ChatComponent extends React.Component {
 	}
 
 	addChatListener(props = this.props) {
-		const { TwitchClient } = props,
+		const { TwitchClient, commands, botEnabled } = props,
 			self = this;
 
 		if (TwitchClient) {
+			if (botEnabled) {
+				BOT.init({ commands, client: TwitchClient });
+			}
 			TwitchClient.connect();
 			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
 				self.messageReceived({
@@ -207,21 +210,16 @@ class ChatComponent extends React.Component {
 				) : null}
 				<AppBar position="static" color="primary" className={classes.header}>
 					<Toolbar>
-						<Typography type="title" color="inherit">
+						<IconButton onClick={this.toggleAutoplay.bind(this)}>
+							{!commentsAutoplay ? <VolumeOffIcon title="Unmute" /> : <VolumeUpIcon title="Mute" />}
+						</IconButton>
+						<Typography
+							type="title"
+							title={channelData ? channelData.status : 'Connecting...'}
+							color="inherit"
+						>
 							{channelData ? channelData.status : 'Connecting...'}
 						</Typography>
-
-						<IconButton onClick={this.toggleAutoplay.bind(this)}>
-							{!commentsAutoplay ? (
-								<Tooltip title="Unmute" placement="right">
-									<VolumeOffIcon />
-								</Tooltip>
-							) : (
-								<Tooltip title="Mute" placement="right">
-									<VolumeUpIcon />
-								</Tooltip>
-							)}
-						</IconButton>
 					</Toolbar>
 				</AppBar>
 				<Grid container spacing={0} className={classes.chatBody} ref>

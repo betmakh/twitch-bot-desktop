@@ -390,7 +390,9 @@ class SettingsComponent extends React.Component {
 												))}
 										</List>
 
-										<Button onClick={this.openPopup.bind(this, null)}>Add command</Button>
+										<Button raised color="primary" onClick={this.openPopup.bind(this, null)}>
+											Add command
+										</Button>
 									</CardContent>
 								</Card>
 							</Grid>

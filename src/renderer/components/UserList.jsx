@@ -190,14 +190,14 @@ class UserListComponent extends React.Component {
 				</Modal>
 				<AppBar position="static" color="primary" className={classes.header}>
 					<Toolbar>
-						<Typography type="title" color="inherit">
-							Chatters at {currentChannel} ({totalUsersCount})
-						</Typography>
 						<IconButton onClick={event => this.refreshList()}>
 							<Tooltip id="tooltip-right" title="Refresh" placement="right">
 								<RefreshIcon color="inherit" />
 							</Tooltip>
 						</IconButton>
+						<Typography type="title" color="inherit">
+							Chatters at {currentChannel} ({totalUsersCount})
+						</Typography>
 					</Toolbar>
 				</AppBar>
 

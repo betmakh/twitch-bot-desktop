@@ -77,6 +77,11 @@ export const API = {
 			client.say(channel, msg);
 		}
 	},
+	sendAction: function(client, msg, channel) {
+		if (msg && msg.length && client && channel) {
+			client.action(channel, msg);
+		}
+	},
 	revokeUserAccess: token =>
 		fetch(
 			`${KRAKEN_PREFIX_URL}oauth2/revoke?${querystring.stringify({

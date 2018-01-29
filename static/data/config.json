@@ -1,0 +1,6 @@
+{
+	"commands": [
+		{ "command": "!uptime", "text": "time is %uptime%", "type": "text" },
+		{ "command": "!game", "text": "curren game is %game%", "type": "text" }
+	]
+}

@@ -23,7 +23,25 @@ class BotCommandDetails extends React.Component {
 		command: '',
 		commandTypes: ['text'],
 		header: 'Create bot command',
-		placeholdersDescription: 'Use %uptime% to get current streaming time'
+		placeholdersDescription: (
+			<div>
+				<Typography component="p" gutterBottom>
+					Availible commands so far:
+				</Typography>
+
+				<ul>
+					<li>
+						<b>%uptime%</b> - time of stream
+					</li>
+					<li>
+						<b>%game%</b> - current game
+					</li>
+					<li>
+						<b>%username%</b> - username who sends the command
+					</li>
+				</ul>
+			</div>
+		)
 	};
 
 	componentWillMount() {
@@ -62,9 +80,7 @@ class BotCommandDetails extends React.Component {
 				<Typography type="title" gutterBottom>
 					{header}
 				</Typography>
-				<Typography type="subheading" gutterBottom>
-					{placeholdersDescription}
-				</Typography>
+				{placeholdersDescription}
 
 				<Grid container alignItems="baseline">
 					<Grid item xs={6}>

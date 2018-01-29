@@ -8,7 +8,7 @@ const placeholders = {
 			return Promise.resolve((resp.stream && resp.stream.game) || 'unknown');
 		});
 	},
-	'%username': (channel, username) => username,
+	'%username%': (channel, user) => Promise.resolve(user.username),
 	'%uptime%': channel => {
 		var time = 'offline';
 		return API.getStreamInfo(channel).then(resp => {

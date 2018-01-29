@@ -23,16 +23,26 @@ class MainAppContainer extends React.Component {
 		notification: null,
 		commentsAutoplay: true,
 		currentChannel: '',
-		sectionSelected: UserListComponent.COMPONENT_NAME,
+		sectionSelected: SettingsComponent.COMPONENT_NAME,
 		TwitchClient: null,
 		FollowersWatcher,
 		channelData: null,
 		followersNotification: true,
+		commands: [],
 		botEnabled: false,
 		messages: []
 	};
 	saveSettings(settings) {
-		var { channels, commentsAutoplay, currentChannel, botEnabled, PASS, TOKEN, followersNotification } = this.state;
+		var {
+			channels,
+			commentsAutoplay,
+			commands,
+			currentChannel,
+			botEnabled,
+			PASS,
+			TOKEN,
+			followersNotification
+		} = this.state;
 		ipcRenderer.send('settings-save', {
 			channels,
 			commentsAutoplay,
@@ -41,20 +51,25 @@ class MainAppContainer extends React.Component {
 			TOKEN,
 			botEnabled,
 			followersNotification,
+			commands,
 			...settings
 		});
 	}
 
 	showNotification(notification, delay = 7000) {
-		var that = this;
-		this.state.TwitchClient.action(this.state.currentChannel, notification);
+		var that = this,
+			{ TwitchClient } = this.state;
+		if (TwitchClient) {
+			TwitchClient.action(this.state.currentChannel, notification);
+		}
 		setTimeout(() => {
 			that.setState({ notification: null });
 		}, delay);
 		this.setState({ notification });
 	}
 	componentWillMount() {
-		var self = this;
+		var self = this,
+			{ TwitchClient } = this.state;
 		// request initial settings
 		ipcRenderer.send('settings-request');
 
@@ -68,6 +83,15 @@ class MainAppContainer extends React.Component {
 						'New followers: ' + follows.map(follow => follow.user.display_name).join(', ')
 					);
 				});
+			}
+			if (TwitchClient) {
+				if (data.watchersNotification) {
+					TwitchClient.on('join', (channel, username, byOwn) => {
+						self.showNotification(`New watcher. Cheers for @${username}`);
+					});
+				} else {
+					TwitchClient.removeAllListeners('join');
+				}
 			}
 			if (data.PASS && (currentChannel !== data.currentChannel || !self.state.TwitchClient)) {
 				// update connection if selected channel has changed
@@ -118,7 +142,9 @@ class MainAppContainer extends React.Component {
 				PASS,
 				followersNotification,
 				notification,
-				messages
+				watchersNotification,
+				messages,
+				commands
 			} = this.state,
 			propsTopPass = {
 				drawerWidth,
@@ -129,7 +155,9 @@ class MainAppContainer extends React.Component {
 				channelData,
 				PASS,
 				followersNotification,
-				messages
+				messages,
+				watchersNotification,
+				commands
 			},
 			self = this;
 
@@ -151,7 +179,11 @@ class MainAppContainer extends React.Component {
 				break;
 			case SettingsComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
-					<SettingsComponent {...this.state} saveSettings={this.saveSettings.bind(this)} />
+					<SettingsComponent
+						{...this.state}
+						saveSettings={this.saveSettings.bind(this)}
+						showNotification={this.showNotification.bind(this)}
+					/>
 				);
 				break;
 			case FollowersListComponent.COMPONENT_NAME:

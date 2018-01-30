@@ -3,7 +3,7 @@ import moment from 'moment';
 import querystring from 'querystring';
 import _ from 'lodash';
 
-import { KRAKEN_PREFIX_URL, TOKEN, TWITCH_API_PREFIX_URL } from './constants.js';
+import { KRAKEN_PREFIX_URL, TOKEN, TWITCH_API_PREFIX_URL, FOLLOWERS_UPDATE_TIME } from './constants.js';
 
 const Messages = {
 	answers: ['Да', 'Нет', 'Ты конч такие вопросы задавать?', 'Определенно нет', 'Базарю, инфа сотка']
@@ -32,7 +32,7 @@ export const API = {
 			}
 		}),
 	getChannelInfo: channel => {
-		return fetch(KRAKEN_PREFIX_URL + 'channels/' + channel, {
+		return fetch(`${KRAKEN_PREFIX_URL}channels/${channel}`, {
 			headers: {
 				'Client-ID': TOKEN
 			}
@@ -44,8 +44,8 @@ export const API = {
 			}
 		});
 	},
-	getFollowersList: channel => {
-		return fetch(KRAKEN_PREFIX_URL + 'channels/' + channel + '/follows', {
+	getFollowersList: (channel, limit = 25) => {
+		return fetch(`${KRAKEN_PREFIX_URL}channels/${channel}/follows?limit=${limit}`, {
 			headers: {
 				'Client-ID': TOKEN
 			}
@@ -169,8 +169,8 @@ export const FollowersWatcher = (() => {
 				this.stop();
 			}
 			timer = setInterval(() => {
-				API.getFollowersList(channel).then(resp => {
-					if (followers.length) {
+				API.getFollowersList(channel, 30).then(resp => {
+					if (followers.length && timer) {
 						let diff = resp.follows.filter(
 							follower => !followers.find(oldFollower => oldFollower.created_at === follower.created_at)
 						);
@@ -180,10 +180,11 @@ export const FollowersWatcher = (() => {
 					}
 					followers = resp.follows || [];
 				});
-			}, 3000);
+			}, FOLLOWERS_UPDATE_TIME);
 		},
 		stop: function() {
 			clearInterval(timer);
+			timer = null;
 			followers = [];
 		}
 	};
@@ -226,7 +227,6 @@ export const BOT = (client, message, userstate, channel) => {
 	} else if (message.indexOf('!joke') === 0) {
 		API.getJoke().then(
 			function(data) {
-				console.log('data', data);
 				var joke = data[0];
 				API.sendMsg(
 					client,

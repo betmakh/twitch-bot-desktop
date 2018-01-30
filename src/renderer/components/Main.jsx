@@ -85,12 +85,11 @@ class MainAppContainer extends React.Component {
 				});
 			}
 			if (TwitchClient) {
+				TwitchClient.removeAllListeners('join');
 				if (data.watchersNotification) {
 					TwitchClient.on('join', (channel, username, byOwn) => {
 						self.showNotification(`New watcher. Cheers for @${username}`);
 					});
-				} else {
-					TwitchClient.removeAllListeners('join');
 				}
 			}
 			if (data.PASS && (currentChannel !== data.currentChannel || !self.state.TwitchClient)) {

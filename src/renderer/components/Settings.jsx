@@ -379,16 +379,16 @@ class SettingsComponent extends React.Component {
 														/>
 														<ListItemSecondaryAction>
 															<IconButton
-																title="Delete command"
-																onClick={e => this.removeCommand(command)}
-															>
-																<DeleteIcon />
-															</IconButton>
-															<IconButton
 																title="Edit command"
 																onClick={e => this.openPopup(command)}
 															>
 																<EditIcon />
+															</IconButton>
+															<IconButton
+																title="Delete command"
+																onClick={e => this.removeCommand(command)}
+															>
+																<DeleteIcon />
 															</IconButton>
 														</ListItemSecondaryAction>
 													</ListItem>

@@ -50,7 +50,7 @@ class ChatComponent extends React.Component {
 	static COMPONENT_NAME = CHAT_COMPONENT;
 	constructor(props) {
 		super(props);
-		this.messageReceived.bind(this);
+		this.messageReceived = this.messageReceived.bind(this);
 
 		this.state = {
 			audioQueue: [],
@@ -150,6 +150,7 @@ class ChatComponent extends React.Component {
 				BOT.init({ commands, client: TwitchClient });
 			}
 			TwitchClient.connect();
+			TwitchClient.removeAllListeners('chat');
 			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
 				self.messageReceived({
 					user: userstate,
@@ -172,9 +173,7 @@ class ChatComponent extends React.Component {
 		const { TwitchClient } = nextProps;
 
 		if (TwitchClient !== this.props.TwitchClient) {
-			if (this.props.TwitchClient) {
-				this.props.TwitchClient.removeAllListeners('chat');
-			}
+			TwitchClient.disconnect();
 			this.addChatListener(nextProps);
 		}
 	}

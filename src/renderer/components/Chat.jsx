@@ -135,8 +135,7 @@ class ChatComponent extends React.Component {
 	componentWillUnmount() {
 		var { TwitchClient } = this.props;
 		if (TwitchClient) {
-			TwitchClient.removeAllListeners('chat');
-			TwitchClient.disconnect();
+			this.destroyClient(TwitchClient);
 		}
 		this.props.updateMessages(this.state.messages);
 	}
@@ -150,7 +149,6 @@ class ChatComponent extends React.Component {
 				BOT.init({ commands, client: TwitchClient });
 			}
 			TwitchClient.connect();
-			TwitchClient.removeAllListeners('chat');
 			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
 				self.messageReceived({
 					user: userstate,
@@ -160,6 +158,11 @@ class ChatComponent extends React.Component {
 				});
 			});
 		}
+	}
+
+	destroyClient(twitchClient) {
+		twitchClient.removeAllListeners('chat');
+		twitchClient.disconnect();
 	}
 
 	componentWillMount() {
@@ -173,7 +176,8 @@ class ChatComponent extends React.Component {
 		const { TwitchClient } = nextProps;
 
 		if (TwitchClient !== this.props.TwitchClient) {
-			TwitchClient.disconnect();
+			console.log('destroyClient receive');
+			this.destroyClient(TwitchClient);
 			this.addChatListener(nextProps);
 		}
 	}

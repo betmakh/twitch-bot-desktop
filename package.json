@@ -4,7 +4,7 @@
   "description": "Crossplatform Twitch bot application ",
   "main": "main.js",
   "scripts": {
-    "start": "set NODE_ENV=development electron bin/dev --inspect=5858",
+    "start": "electron bin/dev --inspect=5858",
     "format": "prettier --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
     "prebuild": "webpack --env.prod true",
     "prodPrebuild": "set NODE_ENV=production && webpack --env.prod true",

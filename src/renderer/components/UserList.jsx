@@ -17,7 +17,7 @@ import Subheader from 'material-ui/List/ListSubheader';
 import InfoIcon from 'material-ui-icons/Info';
 import Tooltip from 'material-ui/Tooltip';
 import Divider from 'material-ui/Divider';
-import { GridList, GridListTile, GridListTileBar } from 'material-ui/GridList';
+import GridList, { GridListTile, GridListTileBar } from 'material-ui/GridList';
 import RefreshIcon from 'material-ui-icons/Refresh';
 
 import { USER_LIST_COMPONENT } from '../utils/constants.js';
@@ -53,8 +53,8 @@ export const stylesLocal = theme =>
 		}
 	});
 
-const UserGroupList = withStyles(stylesLocal)(props => {
-	const { groupTitle, users, classes, onUserOptionsOpen } = props;
+const UserGroupList = props => {
+	const { groupTitle, users, onUserOptionsOpen } = props;
 	return (
 		<GridList cellHeight={180} cols={3}>
 			<GridListTile key="Subheader" cols={3} style={{ height: 'auto' }}>
@@ -67,7 +67,7 @@ const UserGroupList = withStyles(stylesLocal)(props => {
 						title={user.display_name}
 						subtitle={`(${user.login})`}
 						actionIcon={
-							<IconButton color="contrast" onClick={onUserOptionsOpen(user)}>
+							<IconButton onClick={onUserOptionsOpen(user)}>
 								<MoreVertIcon />
 							</IconButton>
 						}
@@ -76,7 +76,7 @@ const UserGroupList = withStyles(stylesLocal)(props => {
 			))}
 		</GridList>
 	);
-});
+};
 
 class UserListComponent extends React.Component {
 	static COMPONENT_NAME = USER_LIST_COMPONENT;
@@ -161,6 +161,7 @@ class UserListComponent extends React.Component {
 		});
 		ipcRenderer.send('chatters-get', channel);
 		ipcRenderer.on('chatters-received', (event, data) => {
+			console.log('data', data);
 			if (self._isMounted) {
 				self.setState({ users: data.users, totalUsersCount: data.totalUsersCount, loading: false });
 			}
@@ -208,7 +209,7 @@ class UserListComponent extends React.Component {
 					{loading ? (
 						<Grid item xs={12}>
 							<div className={classes.textCenter}>
-								<CircularProgress size={100} color="accent" />
+								<CircularProgress size={100} color="secondary" />
 							</div>
 						</Grid>
 					) : (

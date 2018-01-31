@@ -28,6 +28,7 @@ class MainAppContainer extends React.Component {
 		FollowersWatcher,
 		channelData: null,
 		followersNotification: true,
+		watchersNotification: false,
 		commands: [],
 		botEnabled: false,
 		messages: []
@@ -41,13 +42,15 @@ class MainAppContainer extends React.Component {
 			botEnabled,
 			PASS,
 			TOKEN,
-			followersNotification
+			followersNotification,
+			watchersNotification
 		} = this.state;
 		ipcRenderer.send('settings-save', {
 			channels,
 			commentsAutoplay,
 			currentChannel,
 			PASS,
+			watchersNotification,
 			TOKEN,
 			botEnabled,
 			followersNotification,
@@ -79,9 +82,7 @@ class MainAppContainer extends React.Component {
 				FollowersWatcher.stop();
 			} else {
 				FollowersWatcher.start(data.currentChannel, follows => {
-					self.showNotification(
-						'New followers: ' + follows.map(follow => follow.user.display_name).join(', ')
-					);
+					self.showNotification('New followers: ' + follows.map(follow => follow.user.display_name).join(', '));
 				});
 			}
 			if (TwitchClient) {

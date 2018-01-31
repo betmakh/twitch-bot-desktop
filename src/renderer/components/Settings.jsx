@@ -13,7 +13,7 @@ import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import DeleteIcon from 'material-ui-icons/Delete';
 import EditIcon from 'material-ui-icons/Edit';
 import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import Checkbox from 'material-ui/Checkbox';
+import Switch from 'material-ui/Switch';
 import List, { ListItem, ListItemAvatar, ListItemIcon, ListItemSecondaryAction, ListItemText } from 'material-ui/List';
 import UrlUtils from 'url';
 import { CircularProgress } from 'material-ui/Progress';
@@ -251,9 +251,7 @@ class SettingsComponent extends React.Component {
 												Authorize your bot account
 											</Typography>
 										)}
-										<Typography component="p">
-											Your bot is going to send messages from this account
-										</Typography>
+										<Typography component="p">Your bot is going to send messages from this account</Typography>
 									</CardContent>
 									<CardActions>
 										<Button color="primary" onClick={this.login.bind(this)}>
@@ -284,11 +282,7 @@ class SettingsComponent extends React.Component {
 										</Grid>
 
 										<Grid item xs={12} sm={4} className={classes.spacingBlock}>
-											<Button
-												style={{ width: '100%' }}
-												color="primary"
-												onClick={this.addChannel.bind(this)}
-											>
+											<Button style={{ width: '100%' }} color="primary" onClick={this.addChannel.bind(this)}>
 												Add
 											</Button>
 										</Grid>
@@ -298,10 +292,7 @@ class SettingsComponent extends React.Component {
 											<ListItem key={channelName} button>
 												<ListItemText primary={channelName} />
 												<ListItemSecondaryAction>
-													<IconButton
-														aria-label={channelName}
-														onClick={this.removeChannel.bind(this)}
-													>
+													<IconButton aria-label={channelName} onClick={this.removeChannel.bind(this)}>
 														<DeleteIcon />
 													</IconButton>
 												</ListItemSecondaryAction>
@@ -319,29 +310,25 @@ class SettingsComponent extends React.Component {
 									</Typography>
 									<FormControlLabel
 										control={
-											<Checkbox
+											<Switch
 												checked={commentsAutoplay}
-												onChange={event =>
-													saveSettings({ commentsAutoplay: event.target.checked })
-												}
+												onChange={event => saveSettings({ commentsAutoplay: event.target.checked })}
 											/>
 										}
 										label="Translate text to speach"
 									/>
 									<FormControlLabel
 										control={
-											<Checkbox
+											<Switch
 												checked={followersNotification}
-												onChange={event =>
-													saveSettings({ followersNotification: event.target.checked })
-												}
+												onChange={event => saveSettings({ followersNotification: event.target.checked })}
 											/>
 										}
 										label="Show new followers notifiations"
 									/>
 									<FormControlLabel
 										control={
-											<Checkbox
+											<Switch
 												checked={botEnabled}
 												onChange={event => saveSettings({ botEnabled: event.target.checked })}
 											/>
@@ -350,11 +337,9 @@ class SettingsComponent extends React.Component {
 									/>
 									<FormControlLabel
 										control={
-											<Checkbox
+											<Switch
 												checked={watchersNotification}
-												onChange={event =>
-													saveSettings({ watchersNotification: event.target.checked })
-												}
+												onChange={event => saveSettings({ watchersNotification: event.target.checked })}
 											/>
 										}
 										label="Enable new watchers notification"
@@ -373,21 +358,12 @@ class SettingsComponent extends React.Component {
 											{commands &&
 												commands.map(command => (
 													<ListItem key={command.command} button>
-														<ListItemText
-															primary={command.command}
-															secondary={`${command.type}: ${command.text}`}
-														/>
+														<ListItemText primary={command.command} secondary={`${command.type}: ${command.text}`} />
 														<ListItemSecondaryAction>
-															<IconButton
-																title="Edit command"
-																onClick={e => this.openPopup(command)}
-															>
+															<IconButton title="Edit command" onClick={e => this.openPopup(command)}>
 																<EditIcon />
 															</IconButton>
-															<IconButton
-																title="Delete command"
-																onClick={e => this.removeCommand(command)}
-															>
+															<IconButton title="Delete command" onClick={e => this.removeCommand(command)}>
 																<DeleteIcon />
 															</IconButton>
 														</ListItemSecondaryAction>

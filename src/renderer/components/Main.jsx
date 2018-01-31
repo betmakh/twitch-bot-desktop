@@ -82,17 +82,12 @@ class MainAppContainer extends React.Component {
 				FollowersWatcher.stop();
 			} else {
 				FollowersWatcher.start(data.currentChannel, follows => {
-					self.showNotification('New followers: ' + follows.map(follow => follow.user.display_name).join(', '));
+					self.showNotification(
+						'New followers: ' + follows.map(follow => follow.user.display_name).join(', ')
+					);
 				});
 			}
-			if (TwitchClient) {
-				TwitchClient.removeAllListeners('join');
-				if (data.watchersNotification) {
-					TwitchClient.on('join', (channel, username, byOwn) => {
-						self.showNotification(`New watcher. Cheers for @${username}`);
-					});
-				}
-			}
+
 			if (data.PASS && (currentChannel !== data.currentChannel || !self.state.TwitchClient)) {
 				// update connection if selected channel has changed
 				if (self.state.TwitchClient) {
@@ -111,6 +106,12 @@ class MainAppContainer extends React.Component {
 					},
 					channels: [data.currentChannel]
 				});
+				TwitchClient.removeAllListeners('join');
+				if (data.watchersNotification) {
+					TwitchClient.on('join', (channel, username, byOwn) => {
+						self.showNotification(`New watcher. Cheers for @${username}`);
+					});
+				}
 
 				self.setState({ TwitchClient });
 			}

@@ -66,12 +66,16 @@ class SettingsComponent extends React.Component {
 	};
 
 	addChannel(event) {
-		var { channels, saveSettings } = this.props,
+		var { channels, saveSettings, currentChannel } = this.props,
 			ChannelNameValue = this.ChannelNameField.value;
 		if (ChannelNameValue.length && !~channels.indexOf(ChannelNameValue.toLowerCase())) {
 			channels.push(ChannelNameValue.toLowerCase());
 			this.ChannelNameField.value = '';
-			saveSettings({ channels });
+			let dataToSave = { channels };
+			if (!currentChannel) {
+				dataToSave.currentChannel = channels[0];
+			}
+			saveSettings(dataToSave);
 		}
 	}
 
@@ -251,7 +255,9 @@ class SettingsComponent extends React.Component {
 												Authorize your bot account
 											</Typography>
 										)}
-										<Typography component="p">Your bot is going to send messages from this account</Typography>
+										<Typography component="p">
+											Your bot is going to send messages from this account
+										</Typography>
 									</CardContent>
 									<CardActions>
 										<Button color="primary" onClick={this.login.bind(this)}>
@@ -282,7 +288,11 @@ class SettingsComponent extends React.Component {
 										</Grid>
 
 										<Grid item xs={12} sm={4} className={classes.spacingBlock}>
-											<Button style={{ width: '100%' }} color="primary" onClick={this.addChannel.bind(this)}>
+											<Button
+												style={{ width: '100%' }}
+												color="primary"
+												onClick={this.addChannel.bind(this)}
+											>
 												Add
 											</Button>
 										</Grid>
@@ -292,7 +302,10 @@ class SettingsComponent extends React.Component {
 											<ListItem key={channelName} button>
 												<ListItemText primary={channelName} />
 												<ListItemSecondaryAction>
-													<IconButton aria-label={channelName} onClick={this.removeChannel.bind(this)}>
+													<IconButton
+														aria-label={channelName}
+														onClick={this.removeChannel.bind(this)}
+													>
 														<DeleteIcon />
 													</IconButton>
 												</ListItemSecondaryAction>
@@ -312,7 +325,9 @@ class SettingsComponent extends React.Component {
 										control={
 											<Switch
 												checked={commentsAutoplay}
-												onChange={event => saveSettings({ commentsAutoplay: event.target.checked })}
+												onChange={event =>
+													saveSettings({ commentsAutoplay: event.target.checked })
+												}
 											/>
 										}
 										label="Translate text to speach"
@@ -321,7 +336,9 @@ class SettingsComponent extends React.Component {
 										control={
 											<Switch
 												checked={followersNotification}
-												onChange={event => saveSettings({ followersNotification: event.target.checked })}
+												onChange={event =>
+													saveSettings({ followersNotification: event.target.checked })
+												}
 											/>
 										}
 										label="Show new followers notifiations"
@@ -339,7 +356,9 @@ class SettingsComponent extends React.Component {
 										control={
 											<Switch
 												checked={watchersNotification}
-												onChange={event => saveSettings({ watchersNotification: event.target.checked })}
+												onChange={event =>
+													saveSettings({ watchersNotification: event.target.checked })
+												}
 											/>
 										}
 										label="Enable new watchers notification"
@@ -358,12 +377,21 @@ class SettingsComponent extends React.Component {
 											{commands &&
 												commands.map(command => (
 													<ListItem key={command.command} button>
-														<ListItemText primary={command.command} secondary={`${command.type}: ${command.text}`} />
+														<ListItemText
+															primary={command.command}
+															secondary={`${command.type}: ${command.text}`}
+														/>
 														<ListItemSecondaryAction>
-															<IconButton title="Edit command" onClick={e => this.openPopup(command)}>
+															<IconButton
+																title="Edit command"
+																onClick={e => this.openPopup(command)}
+															>
 																<EditIcon />
 															</IconButton>
-															<IconButton title="Delete command" onClick={e => this.removeCommand(command)}>
+															<IconButton
+																title="Delete command"
+																onClick={e => this.removeCommand(command)}
+															>
 																<DeleteIcon />
 															</IconButton>
 														</ListItemSecondaryAction>

@@ -14,6 +14,7 @@ import UserListComponent from './UserList.jsx';
 import SettingsComponent from './Settings.jsx';
 import FollowersListComponent from './FollowersList.jsx';
 import { FollowersWatcher, API } from '../utils/chatUtils.js';
+import ChatMediator from '../utils/chatMediator';
 
 class MainAppContainer extends React.Component {
 	state = {
@@ -23,11 +24,11 @@ class MainAppContainer extends React.Component {
 		notification: null,
 		commentsAutoplay: true,
 		currentChannel: '',
-		sectionSelected: SettingsComponent.COMPONENT_NAME,
+		sectionSelected: ChatComponent.COMPONENT_NAME,
 		TwitchClient: null,
 		FollowersWatcher,
 		channelData: null,
-		followersNotification: true,
+		followersNotification: false,
 		watchersNotification: false,
 		commands: [],
 		botEnabled: false,
@@ -71,13 +72,12 @@ class MainAppContainer extends React.Component {
 		this.setState({ notification });
 	}
 	componentWillMount() {
-		var self = this,
-			{ TwitchClient } = this.state;
+		var self = this;
 		// request initial settings
 		ipcRenderer.send('settings-request');
 
 		ipcRenderer.on('settings-updated', (event, data) => {
-			const { currentChannel, FollowersWatcher } = self.state;
+			var { currentChannel, FollowersWatcher, TwitchClient, PASS } = self.state;
 			if (!data.followersNotification) {
 				FollowersWatcher.stop();
 			} else {
@@ -87,40 +87,48 @@ class MainAppContainer extends React.Component {
 					);
 				});
 			}
-
-			if (data.PASS && (currentChannel !== data.currentChannel || !self.state.TwitchClient)) {
-				// update connection if selected channel has changed
-				if (self.state.TwitchClient) {
-					self.state.TwitchClient.disconnect();
-				}
-				var TwitchClient = new tmi.client({
-					options: {
-						debug: true
-					},
-					connection: {
-						reconnect: true
-					},
-					identity: {
-						password: `oauth:${data.PASS}`,
-						username: 'null'
-					},
-					channels: [data.currentChannel]
-				});
-				TwitchClient.removeAllListeners('join');
-				if (data.watchersNotification) {
-					TwitchClient.on('join', (channel, username, byOwn) => {
-						self.showNotification(`New watcher. Cheers for @${username}`);
+			var connection = (() => {
+				if (PASS !== data.PASS) {
+					TwitchClient && TwitchClient.disconnect();
+					TwitchClient = new tmi.client({
+						options: {
+							debug: true
+						},
+						connection: {
+							reconnect: true
+						},
+						identity: {
+							password: `oauth:${data.PASS}`,
+							username: 'null'
+						},
+						channels: [currentChannel]
 					});
+					return TwitchClient.connect().then(server => Promise.resolve(TwitchClient));
+				} else {
+					return Promise.resolve(TwitchClient);
 				}
+			})();
 
+			connection.then(TwitchClient => {
+				if (TwitchClient) {
+					ChatMediator.init(TwitchClient);
+					TwitchClient.removeAllListeners('join');
+					if (currentChannel !== data.currentChannel && data.currentChannel) {
+						currentChannel && TwitchClient.leave(currentChannel);
+						TwitchClient.join(data.currentChannel);
+						API.getChannelInfo(data.currentChannel).then(resp => {
+							self.setState({ channelData: resp });
+						});
+					}
+					if (data.watchersNotification) {
+						TwitchClient.on('join', (channel, username, byOwn) => {
+							self.showNotification(`New watcher. Cheers for @${username}`);
+						});
+					}
+				}
 				self.setState({ TwitchClient });
-			}
-			if (data.currentChannel) {
-				API.getChannelInfo(data.currentChannel).then(resp => {
-					self.setState({ channelData: resp });
-				});
-			}
-			self.setState(data);
+				self.setState(data);
+			});
 		});
 
 		ipcRenderer.on('error', (event, data) => {});
@@ -145,11 +153,13 @@ class MainAppContainer extends React.Component {
 				notification,
 				watchersNotification,
 				messages,
-				commands
+				commands,
+				botEnabled
 			} = this.state,
 			propsTopPass = {
 				drawerWidth,
 				channels,
+				botEnabled,
 				currentChannel,
 				commentsAutoplay,
 				TwitchClient,
@@ -162,12 +172,13 @@ class MainAppContainer extends React.Component {
 			},
 			self = this;
 
+		console.log('render botEnabled', botEnabled);
 		var selectedSectionMarkup = null;
 		switch (sectionSelected) {
 			case ChatComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
 					<ChatComponent
-						{...this.state}
+						{...propsTopPass}
 						updateMessages={this.updateMessageList.bind(this)}
 						saveSettings={this.saveSettings.bind(this)}
 					/>

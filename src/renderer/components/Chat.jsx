@@ -10,6 +10,7 @@ import Sound from 'react-sound';
 import IconButton from 'material-ui/IconButton';
 import { MenuItem } from 'material-ui/Menu';
 import Tooltip from 'material-ui/Tooltip';
+import TextField from 'material-ui/TextField';
 
 // iconsPcom
 import PlayIcon from 'material-ui-icons/PlayCircleOutline';
@@ -18,6 +19,7 @@ import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 
 import { API } from '../utils/chatUtils.js';
 import BOT from '../utils/bot.js';
+import ChatMediator from '../utils/chatMediator';
 import { CHAT_COMPONENT } from '../utils/constants.js';
 
 export const styles = theme => ({
@@ -43,6 +45,17 @@ export const styles = theme => ({
 	},
 	headerSelect: {
 		color: theme.palette.text.primary
+	},
+	bottomContainerWrapper: {
+		paddingBottom: theme.spacing.unit * 20,
+		position: 'relative',
+		heigth: '100vh'
+	},
+	bottomContainer: {
+		position: 'absolute',
+		bottom: 0,
+		left: 0,
+		heigth: theme.spacing.unit * 15
 	}
 });
 
@@ -134,9 +147,6 @@ class ChatComponent extends React.Component {
 
 	componentWillUnmount() {
 		var { TwitchClient } = this.props;
-		if (TwitchClient) {
-			this.destroyClient(TwitchClient);
-		}
 		this.props.updateMessages(this.state.messages);
 	}
 
@@ -148,21 +158,8 @@ class ChatComponent extends React.Component {
 			if (botEnabled) {
 				BOT.init({ commands, client: TwitchClient });
 			}
-			TwitchClient.connect();
-			TwitchClient.on('chat', (channel, userstate, message, byOwn) => {
-				self.messageReceived({
-					user: userstate,
-					text: message,
-					id: Date.now(),
-					byOwn
-				});
-			});
+			ChatMediator.removeListener('chat').addListener('chat', self.messageReceived);
 		}
-	}
-
-	destroyClient(twitchClient) {
-		twitchClient.removeAllListeners('chat');
-		twitchClient.disconnect();
 	}
 
 	componentWillMount() {
@@ -173,11 +170,9 @@ class ChatComponent extends React.Component {
 	}
 
 	componentWillReceiveProps(nextProps) {
-		const { TwitchClient } = nextProps;
+		const { currentChannel } = nextProps;
 
-		if (TwitchClient !== this.props.TwitchClient) {
-			console.log('destroyClient receive');
-			this.destroyClient(TwitchClient);
+		if (currentChannel && currentChannel !== this.props.currentChannel) {
 			this.addChatListener(nextProps);
 		}
 	}
@@ -225,7 +220,7 @@ class ChatComponent extends React.Component {
 						</Typography>
 					</Toolbar>
 				</AppBar>
-				<Grid container spacing={0} className={classes.chatBody} ref>
+				<Grid container spacing={0} className={`${classes.chatBody}`} ref>
 					{messages.length ? (
 						messages.map((msg, index) => (
 							<Grid

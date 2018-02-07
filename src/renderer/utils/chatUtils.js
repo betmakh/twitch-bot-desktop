@@ -161,15 +161,18 @@ export const API = {
 
 export const FollowersWatcher = (() => {
 	var timer = null,
+		channelToWatch,
 		followers = [];
 
 	return {
 		start: function(channel, listener) {
+			if (channel === channelToWatch) return this;
+			channelToWatch = channel;
 			if (timer) {
 				this.stop();
 			}
 			timer = setInterval(() => {
-				API.getFollowersList(channel, 30).then(resp => {
+				API.getFollowersList(channelToWatch, 30).then(resp => {
 					if (followers.length && timer) {
 						let diff = resp.follows.filter(
 							follower => !followers.find(oldFollower => oldFollower.created_at === follower.created_at)
@@ -185,6 +188,7 @@ export const FollowersWatcher = (() => {
 		stop: function() {
 			clearInterval(timer);
 			timer = null;
+			channelToWatch = null;
 			followers = [];
 		}
 	};

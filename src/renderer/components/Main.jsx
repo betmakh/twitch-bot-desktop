@@ -5,16 +5,17 @@ import Slide from 'material-ui/transitions/Slide';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import { ipcRenderer } from 'electron';
-import tmi from 'tmi.js';
+// import tmi from 'tmi.js';
 
 import MainMenu from './MainMenu.jsx';
-// import TwitchClient from '../utils/main';
+// import twitchClient from '../utils/main';
 import ChatComponent from './Chat.jsx';
 import UserListComponent from './UserList.jsx';
 import SettingsComponent from './Settings.jsx';
 import FollowersListComponent from './FollowersList.jsx';
 import { FollowersWatcher, API } from '../utils/chatUtils.js';
-import ChatMediator from '../utils/chatMediator';
+// import ChatMediator from '../utils/chatMediator';
+import TwitchClient from '../utils/TwitchClient';
 
 class MainAppContainer extends React.Component {
 	state = {
@@ -25,7 +26,7 @@ class MainAppContainer extends React.Component {
 		commentsAutoplay: true,
 		currentChannel: '',
 		sectionSelected: ChatComponent.COMPONENT_NAME,
-		TwitchClient: null,
+		twitchClient: null,
 		FollowersWatcher,
 		channelData: null,
 		followersNotification: false,
@@ -62,9 +63,9 @@ class MainAppContainer extends React.Component {
 
 	showNotification(notification, delay = 7000) {
 		var that = this,
-			{ TwitchClient } = this.state;
-		if (TwitchClient) {
-			TwitchClient.action(this.state.currentChannel, notification);
+			{ twitchClient } = this.state;
+		if (twitchClient) {
+			twitchClient.action(this.state.currentChannel, notification);
 		}
 		setTimeout(() => {
 			that.setState({ notification: null });
@@ -77,7 +78,7 @@ class MainAppContainer extends React.Component {
 		ipcRenderer.send('settings-request');
 
 		ipcRenderer.on('settings-updated', (event, data) => {
-			var { currentChannel, FollowersWatcher, TwitchClient, PASS } = self.state;
+			var { currentChannel, FollowersWatcher, twitchClient, PASS } = self.state;
 			if (!data.followersNotification) {
 				FollowersWatcher.stop();
 			} else {
@@ -87,46 +88,35 @@ class MainAppContainer extends React.Component {
 					);
 				});
 			}
-			var connection = (() => {
-				if (PASS !== data.PASS) {
-					TwitchClient && TwitchClient.disconnect();
-					TwitchClient = new tmi.client({
-						options: {
-							debug: true
-						},
-						connection: {
-							reconnect: true
-						},
-						identity: {
-							password: `oauth:${data.PASS}`,
-							username: 'null'
-						},
-						channels: [currentChannel]
-					});
-					return TwitchClient.connect().then(server => Promise.resolve(TwitchClient));
-				} else {
-					return Promise.resolve(TwitchClient);
-				}
-			})();
+			if (!twitchClient) {
+				twitchClient = new TwitchClient({
+					identity: {
+						password: `oauth:${data.PASS}`,
+						username: 'null'
+					},
+					channels: [currentChannel]
+				});
+			}
 
-			connection.then(TwitchClient => {
-				if (TwitchClient) {
-					ChatMediator.init(TwitchClient);
-					TwitchClient.removeAllListeners('join');
-					if (currentChannel !== data.currentChannel && data.currentChannel) {
-						currentChannel && TwitchClient.leave(currentChannel);
-						TwitchClient.join(data.currentChannel);
-						API.getChannelInfo(data.currentChannel).then(resp => {
-							self.setState({ channelData: resp });
-						});
-					}
-					if (data.watchersNotification) {
-						TwitchClient.on('join', (channel, username, byOwn) => {
-							self.showNotification(`New watcher. Cheers for @${username}`);
-						});
-					}
+			if (data.PASS !== PASS) {
+				twitchClient.updatePass(data.PASS);
+			}
+
+			twitchClient.connect().then(() => {
+				if (currentChannel !== data.currentChannel && data.currentChannel) {
+					twitchClient.chageChannel(data.currentChannel);
+					API.getChannelInfo(data.currentChannel).then(resp => {
+						self.setState({ channelData: resp });
+					});
 				}
-				self.setState({ TwitchClient });
+				twitchClient.removeAllListeners('join');
+				if (data.watchersNotification) {
+					twitchClient.on('join', (channel, username, byOwn) => {
+						self.showNotification(`New watcher. Cheers for @${username}`);
+					});
+				}
+				twitchClient.enableBot(data.botEnabled, data.commands);
+				self.setState({ twitchClient });
 				self.setState(data);
 			});
 		});
@@ -146,7 +136,7 @@ class MainAppContainer extends React.Component {
 				channels,
 				drawerWidth,
 				commentsAutoplay,
-				TwitchClient,
+				twitchClient,
 				channelData,
 				PASS,
 				followersNotification,
@@ -162,7 +152,7 @@ class MainAppContainer extends React.Component {
 				botEnabled,
 				currentChannel,
 				commentsAutoplay,
-				TwitchClient,
+				twitchClient,
 				channelData,
 				PASS,
 				followersNotification,

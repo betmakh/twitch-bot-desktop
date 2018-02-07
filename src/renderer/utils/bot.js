@@ -51,15 +51,15 @@ const placeholders = (placeholder, msg) => {
 	};
 };
 
-const BOT = (() => {
+const bot = (() => {
 	var commands = [],
 		client;
 	return {
-		init(options) {
-			commands = options.commands;
-			client = options.client;
+		setCommands(cmnds) {
+			commands = cmds;
+			return this;
 		},
-		handleMessage(msg, user) {
+		handleMessage(msg, user, commands, client) {
 			var command = commands.find(el => !msg.indexOf(el.command)),
 				matchesPromises = [],
 				channel = client.getChannels()[0].slice(1),
@@ -88,4 +88,4 @@ const BOT = (() => {
 	};
 })();
 
-export default BOT;
+export default bot;

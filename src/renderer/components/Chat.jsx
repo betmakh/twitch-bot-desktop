@@ -19,7 +19,6 @@ import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 
 import { API } from '../utils/chatUtils.js';
 import BOT from '../utils/bot.js';
-import ChatMediator from '../utils/chatMediator';
 import { CHAT_COMPONENT } from '../utils/constants.js';
 
 export const styles = theme => ({
@@ -106,10 +105,16 @@ class ChatComponent extends React.Component {
 		this.props.saveSettings({ commentsAutoplay: !commentsAutoplay });
 	}
 
-	messageReceived(msg) {
+	messageReceived(channel, userstate, message, byOwn) {
 		var { messages, audioQueue } = this.state,
-			{ commentsAutoplay, maxMessages, TwitchClient, botEnabled } = this.props,
-			self = this;
+			{ commentsAutoplay, maxMessages, twitchClient, botEnabled } = this.props,
+			self = this,
+			msg = {
+				user: userstate,
+				text: message,
+				id: Date.now(),
+				byOwn
+			};
 
 		var addMsg = msg => {
 			messages.push(msg);
@@ -140,26 +145,20 @@ class ChatComponent extends React.Component {
 		} else {
 			addMsg(msg);
 		}
-		if (!msg.byOwn && this.props.botEnabled) {
-			BOT.handleMessage(msg.text, msg.user);
-		}
-	}
-
-	componentWillUnmount() {
-		var { TwitchClient } = this.props;
-		this.props.updateMessages(this.state.messages);
+		// if (!msg.byOwn && this.props.botEnabled) {
+		// 	BOT.handleMessage(msg.text, msg.user);
+		// }
 	}
 
 	addChatListener(props = this.props) {
-		const { TwitchClient, commands, botEnabled } = props,
+		const { twitchClient, commands, botEnabled } = props,
 			self = this;
 
-		if (TwitchClient) {
-			if (botEnabled) {
-				BOT.init({ commands, client: TwitchClient });
-			}
-			ChatMediator.removeListener('chat').addListener('chat', self.messageReceived);
-		}
+		twitchClient && twitchClient.addListener('chat', self.messageReceived);
+
+		// if (botEnabled) {
+		// 	BOT.init({ commands, client: twitchClient });
+		// }
 	}
 
 	componentWillMount() {
@@ -169,10 +168,15 @@ class ChatComponent extends React.Component {
 		this.addChatListener();
 	}
 
+	componentWillUnmount() {
+		var { twitchClient } = this.props;
+		this.props.updateMessages(this.state.messages);
+		twitchClient && twitchClient.removeListener('chat', this.messageReceived);
+	}
 	componentWillReceiveProps(nextProps) {
-		const { currentChannel } = nextProps;
+		const { twitchClient } = nextProps;
 
-		if (currentChannel && currentChannel !== this.props.currentChannel) {
+		if (twitchClient && !this.props.twitchClient) {
 			this.addChatListener(nextProps);
 		}
 	}

@@ -26,10 +26,6 @@ import BotCommandDetails from './BotCommandDetails.jsx';
 
 const stylesLocal = theme =>
 	Object.assign(styles(theme), {
-		spacingBlock: {
-			paddingRight: theme.spacing.unit,
-			paddingLeft: theme.spacing.unit
-		},
 		hidden: {
 			display: 'none'
 		},
@@ -224,7 +220,7 @@ class SettingsComponent extends React.Component {
 				</Modal>
 				<AppBar position="static" color="primary" className={classes.header}>
 					<Toolbar>
-						<Typography type="title" color="inherit">
+						<Typography variant="title" color="inherit">
 							{'Settings'}
 						</Typography>
 					</Toolbar>
@@ -234,7 +230,7 @@ class SettingsComponent extends React.Component {
 						<Grid md={6} xs={12} item lg={4}>
 							{userDataLoading ? (
 								<div className={classes.textCenter}>
-									<CircularProgress size={100} color="accent" />
+									<CircularProgress size={100} color="secondary" />
 								</div>
 							) : (
 								<Card>
@@ -247,11 +243,11 @@ class SettingsComponent extends React.Component {
 									)}
 									<CardContent>
 										{userData ? (
-											<Typography type="headline" component="h2">
+											<Typography variant="headline" component="h2">
 												{userData.display_name}
 											</Typography>
 										) : (
-											<Typography type="headline" gutterBottom>
+											<Typography variant="headline" gutterBottom>
 												Authorize your bot account
 											</Typography>
 										)}
@@ -271,7 +267,7 @@ class SettingsComponent extends React.Component {
 						<Grid md={6} xs={12} item lg={4}>
 							<Card>
 								<CardContent>
-									<Typography type="headline" gutterBottom>
+									<Typography variant="headline" gutterBottom>
 										Channels list
 									</Typography>
 									<Typography component="p">Add channels to which you want connect to</Typography>
@@ -318,7 +314,7 @@ class SettingsComponent extends React.Component {
 						<Grid md={6} xs={12} item lg={4}>
 							<Card>
 								<CardContent>
-									<Typography type="headline" gutterBottom>
+									<Typography variant="headline" gutterBottom>
 										Chat settings
 									</Typography>
 									<FormControlLabel
@@ -370,7 +366,7 @@ class SettingsComponent extends React.Component {
 							<Grid xs={12} item>
 								<Card>
 									<CardContent>
-										<Typography type="headline" gutterBottom>
+										<Typography variant="headline" gutterBottom>
 											Bot commands
 										</Typography>
 										<List dense>
@@ -399,7 +395,11 @@ class SettingsComponent extends React.Component {
 												))}
 										</List>
 
-										<Button raised color="primary" onClick={this.openPopup.bind(this, null)}>
+										<Button
+											variant="raised"
+											color="primary"
+											onClick={this.openPopup.bind(this, null)}
+										>
 											Add command
 										</Button>
 									</CardContent>

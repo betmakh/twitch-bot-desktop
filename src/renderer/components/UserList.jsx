@@ -196,7 +196,7 @@ class UserListComponent extends React.Component {
 								<RefreshIcon color="inherit" />
 							</Tooltip>
 						</IconButton>
-						<Typography type="title" color="inherit">
+						<Typography variant="title" color="inherit">
 							Chatters at {currentChannel} ({totalUsersCount})
 						</Typography>
 					</Toolbar>

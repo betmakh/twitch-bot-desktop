@@ -11,11 +11,13 @@ import IconButton from 'material-ui/IconButton';
 import { MenuItem } from 'material-ui/Menu';
 import Tooltip from 'material-ui/Tooltip';
 import TextField from 'material-ui/TextField';
+import Button from 'material-ui/Button';
 
 // iconsPcom
 import PlayIcon from 'material-ui-icons/PlayCircleOutline';
 import VolumeOffIcon from 'material-ui-icons/VolumeOff';
 import VolumeUpIcon from 'material-ui-icons/VolumeUp';
+import SendIcon from 'material-ui-icons/Send';
 
 import { API } from '../utils/chatUtils.js';
 import BOT from '../utils/bot.js';
@@ -26,6 +28,10 @@ export const styles = theme => ({
 		padding: '0.1em 1.5em',
 		margin: '0.5em',
 		position: 'relative'
+	},
+	spacingBlock: {
+		paddingRight: theme.spacing.unit,
+		paddingLeft: theme.spacing.unit
 	},
 	playButton: {
 		position: 'absolute',
@@ -46,15 +52,18 @@ export const styles = theme => ({
 		color: theme.palette.text.primary
 	},
 	bottomContainerWrapper: {
-		paddingBottom: theme.spacing.unit * 20,
 		position: 'relative',
-		heigth: '100vh'
+		height: '100vh',
+		paddingBottom: theme.spacing.unit * 20,
+		marginBottom: '-8px'
 	},
 	bottomContainer: {
+		borderTop: `1px solid ${theme.palette.divider}`,
 		position: 'absolute',
+		padding: theme.spacing.unit,
 		bottom: 0,
 		left: 0,
-		heigth: theme.spacing.unit * 15
+		height: theme.spacing.unit * 15
 	}
 });
 
@@ -145,9 +154,6 @@ class ChatComponent extends React.Component {
 		} else {
 			addMsg(msg);
 		}
-		// if (!msg.byOwn && this.props.botEnabled) {
-		// 	BOT.handleMessage(msg.text, msg.user);
-		// }
 	}
 
 	addChatListener(props = this.props) {
@@ -155,10 +161,6 @@ class ChatComponent extends React.Component {
 			self = this;
 
 		twitchClient && twitchClient.addListener('chat', self.messageReceived);
-
-		// if (botEnabled) {
-		// 	BOT.init({ commands, client: twitchClient });
-		// }
 	}
 
 	componentWillMount() {
@@ -201,7 +203,12 @@ class ChatComponent extends React.Component {
 		const { audioQueue, messages } = this.state;
 
 		return (
-			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
+			<Grid
+				container
+				spacing={0}
+				style={{ marginLeft: drawerWidth }}
+				className={`${classes.chatContainer} ${classes.bottomContainerWrapper}`}
+			>
 				{/*play queued messages*/}
 				{audioQueue.length ? (
 					<Sound
@@ -216,7 +223,7 @@ class ChatComponent extends React.Component {
 							{!commentsAutoplay ? <VolumeOffIcon title="Unmute" /> : <VolumeUpIcon title="Mute" />}
 						</IconButton>
 						<Typography
-							type="title"
+							variant="title"
 							title={channelData ? channelData.status : 'Connecting...'}
 							color="inherit"
 						>
@@ -224,7 +231,7 @@ class ChatComponent extends React.Component {
 						</Typography>
 					</Toolbar>
 				</AppBar>
-				<Grid container spacing={0} className={`${classes.chatBody}`} ref>
+				<Grid container spacing={0} className={`${classes.chatBody}`}>
 					{messages.length ? (
 						messages.map((msg, index) => (
 							<Grid
@@ -234,7 +241,7 @@ class ChatComponent extends React.Component {
 								ref={index === messages.length - 1 ? this.scrollToBottom : null}
 							>
 								<Paper className={classes.card}>
-									<Typography type="title" gutterBottom>
+									<Typography variant="title" gutterBottom>
 										{msg.user.username}
 									</Typography>
 									<Typography gutterBottom>{msg.text}</Typography>
@@ -255,7 +262,28 @@ class ChatComponent extends React.Component {
 						</Typography>
 					)}
 				</Grid>
-			</div>
+				<Grid
+					container
+					alignItems="flex-end"
+					justify="space-between"
+					spacing={0}
+					className={`${classes.bottomContainer}`}
+				>
+					<Grid item sm={9} lg={10} xl={11}>
+						<div className={classes.spacingBlock}>
+							<TextField label="Multiline" multiline fullWidth rowsMax="3" margin="normal" />
+						</div>
+					</Grid>
+					<Grid item sm={3} lg={2} xl={1}>
+						<div className={classes.spacingBlock}>
+							<Button fullWidth variant="raised" color="secondary" size="small" color="primary">
+								Send
+								<SendIcon className={classes.spacingBlock} />
+							</Button>
+						</div>
+					</Grid>
+				</Grid>
+			</Grid>
 		);
 	}
 }

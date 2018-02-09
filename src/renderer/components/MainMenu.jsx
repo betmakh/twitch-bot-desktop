@@ -42,7 +42,7 @@ class MainMenu extends React.Component {
 		// 	saveSettings({ currentChannel: channels[0] });
 		// }
 		return (
-			<Drawer type="permanent">
+			<Drawer variant="permanent">
 				<MenuItem className={classes.drawerHeader}>
 					{channelData && <Avatar alt="Remy Sharp" src={channelData.logo} className={classes.logo} />}
 					{channels && channels.length ? (

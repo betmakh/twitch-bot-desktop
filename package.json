@@ -8,10 +8,8 @@
     "format": "prettier --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
     "prebuild": "webpack --env.prod true",
     "prodPrebuild": "set NODE_ENV=production && webpack --env.prod true",
-    "create-linux":
-      "yarn prodPrebuild && electron-packager ./ TwitchBotBeta --platform linux --out release-builds --overwrite --ignore src --ignore bin",
-    "create-win":
-      "yarn prodPrebuild && electron-packager ./ TwitchBotBeta --platform win32 --out release-builds --overwrite --ignore src --ignore bin --icon=static/icons/icon.ico"
+    "create-linux": "yarn prodPrebuild && electron-packager ./ TwitchBotBeta --platform linux --out release-builds --overwrite --ignore src --ignore bin",
+    "create-win": "yarn prodPrebuild && electron-packager ./ TwitchBotBeta --platform win32 --out release-builds --overwrite --ignore src --ignore bin --icon=static/icons/icon.ico"
   },
   "build": {
     "appId": "com.electron.twitchBot",
@@ -36,7 +34,7 @@
     "google-tts-api": "0.0.2",
     "jsonfile": "^4.0.0",
     "lodash": "^4.17.4",
-    "material-ui": "^1.0.0-beta.27",
+    "material-ui": "^1.0.0-beta.32",
     "material-ui-icons": "^1.0.0-beta.17",
     "moment": "^2.19.2",
     "node-fetch": "^1.7.3",

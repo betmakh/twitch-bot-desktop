@@ -33,11 +33,21 @@ const styles = theme => ({
 
 class MainMenu extends React.Component {
 	handleSectionSelect(sectionName) {
+		this.props.saveSettings({ sectionSelected: sectionName });
 		this.props.selectSection(sectionName);
 	}
 
 	render() {
-		const { classes, sectionSelected, channels, currentChannel, saveSettings, channelData } = this.props;
+		const {
+			classes,
+			sectionSelected,
+			channels,
+			currentChannel,
+			saveSettings,
+			channelData,
+			widgetUrl,
+			drawerWidth
+		} = this.props;
 		// if (!currentChannel && channels) {
 		// 	saveSettings({ currentChannel: channels[0] });
 		// }
@@ -100,6 +110,18 @@ class MainMenu extends React.Component {
 						</ListItemIcon>Setting
 					</MenuItem>
 				</MenuList>
+				{widgetUrl && (
+					<webview
+						src={widgetUrl}
+						style={{
+							display: 'inline-flex',
+							width: `${drawerWidth}px`,
+							maxWidth: '100%',
+							overflow: 'hidden',
+							height: '480px'
+						}}
+					/>
+				)}
 			</Drawer>
 		);
 	}

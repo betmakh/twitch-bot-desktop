@@ -33,7 +33,8 @@ class MainAppContainer extends React.Component {
 		watchersNotification: false,
 		commands: [],
 		botEnabled: false,
-		messages: []
+		messages: [],
+		widgetUrl: ''
 	};
 	saveSettings(settings) {
 		var {
@@ -45,7 +46,9 @@ class MainAppContainer extends React.Component {
 			PASS,
 			TOKEN,
 			followersNotification,
-			watchersNotification
+			watchersNotification,
+			sectionSelected,
+			widgetUrl
 		} = this.state;
 		ipcRenderer.send('settings-save', {
 			channels,
@@ -57,6 +60,8 @@ class MainAppContainer extends React.Component {
 			botEnabled,
 			followersNotification,
 			commands,
+			sectionSelected,
+			widgetUrl,
 			...settings
 		});
 	}
@@ -144,6 +149,7 @@ class MainAppContainer extends React.Component {
 				watchersNotification,
 				messages,
 				commands,
+				widgetUrl,
 				botEnabled
 			} = this.state,
 			propsTopPass = {
@@ -151,7 +157,9 @@ class MainAppContainer extends React.Component {
 				channels,
 				botEnabled,
 				currentChannel,
+				sectionSelected,
 				commentsAutoplay,
+				widgetUrl,
 				twitchClient,
 				channelData,
 				PASS,
@@ -162,7 +170,6 @@ class MainAppContainer extends React.Component {
 			},
 			self = this;
 
-		console.log('render botEnabled', botEnabled);
 		var selectedSectionMarkup = null;
 		switch (sectionSelected) {
 			case ChatComponent.COMPONENT_NAME:
@@ -182,7 +189,7 @@ class MainAppContainer extends React.Component {
 			case SettingsComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (
 					<SettingsComponent
-						{...this.state}
+						{...propsTopPass}
 						saveSettings={this.saveSettings.bind(this)}
 						showNotification={this.showNotification.bind(this)}
 					/>
@@ -195,7 +202,7 @@ class MainAppContainer extends React.Component {
 		return (
 			<Grid container>
 				<MainMenu
-					{...this.state}
+					{...propsTopPass}
 					saveSettings={this.saveSettings.bind(this)}
 					selectSection={sectionSelectedName => self.setState({ sectionSelected: sectionSelectedName })}
 				/>

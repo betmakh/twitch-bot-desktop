@@ -34,7 +34,7 @@ export const styles = theme => ({
 		paddingLeft: theme.spacing.unit
 	},
 	playButton: {
-		position: 'absolute',
+		position: 'fixed',
 		top: 0,
 		right: 0
 	},
@@ -53,8 +53,8 @@ export const styles = theme => ({
 	},
 	bottomContainerWrapper: {
 		position: 'relative',
-		height: '100vh',
-		paddingBottom: theme.spacing.unit * 20,
+		minHeight: '100vh',
+		width: '100%',
 		marginBottom: '-8px'
 	},
 	bottomContainer: {
@@ -182,6 +182,13 @@ class ChatComponent extends React.Component {
 			this.addChatListener(nextProps);
 		}
 	}
+	sendMessage() {
+		var msg = this.MessageField.value;
+		if (msg && msg.trim().length) {
+			API.sendMsg(this.props.twitchClient, msg);
+			this.MessageField.value = '';
+		}
+	}
 
 	scrollToBottom(node) {
 		if (node) {
@@ -203,12 +210,7 @@ class ChatComponent extends React.Component {
 		const { audioQueue, messages } = this.state;
 
 		return (
-			<Grid
-				container
-				spacing={0}
-				style={{ marginLeft: drawerWidth }}
-				className={`${classes.chatContainer} ${classes.bottomContainerWrapper}`}
-			>
+			<div className={classes.bottomContainerWrapper} style={{ marginLeft: drawerWidth }}>
 				{/*play queued messages*/}
 				{audioQueue.length ? (
 					<Sound
@@ -231,59 +233,69 @@ class ChatComponent extends React.Component {
 						</Typography>
 					</Toolbar>
 				</AppBar>
-				<Grid container spacing={0} className={`${classes.chatBody}`}>
-					{messages.length ? (
-						messages.map((msg, index) => (
-							<Grid
-								item
-								xs={12}
-								key={msg.id}
-								ref={index === messages.length - 1 ? this.scrollToBottom : null}
-							>
-								<Paper className={classes.card}>
-									<Typography variant="title" gutterBottom>
-										{msg.user.username}
-									</Typography>
-									<Typography gutterBottom>{msg.text}</Typography>
-									{msg.audioSrc ? (
-										<IconButton
-											className={classes.playButton}
-											onClick={this.queueMsg.bind(this, msg, false)}
-										>
-											<PlayIcon />
-										</IconButton>
-									) : null}
-								</Paper>
-							</Grid>
-						))
-					) : (
-						<Typography gutterBottom align="center" className={classes.card}>
-							No messages
-						</Typography>
-					)}
+				<Grid container spacing={0} className={`${classes.chatContainer}`} style={{ paddingBottom: '120px' }}>
+					<Grid container spacing={0} className={`${classes.chatBody}`}>
+						{messages.length ? (
+							messages.map((msg, index) => (
+								<Grid
+									item
+									xs={12}
+									key={msg.id}
+									ref={index === messages.length - 1 ? this.scrollToBottom : null}
+								>
+									<Paper className={classes.card}>
+										<Typography variant="title" gutterBottom>
+											{msg.user.username}
+										</Typography>
+										<Typography gutterBottom>{msg.text}</Typography>
+										{msg.audioSrc ? (
+											<IconButton
+												className={classes.playButton}
+												onClick={this.queueMsg.bind(this, msg, false)}
+											>
+												<PlayIcon />
+											</IconButton>
+										) : null}
+									</Paper>
+								</Grid>
+							))
+						) : (
+							<Typography gutterBottom align="center" className={classes.card}>
+								No messages
+							</Typography>
+						)}
+					</Grid>
 				</Grid>
-				<Grid
-					container
-					alignItems="flex-end"
-					justify="space-between"
-					spacing={0}
-					className={`${classes.bottomContainer}`}
-				>
+				<Grid container spacing={0} className={`${classes.bottomContainer}`}>
 					<Grid item sm={9} lg={10} xl={11}>
 						<div className={classes.spacingBlock}>
-							<TextField label="Multiline" multiline fullWidth rowsMax="3" margin="normal" />
+							<TextField
+								label="Multiline"
+								multiline
+								fullWidth
+								rowsMax="3"
+								inputRef={ref => (this.MessageField = ref)}
+								margin="normal"
+							/>
 						</div>
 					</Grid>
 					<Grid item sm={3} lg={2} xl={1}>
 						<div className={classes.spacingBlock}>
-							<Button fullWidth variant="raised" color="secondary" size="small" color="primary">
+							<Button
+								fullWidth
+								variant="raised"
+								color="secondary"
+								size="small"
+								color="primary"
+								onClick={this.sendMessage.bind(this)}
+							>
 								Send
 								<SendIcon className={classes.spacingBlock} />
 							</Button>
 						</div>
 					</Grid>
 				</Grid>
-			</Grid>
+			</div>
 		);
 	}
 }

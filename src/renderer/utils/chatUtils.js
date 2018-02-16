@@ -73,7 +73,8 @@ export const API = {
 		});
 	},
 	sendMsg: function(client, msg, channel) {
-		if (msg && msg.length && client && channel) {
+		if (msg && msg.length && client) {
+			channel = channel || client.getChannels()[0];
 			client.say(channel, msg);
 		}
 	},

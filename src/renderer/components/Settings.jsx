@@ -75,6 +75,8 @@ class SettingsComponent extends React.Component {
 		}
 	}
 
+	addWidget(event) {}
+
 	login(event) {
 		var { showLoginPage, loginUrl } = this.state,
 			{ PASS } = this.props,
@@ -207,7 +209,8 @@ class SettingsComponent extends React.Component {
 				followersNotification,
 				commentsAutoplay,
 				watchersNotification,
-				commands
+				commands,
+				widgetUrl
 			} = this.props,
 			{ showLoginPage, userData, loginUrl, userDataLoading, commandPopUp } = this.state;
 
@@ -359,6 +362,37 @@ class SettingsComponent extends React.Component {
 										}
 										label="Enable new watchers notification"
 									/>
+								</CardContent>
+							</Card>
+						</Grid>
+						<Grid md={6} xs={12} item lg={4}>
+							<Card>
+								<CardContent>
+									<Typography variant="headline" gutterBottom>
+										Add widget
+									</Typography>
+									<Grid container alignItems="baseline">
+										<Grid item xs={12} sm={8} className={classes.spacingBlock}>
+											<TextField
+												placeholder="widget url"
+												className={classes.textField}
+												inputRef={ref => (this.WidgetLinkField = ref)}
+												margin="normal"
+												fullWidth
+												value={widgetUrl}
+											/>
+										</Grid>
+
+										<Grid item xs={12} sm={4} className={classes.spacingBlock}>
+											<Button
+												style={{ width: '100%' }}
+												color="primary"
+												onClick={() => saveSettings({ widgetUrl: this.WidgetLinkField.value })}
+											>
+												Save
+											</Button>
+										</Grid>
+									</Grid>
 								</CardContent>
 							</Card>
 						</Grid>

@@ -11,9 +11,12 @@ import Select from 'material-ui/Select';
 import Radio, { RadioGroup } from 'material-ui/Radio';
 import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
 
+import { BOT_COMMANDS_DESCRIPTION } from '../utils/constants.js';
+
 class BotCommandDetails extends React.Component {
 	static propTypes = {
 		command: PropTypes.object.isRequired,
+
 		actionHandler: PropTypes.func.isRequired
 	};
 
@@ -30,15 +33,11 @@ class BotCommandDetails extends React.Component {
 				</Typography>
 
 				<ul>
-					<li>
-						<b>%uptime%</b> - time of stream
-					</li>
-					<li>
-						<b>%game%</b> - current game
-					</li>
-					<li>
-						<b>%username%</b> - username who sends the command
-					</li>
+					{BOT_COMMANDS_DESCRIPTION.map(cmd => {
+						<li>
+							<b>{cmd.name}</b> - {cmd.description}
+						</li>;
+					})}
 				</ul>
 			</div>
 		)
@@ -46,7 +45,6 @@ class BotCommandDetails extends React.Component {
 
 	componentWillMount() {
 		var { command } = this.props;
-		console.log('command', command);
 		if (Object.keys(command).length) {
 			this.setState({
 				header: 'Edit bot command'
@@ -55,8 +53,6 @@ class BotCommandDetails extends React.Component {
 		this.handleChange = this.handleChange.bind(this);
 		this.saveCommand = this.saveCommand.bind(this);
 		var state = { ...command };
-		console.log('state', state);
-
 		this.setState(command);
 	}
 

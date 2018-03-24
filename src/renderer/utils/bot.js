@@ -2,7 +2,7 @@ import moment from 'moment';
 
 import { API } from './chatUtils';
 
-const placeholders = (placeholder, msg) => {
+const processWord = (placeholder, msg) => {
 	const staticHolders = {
 		'%joke%': () =>
 			API.getJoke().then(
@@ -70,7 +70,7 @@ const bot = (() => {
 
 				if (matches) {
 					matches.forEach(match => {
-						let replacer = placeholders(match, msg);
+						let replacer = processWord(match, msg);
 						if (replacer) {
 							matchesPromises.push(
 								replacer(channel, user).then(data => {

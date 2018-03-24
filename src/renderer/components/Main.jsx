@@ -5,7 +5,7 @@ import Slide from 'material-ui/transitions/Slide';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import { ipcRenderer } from 'electron';
-// import tmi from 'tmi.js';
+import _ from 'lodash';
 
 import MainMenu from './MainMenu.jsx';
 // import twitchClient from '../utils/main';
@@ -37,33 +37,20 @@ class MainAppContainer extends React.Component {
 		widgetUrl: ''
 	};
 	saveSettings(settings) {
-		var {
-			channels,
-			commentsAutoplay,
-			commands,
-			currentChannel,
-			botEnabled,
-			PASS,
-			TOKEN,
-			followersNotification,
-			watchersNotification,
-			sectionSelected,
-			widgetUrl
-		} = this.state;
-		ipcRenderer.send('settings-save', {
-			channels,
-			commentsAutoplay,
-			currentChannel,
-			PASS,
-			watchersNotification,
-			TOKEN,
-			botEnabled,
-			followersNotification,
-			commands,
-			sectionSelected,
-			widgetUrl,
-			...settings
-		});
+		var paramsObj = _.pick(this.state, [
+			'channels',
+			'commentsAutoplay',
+			'commands',
+			'currentChannel',
+			'botEnabled',
+			'PASS',
+			'TOKEN',
+			'followersNotification',
+			'watchersNotification',
+			'sectionSelected',
+			'widgetUrl'
+		]);
+		ipcRenderer.send('settings-save', Object.assign(paramsObj, settings));
 	}
 
 	showNotification(notification, delay = 7000) {
@@ -134,43 +121,27 @@ class MainAppContainer extends React.Component {
 	}
 
 	render() {
-		const {
-				errorMessage,
-				sectionSelected,
-				currentChannel,
-				channels,
-				drawerWidth,
-				commentsAutoplay,
-				twitchClient,
-				channelData,
-				PASS,
-				followersNotification,
-				notification,
-				watchersNotification,
-				messages,
-				commands,
-				widgetUrl,
-				botEnabled
-			} = this.state,
-			propsTopPass = {
-				drawerWidth,
-				channels,
-				botEnabled,
-				currentChannel,
-				sectionSelected,
-				commentsAutoplay,
-				widgetUrl,
-				twitchClient,
-				channelData,
-				PASS,
-				followersNotification,
-				messages,
-				watchersNotification,
-				commands
-			},
+		const { errorMessage, notification, sectionSelected } = this.state,
+			propsTopPass = _.pick(this.state, [
+				'drawerWidth',
+				'channels',
+				'botEnabled',
+				'currentChannel',
+				'sectionSelected',
+				'commentsAutoplay',
+				'widgetUrl',
+				'twitchClient',
+				'channelData',
+				'PASS',
+				'followersNotification',
+				'messages',
+				'watchersNotification',
+				'commands'
+			]),
 			self = this;
 
 		var selectedSectionMarkup = null;
+
 		switch (sectionSelected) {
 			case ChatComponent.COMPONENT_NAME:
 				selectedSectionMarkup = (

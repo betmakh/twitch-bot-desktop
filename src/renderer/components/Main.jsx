@@ -70,6 +70,7 @@ class MainAppContainer extends React.Component {
 		ipcRenderer.send('settings-request');
 
 		ipcRenderer.on('settings-updated', (event, data) => {
+			console.log('data', data);
 			var { currentChannel, FollowersWatcher, twitchClient, PASS } = self.state;
 			if (!data.followersNotification) {
 				FollowersWatcher.stop();

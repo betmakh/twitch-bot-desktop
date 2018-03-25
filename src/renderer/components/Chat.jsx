@@ -82,6 +82,7 @@ class ChatComponent extends React.Component {
 			isConnected: false,
 			handlers: {
 				connected: () => {
+					console.log('connected');
 					self.setState({
 						isConnected: true
 					});
@@ -175,12 +176,17 @@ class ChatComponent extends React.Component {
 
 	addChatListeners(props = this.props) {
 		const { twitchClient, commands, botEnabled } = props,
-			{ handlers } = this.state,
+			{ handlers, isConnected } = this.state,
 			self = this;
 
 		if (twitchClient) {
 			for (let i in handlers) {
 				twitchClient.on(i, handlers[i]);
+			}
+			if (twitchClient.readyState() === 'OPEN') {
+				self.setState({
+					isConnected: true
+				});
 			}
 		}
 	}
@@ -196,8 +202,9 @@ class ChatComponent extends React.Component {
 		}
 	}
 
-	connectHandled() {}
 	componentWillMount() {
+		var { twitchClient } = this.props;
+
 		this.setState({
 			messages: this.props.messages
 		});

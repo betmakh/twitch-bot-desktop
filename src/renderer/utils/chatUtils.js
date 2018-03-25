@@ -75,7 +75,9 @@ export const API = {
 	sendMsg: function(client, msg, channel) {
 		if (msg && msg.length && client) {
 			channel = channel || client.getChannels()[0];
-			client.say(channel, msg);
+			return client.say(channel, msg);
+		} else {
+			throw Error('client, mssg and channel parameters are reequired');
 		}
 	},
 	sendAction: function(client, msg, channel) {

@@ -182,7 +182,7 @@ class ChatComponent extends React.Component {
 			this.addChatListener(nextProps);
 		}
 	}
-	sendMessage() {
+	sendMessage(event) {
 		var msg = this.MessageField.value;
 		if (msg && msg.trim().length) {
 			API.sendMsg(this.props.twitchClient, msg);
@@ -194,6 +194,19 @@ class ChatComponent extends React.Component {
 		if (node) {
 			node = ReactDOM.findDOMNode(node);
 			node.scrollIntoView({ behavior: 'smooth' });
+		}
+	}
+
+	messageFieldKeyPress(event) {
+		if (event.key === 'Enter') {
+			if (event.ctrlKey) {
+				this.MessageField.value =
+					this.MessageField.value.substring(0, event.target.selectionStart) +
+					'\n' +
+					this.MessageField.value.substring(event.target.selectionStart);
+			} else {
+				this.sendMessage();
+			}
 		}
 	}
 
@@ -274,6 +287,7 @@ class ChatComponent extends React.Component {
 								multiline
 								fullWidth
 								rowsMax="3"
+								onKeyUp={this.messageFieldKeyPress.bind(this)}
 								inputRef={ref => (this.MessageField = ref)}
 								margin="normal"
 							/>

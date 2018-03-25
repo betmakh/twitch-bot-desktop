@@ -71,6 +71,7 @@ const bot = (() => {
 				if (matches) {
 					matches.forEach(match => {
 						let replacer = processWord(match, msg);
+						console.log('replacer', replacer);
 						if (replacer) {
 							matchesPromises.push(
 								replacer(channel, user).then(data => {

@@ -71,13 +71,29 @@ class ChatComponent extends React.Component {
 	static COMPONENT_NAME = CHAT_COMPONENT;
 	constructor(props) {
 		super(props);
+		var self = this;
 		this.messageReceived = this.messageReceived.bind(this);
 
 		this.state = {
 			audioQueue: [],
 			messages: [],
 			channels: [],
-			currentChannel: ''
+			currentChannel: '',
+			isConnected: false,
+			handlers: {
+				connected: () => {
+					self.setState({
+						isConnected: true
+					});
+				},
+				disconnected: () => {
+					self.setState({
+						isConnected: false
+					});
+				},
+				action: self.messageReceived.bind(self),
+				chat: self.messageReceived.bind(self)
+			}
 		};
 	}
 
@@ -89,13 +105,12 @@ class ChatComponent extends React.Component {
 	}
 
 	// queue audio message to TTS
-	queueMsg(msg, isAutoplay = false) {
+	queueMsg(msg) {
 		if (!msg.audioSrc) return;
 
 		var { audioQueue } = this.state;
 		audioQueue.push({
-			...msg,
-			isAutoplay
+			...msg
 		});
 
 		this.setState({ audioQueue });
@@ -122,15 +137,16 @@ class ChatComponent extends React.Component {
 				user: userstate,
 				text: message,
 				id: Date.now(),
+				isAction: userstate['message-type'] === 'action' ? true : false,
 				byOwn
 			};
 
 		var addMsg = msg => {
 			messages.push(msg);
 			if (commentsAutoplay) {
-				audioQueue.push(msg);
+				self.queueMsg(msg);
 			}
-			if (messages.length > maxMessages) {
+			while (messages.length > maxMessages) {
 				messages.shift();
 			}
 			self.setState({
@@ -146,6 +162,7 @@ class ChatComponent extends React.Component {
 					addMsg(msg);
 				})
 				.catch(err => {
+					self.props.showNotification();
 					self.setState({
 						errorMessage: err.message
 					});
@@ -156,30 +173,47 @@ class ChatComponent extends React.Component {
 		}
 	}
 
-	addChatListener(props = this.props) {
+	addChatListeners(props = this.props) {
 		const { twitchClient, commands, botEnabled } = props,
+			{ handlers } = this.state,
 			self = this;
 
-		twitchClient && twitchClient.addListener('chat', self.messageReceived);
+		if (twitchClient) {
+			for (let i in handlers) {
+				twitchClient.on(i, handlers[i]);
+			}
+		}
 	}
 
+	removeChatListeners() {
+		const { twitchClient, commands, botEnabled } = this.props,
+			{ handlers } = this.state;
+
+		if (twitchClient) {
+			for (let i in handlers) {
+				twitchClient.removeListener(i, handlers[i]);
+			}
+		}
+	}
+
+	connectHandled() {}
 	componentWillMount() {
 		this.setState({
 			messages: this.props.messages
 		});
-		this.addChatListener();
+		this.addChatListeners();
 	}
 
 	componentWillUnmount() {
 		var { twitchClient } = this.props;
 		this.props.updateMessages(this.state.messages);
-		twitchClient && twitchClient.removeListener('chat', this.messageReceived);
+		this.removeChatListeners();
 	}
 	componentWillReceiveProps(nextProps) {
 		const { twitchClient } = nextProps;
 
 		if (twitchClient && !this.props.twitchClient) {
-			this.addChatListener(nextProps);
+			this.addChatListeners(nextProps);
 		}
 	}
 	sendMessage(event) {
@@ -227,7 +261,7 @@ class ChatComponent extends React.Component {
 			saveSettings,
 			channelData
 		} = this.props;
-		const { audioQueue, messages } = this.state;
+		const { audioQueue, messages, isConnected } = this.state;
 
 		return (
 			<div className={classes.bottomContainerWrapper} style={{ marginLeft: drawerWidth }}>
@@ -263,7 +297,7 @@ class ChatComponent extends React.Component {
 									key={msg.id}
 									ref={index === messages.length - 1 ? this.scrollToBottom : null}
 								>
-									<Paper className={classes.card}>
+									<Paper className={classes.card} square={msg.isAction}>
 										<Typography variant="title" gutterBottom>
 											{msg.user.username}
 										</Typography>
@@ -286,36 +320,46 @@ class ChatComponent extends React.Component {
 						)}
 					</Grid>
 				</Grid>
-				<Grid container spacing={0} className={`${classes.bottomContainer}`}>
-					<Grid item sm={9} lg={10} xl={11}>
-						<div className={classes.spacingBlock}>
-							<TextField
-								label="Multiline"
-								multiline
-								fullWidth
-								rowsMax="3"
-								onKeyUp={this.messageFieldKeyPress.bind(this)}
-								inputRef={ref => (this.MessageField = ref)}
-								margin="normal"
-							/>
-						</div>
+				{isConnected ? (
+					<Grid container spacing={0} className={`${classes.bottomContainer}`}>
+						<Grid item sm={9} lg={10} xl={11}>
+							<div className={classes.spacingBlock}>
+								<TextField
+									label="Multiline"
+									multiline
+									fullWidth
+									rowsMax="3"
+									onKeyUp={this.messageFieldKeyPress.bind(this)}
+									inputRef={ref => (this.MessageField = ref)}
+									margin="normal"
+								/>
+							</div>
+						</Grid>
+						<Grid item sm={3} lg={2} xl={1}>
+							<div className={classes.spacingBlock}>
+								<Button
+									fullWidth
+									variant="raised"
+									color="secondary"
+									size="small"
+									color="primary"
+									onClick={this.sendMessage.bind(this)}
+								>
+									Send
+									<SendIcon className={classes.spacingBlock} />
+								</Button>
+							</div>
+						</Grid>
 					</Grid>
-					<Grid item sm={3} lg={2} xl={1}>
-						<div className={classes.spacingBlock}>
-							<Button
-								fullWidth
-								variant="raised"
-								color="secondary"
-								size="small"
-								color="primary"
-								onClick={this.sendMessage.bind(this)}
-							>
-								Send
-								<SendIcon className={classes.spacingBlock} />
-							</Button>
-						</div>
+				) : (
+					<Grid container spacing={0} className={`${classes.bottomContainer}`}>
+						<Grid item xs={12}>
+							<Typography gutterBottom align="center" className={classes.card}>
+								You're not connected to twitch
+							</Typography>
+						</Grid>
 					</Grid>
-				</Grid>
+				)}
 			</div>
 		);
 	}

@@ -55,6 +55,7 @@ class SettingsComponent extends React.Component {
 		showLoginPage: false,
 		userData: null,
 		loginUrl: AUTH_URL,
+		loginPageLoading: false,
 		commandPopUp: {
 			open: false,
 			command: {}
@@ -83,10 +84,12 @@ class SettingsComponent extends React.Component {
 			self = this;
 
 		if (!showLoginPage) {
+			this.setState({ loginPageLoading: true });
 			fetch(AUTH_URL).then(resp => {
 				this.setState({
 					loginUrl: resp.url,
-					showLoginPage: true
+					showLoginPage: true,
+					loginPageLoading: false
 				});
 			});
 		} else {
@@ -212,7 +215,7 @@ class SettingsComponent extends React.Component {
 				commands,
 				widgetUrl
 			} = this.props,
-			{ showLoginPage, userData, loginUrl, userDataLoading, commandPopUp } = this.state;
+			{ showLoginPage, userData, loginUrl, userDataLoading, commandPopUp, loginPageLoading } = this.state;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -259,7 +262,11 @@ class SettingsComponent extends React.Component {
 										</Typography>
 									</CardContent>
 									<CardActions>
-										<Button color="primary" onClick={this.login.bind(this)}>
+										<Button
+											color="primary"
+											disabled={loginPageLoading}
+											onClick={this.login.bind(this)}
+										>
 											{userData ? 'Change login' : 'Login'}
 										</Button>
 										{userData ? <Button onClick={this.logout.bind(this)}>Logout</Button> : null}
@@ -441,6 +448,13 @@ class SettingsComponent extends React.Component {
 							</Grid>
 						)}
 					</Grid>
+					{loginPageLoading && (
+						<Grid item xs={12}>
+							<div className={classes.textCenter}>
+								<CircularProgress size={100} color="secondary" />
+							</div>
+						</Grid>
+					)}
 					{showLoginPage && (
 						<div>
 							<webview src={loginUrl} ref={el => this.webViewListener(el)} style={{ height: '500px' }} />

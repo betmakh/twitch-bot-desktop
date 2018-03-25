@@ -26,13 +26,8 @@ class TwitchClient extends tmi.client {
 		var state = this.readyState(),
 			self = this;
 		if (state === 'CLOSING' || state === 'CLOSED') {
-			return super.connect().then(
-				() => Promise.resolve(self),
-				() => {
-					console.log('arguments', arguments);
-				}
-			);
-		} else {
+			return super.connect().then(() => Promise.resolve(self), err => Promise.reject(err));
+		} else if (state === 'CONNECTING' || state === 'OPEN') {
 			return Promise.resolve(self);
 		}
 	}

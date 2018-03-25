@@ -77,7 +77,7 @@ export const API = {
 			channel = channel || client.getChannels()[0];
 			return client.say(channel, msg);
 		} else {
-			throw Error('client, mssg and channel parameters are reequired');
+			throw Error('client and parameters are reequired');
 		}
 	},
 	sendAction: function(client, msg, channel) {

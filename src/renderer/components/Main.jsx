@@ -94,23 +94,28 @@ class MainAppContainer extends React.Component {
 				twitchClient.updatePass(data.PASS);
 			}
 
-			twitchClient.connect().then(() => {
-				if (currentChannel !== data.currentChannel && data.currentChannel) {
-					twitchClient.chageChannel(data.currentChannel);
-					API.getChannelInfo(data.currentChannel).then(resp => {
-						self.setState({ channelData: resp });
-					});
-				}
-				twitchClient.removeAllListeners('join');
-				if (data.watchersNotification) {
-					twitchClient.on('join', (channel, username, byOwn) => {
-						self.showNotification(`New watcher. Cheers for @${username}`);
-					});
-				}
-				twitchClient.enableBot(data.botEnabled, data.commands);
-				self.setState({ twitchClient });
-				self.setState(data);
-			});
+			twitchClient
+				.connect()
+				.then(() => {
+					if (currentChannel !== data.currentChannel && data.currentChannel) {
+						twitchClient.chageChannel(data.currentChannel);
+						API.getChannelInfo(data.currentChannel).then(resp => {
+							self.setState({ channelData: resp });
+						});
+					}
+					twitchClient.removeAllListeners('join');
+					if (data.watchersNotification) {
+						twitchClient.on('join', (channel, username, byOwn) => {
+							self.showNotification(`New watcher. Cheers for @${username}`);
+						});
+					}
+					twitchClient.enableBot(data.botEnabled, data.commands);
+					self.setState({ twitchClient });
+					self.setState(data);
+				})
+				.catch(err => {
+					self.showNotification(err);
+				});
 		});
 
 		ipcRenderer.on('error', (event, data) => {});

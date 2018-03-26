@@ -110,6 +110,7 @@ class MainAppContainer extends React.Component {
 							self.showNotification(`New watcher. Cheers for @${username}`);
 						});
 					}
+					console.log("data.botEnabled", data.botEnabled);
 					twitchClient.enableBot(data.botEnabled, data.commands);
 					self.setState({ twitchClient });
 					self.setState(data);

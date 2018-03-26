@@ -81,8 +81,10 @@ export const API = {
 		}
 	},
 	sendAction: function(client, msg, channel) {
-		if (msg && msg.length && client && channel) {
-			client.action(channel, msg);
+		console.log('sendAction: ', msg);
+		if (msg && msg.length && client) {
+			channel = channel || client.getChannels()[0];
+			return client.action(channel, msg);
 		}
 	},
 	revokeUserAccess: token =>

@@ -16,7 +16,6 @@ import { BOT_COMMANDS_DESCRIPTION } from '../utils/constants.js';
 class BotCommandDetails extends React.Component {
 	static propTypes = {
 		command: PropTypes.object.isRequired,
-
 		actionHandler: PropTypes.func.isRequired
 	};
 
@@ -33,11 +32,10 @@ class BotCommandDetails extends React.Component {
 				</Typography>
 
 				<ul>
-					{BOT_COMMANDS_DESCRIPTION.map(cmd => {
-						<li>
+					{BOT_COMMANDS_DESCRIPTION.map((cmd, index) => (<li key={index}>
 							<b>{cmd.name}</b> - {cmd.description}
-						</li>;
-					})}
+						</li>
+					))}
 				</ul>
 			</div>
 		)

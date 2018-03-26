@@ -82,7 +82,6 @@ class ChatComponent extends React.Component {
 			isConnected: false,
 			handlers: {
 				connected: () => {
-					console.log('connected');
 					self.setState({
 						isConnected: true
 					});
@@ -181,7 +180,7 @@ class ChatComponent extends React.Component {
 
 		if (twitchClient) {
 			for (let i in handlers) {
-				twitchClient.on(i, handlers[i]);
+				twitchClient.addListener(i, handlers[i]);
 			}
 			if (twitchClient.readyState() === 'OPEN') {
 				self.setState({

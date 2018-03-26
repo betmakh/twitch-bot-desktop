@@ -82,9 +82,11 @@ const bot = (() => {
 					});
 				}
 			}
-			return Promise.all(matchesPromises).then(() =>
-				Promise.all([API.sendAction(client, text, channel), Promise.resolve(text)])
-			);
+
+			return Promise.all(matchesPromises).then(() => {
+				console.log('text', text);
+				return Promise.all([API.sendAction(client, text, channel), Promise.resolve(text)]);
+			});
 		}
 	};
 })();

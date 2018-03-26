@@ -22,7 +22,6 @@ class TwitchClient extends tmi.client {
 		);
 	}
 	connect() {
-		console.log('connection');
 		var state = this.readyState(),
 			self = this;
 		if (state === 'CLOSING' || state === 'CLOSED') {
@@ -55,14 +54,22 @@ class TwitchClient extends tmi.client {
 		return self.join(newChannel).then(() => self);
 	}
 	_handleBotMessage(channel, userstate, message, byOwn) {
-		bot.handleMessage(message, userstate, this._botCommands, this);
+		if (this._botEnabled) {
+			bot.handleMessage(message, userstate, this._botCommands, this);
+		}
 	}
+	// addListener(type, listener) {
+	// 	super.addListener(type, listener);
+	// 	this._events[type];
+	// 	console.log('this._events[type]', this._events[type]);
+	// }
 	enableBot(enable = false, commands) {
 		this._botCommands = commands;
 		if (enable && this._botEnabled !== enable) {
 			this._botEnabled = true;
+			this.removeListener('chat', this._handleBotMessage);
 			this.addListener('chat', this._handleBotMessage);
-		} else if (this._botEnabled) {
+		} else if (this._botEnabled && !enable) {
 			this._botEnabled = false;
 			this.removeListener('chat', this._handleBotMessage);
 		}

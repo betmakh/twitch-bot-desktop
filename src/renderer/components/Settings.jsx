@@ -26,10 +26,6 @@ import BotCommandDetails from './BotCommandDetails.jsx';
 
 const stylesLocal = theme =>
 	Object.assign(styles(theme), {
-		spacingBlock: {
-			paddingRight: theme.spacing.unit,
-			paddingLeft: theme.spacing.unit
-		},
 		hidden: {
 			display: 'none'
 		},
@@ -59,6 +55,7 @@ class SettingsComponent extends React.Component {
 		showLoginPage: false,
 		userData: null,
 		loginUrl: AUTH_URL,
+		loginPageLoading: false,
 		commandPopUp: {
 			open: false,
 			command: {}
@@ -79,16 +76,20 @@ class SettingsComponent extends React.Component {
 		}
 	}
 
+	addWidget(event) {}
+
 	login(event) {
 		var { showLoginPage, loginUrl } = this.state,
 			{ PASS } = this.props,
 			self = this;
 
 		if (!showLoginPage) {
+			this.setState({ loginPageLoading: true });
 			fetch(AUTH_URL).then(resp => {
 				this.setState({
 					loginUrl: resp.url,
-					showLoginPage: true
+					showLoginPage: true,
+					loginPageLoading: false
 				});
 			});
 		} else {
@@ -211,9 +212,10 @@ class SettingsComponent extends React.Component {
 				followersNotification,
 				commentsAutoplay,
 				watchersNotification,
-				commands
+				commands,
+				widgetUrl
 			} = this.props,
-			{ showLoginPage, userData, loginUrl, userDataLoading, commandPopUp } = this.state;
+			{ showLoginPage, userData, loginUrl, userDataLoading, commandPopUp, loginPageLoading } = this.state;
 
 		return (
 			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
@@ -224,7 +226,7 @@ class SettingsComponent extends React.Component {
 				</Modal>
 				<AppBar position="static" color="primary" className={classes.header}>
 					<Toolbar>
-						<Typography type="title" color="inherit">
+						<Typography variant="title" color="inherit">
 							{'Settings'}
 						</Typography>
 					</Toolbar>
@@ -234,7 +236,7 @@ class SettingsComponent extends React.Component {
 						<Grid md={6} xs={12} item lg={4}>
 							{userDataLoading ? (
 								<div className={classes.textCenter}>
-									<CircularProgress size={100} color="accent" />
+									<CircularProgress size={100} color="secondary" />
 								</div>
 							) : (
 								<Card>
@@ -247,11 +249,11 @@ class SettingsComponent extends React.Component {
 									)}
 									<CardContent>
 										{userData ? (
-											<Typography type="headline" component="h2">
+											<Typography variant="headline" component="h2">
 												{userData.display_name}
 											</Typography>
 										) : (
-											<Typography type="headline" gutterBottom>
+											<Typography variant="headline" gutterBottom>
 												Authorize your bot account
 											</Typography>
 										)}
@@ -260,7 +262,11 @@ class SettingsComponent extends React.Component {
 										</Typography>
 									</CardContent>
 									<CardActions>
-										<Button color="primary" onClick={this.login.bind(this)}>
+										<Button
+											color="primary"
+											disabled={loginPageLoading}
+											onClick={this.login.bind(this)}
+										>
 											{userData ? 'Change login' : 'Login'}
 										</Button>
 										{userData ? <Button onClick={this.logout.bind(this)}>Logout</Button> : null}
@@ -271,7 +277,7 @@ class SettingsComponent extends React.Component {
 						<Grid md={6} xs={12} item lg={4}>
 							<Card>
 								<CardContent>
-									<Typography type="headline" gutterBottom>
+									<Typography variant="headline" gutterBottom>
 										Channels list
 									</Typography>
 									<Typography component="p">Add channels to which you want connect to</Typography>
@@ -318,7 +324,7 @@ class SettingsComponent extends React.Component {
 						<Grid md={6} xs={12} item lg={4}>
 							<Card>
 								<CardContent>
-									<Typography type="headline" gutterBottom>
+									<Typography variant="headline" gutterBottom>
 										Chat settings
 									</Typography>
 									<FormControlLabel
@@ -366,11 +372,42 @@ class SettingsComponent extends React.Component {
 								</CardContent>
 							</Card>
 						</Grid>
+						<Grid md={6} xs={12} item lg={4}>
+							<Card>
+								<CardContent>
+									<Typography variant="headline" gutterBottom>
+										Add widget
+									</Typography>
+									<Grid container alignItems="baseline">
+										<Grid item xs={12} sm={8} className={classes.spacingBlock}>
+											<TextField
+												placeholder="widget url"
+												className={classes.textField}
+												inputRef={ref => (this.WidgetLinkField = ref)}
+												margin="normal"
+												fullWidth
+												value={widgetUrl}
+											/>
+										</Grid>
+
+										<Grid item xs={12} sm={4} className={classes.spacingBlock}>
+											<Button
+												style={{ width: '100%' }}
+												color="primary"
+												onClick={() => saveSettings({ widgetUrl: this.WidgetLinkField.value })}
+											>
+												Save
+											</Button>
+										</Grid>
+									</Grid>
+								</CardContent>
+							</Card>
+						</Grid>
 						{botEnabled && (
 							<Grid xs={12} item>
 								<Card>
 									<CardContent>
-										<Typography type="headline" gutterBottom>
+										<Typography variant="headline" gutterBottom>
 											Bot commands
 										</Typography>
 										<List dense>
@@ -399,7 +436,11 @@ class SettingsComponent extends React.Component {
 												))}
 										</List>
 
-										<Button raised color="primary" onClick={this.openPopup.bind(this, null)}>
+										<Button
+											variant="raised"
+											color="primary"
+											onClick={this.openPopup.bind(this, null)}
+										>
 											Add command
 										</Button>
 									</CardContent>
@@ -407,6 +448,13 @@ class SettingsComponent extends React.Component {
 							</Grid>
 						)}
 					</Grid>
+					{loginPageLoading && (
+						<Grid item xs={12}>
+							<div className={classes.textCenter}>
+								<CircularProgress size={100} color="secondary" />
+							</div>
+						</Grid>
+					)}
 					{showLoginPage && (
 						<div>
 							<webview src={loginUrl} ref={el => this.webViewListener(el)} style={{ height: '500px' }} />

@@ -2,7 +2,7 @@ import moment from 'moment';
 
 import { API } from './chatUtils';
 
-const placeholders = (placeholder, msg) => {
+const processWord = (placeholder, msg) => {
 	const staticHolders = {
 		'%joke%': () =>
 			API.getJoke().then(
@@ -51,15 +51,15 @@ const placeholders = (placeholder, msg) => {
 	};
 };
 
-const BOT = (() => {
+const bot = (() => {
 	var commands = [],
 		client;
 	return {
-		init(options) {
-			commands = options.commands;
-			client = options.client;
+		setCommands(cmnds) {
+			commands = cmds;
+			return this;
 		},
-		handleMessage(msg, user) {
+		handleMessage(msg, user, commands, client) {
 			var command = commands.find(el => !msg.indexOf(el.command)),
 				matchesPromises = [],
 				channel = client.getChannels()[0].slice(1),
@@ -70,7 +70,8 @@ const BOT = (() => {
 
 				if (matches) {
 					matches.forEach(match => {
-						let replacer = placeholders(match, msg);
+						let replacer = processWord(match, msg);
+						console.log('replacer', replacer);
 						if (replacer) {
 							matchesPromises.push(
 								replacer(channel, user).then(data => {
@@ -81,11 +82,13 @@ const BOT = (() => {
 					});
 				}
 			}
-			return Promise.all(matchesPromises).then(() =>
-				Promise.all([API.sendAction(client, text, channel), Promise.resolve(text)])
-			);
+
+			return Promise.all(matchesPromises).then(() => {
+				console.log('text', text);
+				return Promise.all([API.sendAction(client, text, channel), Promise.resolve(text)]);
+			});
 		}
 	};
 })();
 
-export default BOT;
+export default bot;

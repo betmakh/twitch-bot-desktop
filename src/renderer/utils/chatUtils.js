@@ -73,13 +73,18 @@ export const API = {
 		});
 	},
 	sendMsg: function(client, msg, channel) {
-		if (msg && msg.length && client && channel) {
-			client.say(channel, msg);
+		if (msg && msg.length && client) {
+			channel = channel || client.getChannels()[0];
+			return client.say(channel, msg);
+		} else {
+			throw Error('client and parameters are reequired');
 		}
 	},
 	sendAction: function(client, msg, channel) {
-		if (msg && msg.length && client && channel) {
-			client.action(channel, msg);
+		console.log('sendAction: ', msg);
+		if (msg && msg.length && client) {
+			channel = channel || client.getChannels()[0];
+			return client.action(channel, msg);
 		}
 	},
 	revokeUserAccess: token =>
@@ -161,15 +166,18 @@ export const API = {
 
 export const FollowersWatcher = (() => {
 	var timer = null,
+		channelToWatch,
 		followers = [];
 
 	return {
 		start: function(channel, listener) {
+			if (channel === channelToWatch) return this;
+			channelToWatch = channel;
 			if (timer) {
 				this.stop();
 			}
 			timer = setInterval(() => {
-				API.getFollowersList(channel, 30).then(resp => {
+				API.getFollowersList(channelToWatch, 30).then(resp => {
 					if (followers.length && timer) {
 						let diff = resp.follows.filter(
 							follower => !followers.find(oldFollower => oldFollower.created_at === follower.created_at)
@@ -185,6 +193,7 @@ export const FollowersWatcher = (() => {
 		stop: function() {
 			clearInterval(timer);
 			timer = null;
+			channelToWatch = null;
 			followers = [];
 		}
 	};

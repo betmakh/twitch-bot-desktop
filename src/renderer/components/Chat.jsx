@@ -29,6 +29,9 @@ export const styles = theme => ({
 		margin: '0.5em',
 		position: 'relative'
 	},
+	actionMessage: {
+		border: `1px solid ${theme.palette.primary.light}`
+	},
 	spacingBlock: {
 		paddingRight: theme.spacing.unit,
 		paddingLeft: theme.spacing.unit
@@ -303,7 +306,10 @@ class ChatComponent extends React.Component {
 									key={msg.id}
 									ref={index === messages.length - 1 ? this.scrollToBottom : null}
 								>
-									<Paper className={classes.card} square={msg.isAction}>
+									<Paper
+										className={`${classes.card} ${msg.isAction ? classes.actionMessage : null}`}
+										square={msg.isAction}
+									>
 										<Typography variant="title" gutterBottom>
 											{msg.user.username}
 										</Typography>

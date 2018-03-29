@@ -82,7 +82,8 @@ class UserListComponent extends React.Component {
 	static COMPONENT_NAME = USER_LIST_COMPONENT;
 	static propTypes = {
 		currentChannel: PropTypes.string.isRequired,
-		classes: PropTypes.object.isRequired
+		classes: PropTypes.object.isRequired,
+		twitchClient: PropTypes.object.isRequired
 	};
 
 	state = {
@@ -136,10 +137,11 @@ class UserListComponent extends React.Component {
 
 	closeUserOptionsMenu(action) {
 		var { detailsPopUp } = this.state,
-			{ TwitchClient, currentChannel, showNotification } = this.props;
+			{ twitchClient, currentChannel, showNotification } = this.props;
 		if (action) {
-			// TwitchClient[action.actionType](currentChannel, action.user);
-			API[`${action.actionType}User`](TwitchClient, action.user, currentChannel, action.reason, action.time)
+			console.log('action', action);
+			// twitchClient[action.actionType](currentChannel, action.user);
+			API[`${action.actionType}User`](twitchClient, action.user, currentChannel, action.reason, action.time)
 				.then(resp => {
 					showNotification(`Success: ${resp}`);
 				})

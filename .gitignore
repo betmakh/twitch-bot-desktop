@@ -50,3 +50,4 @@ sftp-config.json
 dist
 static/data/config.json
 main.js
+release-builds

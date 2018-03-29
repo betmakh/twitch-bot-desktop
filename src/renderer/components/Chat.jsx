@@ -12,12 +12,14 @@ import { MenuItem } from 'material-ui/Menu';
 import Tooltip from 'material-ui/Tooltip';
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
+import Divider from 'material-ui/Divider';
 
 // iconsPcom
 import PlayIcon from 'material-ui-icons/PlayCircleOutline';
 import VolumeOffIcon from 'material-ui-icons/VolumeOff';
 import VolumeUpIcon from 'material-ui-icons/VolumeUp';
 import SendIcon from 'material-ui-icons/Send';
+import CodeIcon from 'material-ui-icons/Code';
 
 import { API } from '../utils/chatUtils.js';
 import BOT from '../utils/bot.js';
@@ -67,6 +69,9 @@ export const styles = theme => ({
 		bottom: 0,
 		left: 0,
 		height: theme.spacing.unit * 15
+	},
+	spacer: {
+		margin: '10px 0'
 	}
 });
 
@@ -359,6 +364,18 @@ class ChatComponent extends React.Component {
 								>
 									Send
 									<SendIcon className={classes.spacingBlock} />
+								</Button>
+								<Divider className={classes.spacer} />
+								<Button
+									fullWidth
+									variant="raised"
+									color="secondary"
+									size="small"
+									color="secondary"
+									onClick={this.sendMessage.bind(this)}
+								>
+									commands
+									<CodeIcon className={classes.spacingBlock} />
 								</Button>
 							</div>
 						</Grid>

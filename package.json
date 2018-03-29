@@ -69,7 +69,6 @@
     "electron-packager": "^10.1.1",
     "electron-prebuilt": "^1.4.13",
     "electron-reload": "^1.2.2",
-    "nodemon": "^1.12.1",
     "prettier": "1.8.2",
     "uglifyjs-webpack-plugin": "^1.1.6",
     "webpack": "^3.10.0"

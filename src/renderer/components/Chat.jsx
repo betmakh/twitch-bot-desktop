@@ -76,7 +76,6 @@ export const styles = theme => ({
 });
 
 class ChatComponent extends React.Component {
-	static COMPONENT_NAME = CHAT_COMPONENT;
 	constructor(props) {
 		super(props);
 		var self = this;
@@ -393,5 +392,7 @@ class ChatComponent extends React.Component {
 		);
 	}
 }
+
+ChatComponent.COMPONENT_NAME = CHAT_COMPONENT;
 
 export default withStyles(styles)(ChatComponent);

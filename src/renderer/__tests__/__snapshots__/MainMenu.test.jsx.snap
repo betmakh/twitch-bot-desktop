@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Main menu renders correctly 1`] = `
+<MainMenu
+  classes={
+    Object {
+      "drawerHeader": "MainMenu-drawerHeader-3",
+      "itemActive": "MainMenu-itemActive-1",
+      "logo": "MainMenu-logo-2",
+    }
+  }
+/>
+`;

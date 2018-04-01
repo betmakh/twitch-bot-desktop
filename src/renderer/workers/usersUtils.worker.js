@@ -2,11 +2,7 @@ const KRAKEN_PREFIX_URL = 'https://api.twitch.tv/kraken/';
 const TWITCH_API_PREFIX_URL = 'https://api.twitch.tv/helix/';
 const TOKEN = 'o9gnnqnx1sxt6twajj6h7u4w7ko6bhj';
 
-// import threads from 'threads';
-// import { ipcMain } from 'electron';
-// import fetch from 'node-fetch';
-
-var data = {
+const data = {
 	usersData: new Map(),
 	channelsChatters: new Map()
 };
@@ -153,5 +149,3 @@ onmessage = function(msg) {
 		});
 	}
 };
-
-module.exports = Object.create(null);

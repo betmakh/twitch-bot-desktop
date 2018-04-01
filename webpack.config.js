@@ -32,14 +32,19 @@ let configs = {
     target: 'electron-renderer',
     output: {
       filename: 'app-renderer.js',
-      path: distFolder
+      path: distFolder,
+      publicPath: distFolder + '/'
     },
     devtool: 'eval-source-map',
     module: {
       rules: [
         {
+          test: /\.worker\.js$/,
+          loader: 'worker-loader'
+        },
+        {
           test: /\.js$|\.jsx$/,
-          exclude: /node_modules/,
+          exclude: [/node_modules/, /\.worker\.js$/],
           loader: 'babel-loader'
         }
       ]

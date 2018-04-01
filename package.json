@@ -8,17 +8,18 @@
     "format": "prettier --list-different --single-quote --print-width=120 \"src/**/*.{js,jsx}\"",
     "prebuild": "webpack --env.prod true",
     "prodPrebuild": "set NODE_ENV=production && webpack --env.prod true",
-    "create-linux-packager":
-      "yarn prodPrebuild && electron-packager ./ TwitchBotBeta --platform linux --out release-builds --overwrite --ignore src --ignore bin",
-    "create-win-packager":
-      "yarn prodPrebuild && electron-packager ./ TwitchBotBeta --platform win32 --out release-builds --overwrite --ignore src --ignore bin --icon=static/icons/icon.ico",
+    "create-linux-packager": "yarn prodPrebuild && electron-packager ./ TwitchBotBeta --platform linux --out release-builds --overwrite --ignore src --ignore bin",
+    "create-win-packager": "yarn prodPrebuild && electron-packager ./ TwitchBotBeta --platform win32 --out release-builds --overwrite --ignore src --ignore bin --icon=static/icons/icon.ico",
     "buildProd": "yarn prodPrebuild && electron-builder"
   },
   "build": {
     "appId": "com.electron.twitchBot",
     "productName": "Twitch-Bot-beta",
     "copyright": "Copyright © 2018 year Mykyta Meshcheriakov",
-    "files": ["**/*", "!src"],
+    "files": [
+      "**/*",
+      "!src"
+    ],
     "directories": {
       "buildResources": "/",
       "output": "release-builds"
@@ -37,6 +38,8 @@
   "dependencies": {
     "asar": "^0.14.3",
     "google-tts-api": "0.0.2",
+    "greenlet": "^0.1.2",
+    "husky": "^0.14.3",
     "jsonfile": "^4.0.0",
     "lodash": "^4.17.5",
     "material-ui": "^1.0.0-beta.32",
@@ -69,8 +72,12 @@
     "electron-packager": "^10.1.1",
     "electron-prebuilt": "^1.4.13",
     "electron-reload": "^1.2.2",
-    "prettier": "1.8.2",
+    "eslint": "^4.19.1",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-react": "^7.7.0",
+    "prettier": "^1.11.1",
     "uglifyjs-webpack-plugin": "^1.1.6",
-    "webpack": "^3.10.0"
+    "webpack": "^3.10.0",
+    "worker-loader": "^1.1.1"
   }
 }

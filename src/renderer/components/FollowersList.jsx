@@ -4,7 +4,6 @@ import React from 'react';
 import { stylesLocal, BasicUserComponent } from './UserList.jsx';
 import { API } from '../utils/chatUtils.js';
 import { FOLLOWERS_LIST_COMPONENT } from '../utils/constants.js';
-// import {stylesLocal} from
 
 class FollowersListComponent extends BasicUserComponent {
 	static COMPONENT_NAME = FOLLOWERS_LIST_COMPONENT;

@@ -24,6 +24,9 @@ import { USER_LIST_COMPONENT } from '../utils/constants.js';
 import { API } from '../utils/chatUtils.js';
 import { styles } from './Chat.jsx';
 import UserDetails from './UserDetails.jsx';
+import ChattersWorker from '../workers/usersUtils.worker.js';
+
+const chattersWorker = new ChattersWorker();
 
 export const stylesLocal = theme =>
 	Object.assign(styles(theme), {
@@ -120,16 +123,26 @@ class UserListComponent extends React.Component {
 	}
 
 	filterUserList(event) {
+		var self = this;
 		if (event.target.value.length >= 2) {
 			this.setState({
 				loading: true
 			});
-			ipcRenderer.send('chatters-filter', this.props.currentChannel, event.target.value);
+
+			chattersWorker.postMessage({
+				channel: this.props.currentChannel,
+				type: 'filter',
+				query: event.target.value
+			});
+
+			// ipcRenderer.send('chatters-filter', this.props.currentChannel, event.target.value);
 		} else if (event.target.value.length === 0) {
 			this.setState({
 				loading: true
 			});
-			ipcRenderer.send('chatters-get', this.props.currentChannel);
+			chattersWorker.postMessage({ channel: this.props.currentChannel });
+
+			// ipcRenderer.send('chatters-get', this.props.currentChannel);
 		}
 
 		this.setState({ searchCriteria: event.target.value });
@@ -153,6 +166,12 @@ class UserListComponent extends React.Component {
 		this.setState({ detailsPopUp });
 	}
 
+	chattersReceived(data) {
+		if (this._isMounted) {
+			this.setState({ users: data.users, totalUsersCount: data.totalUsersCount, loading: false });
+		}
+	}
+
 	refreshList(channel = this.props.currentChannel) {
 		if (!channel) return;
 		var self = this,
@@ -161,13 +180,22 @@ class UserListComponent extends React.Component {
 		self.setState({
 			loading: true
 		});
-		ipcRenderer.send('chatters-get', channel);
-		ipcRenderer.on('chatters-received', (event, data) => {
+		// getChatters({ channel: this.props.currentChannel });
+		chattersWorker.postMessage({ channel: this.props.currentChannel });
+		chattersWorker.onmessage = function(e) {
+			var { data } = e;
 			console.log('data', data);
 			if (self._isMounted) {
 				self.setState({ users: data.users, totalUsersCount: data.totalUsersCount, loading: false });
 			}
-		});
+		};
+
+		// ipcRenderer.send('chatters-get', channel);
+		// ipcRenderer.on('chatters-received', (event, data) => {
+		// 	if (self._isMounted) {
+		// 		self.setState({ users: data.users, totalUsersCount: data.totalUsersCount, loading: false });
+		// 	}
+		// });
 	}
 
 	componentWillReceiveProps(nextProps) {

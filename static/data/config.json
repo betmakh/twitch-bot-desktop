@@ -1,6 +1,1 @@
-{
-	"commands": [
-		{ "command": "!uptime", "text": "time is %uptime%", "type": "text" },
-		{ "command": "!game", "text": "curren game is %game%", "type": "text" }
-	]
-}
+{"PASS":"tqgc7jgyntusx8c6gfdqjel31nprq1","botEnabled":false,"channels":["betmanenko","legendary_qstor"],"commands":[{"command":"!joke","text":"%joke%","type":"text"}],"commentsAutoplay":true,"currentChannel":"betmanenko","followersNotification":false,"sectionSelected":"CHAT_COMPONENT","watchersNotification":false,"widgetUrl":""}

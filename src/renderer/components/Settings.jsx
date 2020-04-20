@@ -1,469 +1,528 @@
-import { withStyles } from 'material-ui/styles';
-import React from 'react';
-import Grid from 'material-ui/Grid';
-import Typography from 'material-ui/Typography';
-import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';
-import Paper from 'material-ui/Paper';
-import TextField from 'material-ui/TextField';
-import Button from 'material-ui/Button';
-import IconButton from 'material-ui/IconButton';
-import Modal from 'material-ui/Modal';
-import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
-import DeleteIcon from 'material-ui-icons/Delete';
-import EditIcon from 'material-ui-icons/Edit';
-import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import Switch from 'material-ui/Switch';
-import List, { ListItem, ListItemAvatar, ListItemIcon, ListItemSecondaryAction, ListItemText } from 'material-ui/List';
-import UrlUtils from 'url';
-import { CircularProgress } from 'material-ui/Progress';
-import querystring from 'querystring';
+import { withStyles } from "@material-ui/core/styles";
+import React from "react";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import Paper from "@material-ui/core/Paper";
+import TextField from "@material-ui/core/TextField";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import Modal from "@material-ui/core/Modal";
+import Card, {
+  CardActions,
+  CardContent,
+  CardMedia,
+} from "@material-ui/core/Card";
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
+import { FormGroup, FormControlLabel } from "@material-ui/core/";
+import Switch from "@material-ui/core/Switch";
+import List, {
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+} from "@material-ui/core/List";
+import UrlUtils from "url";
+import { CircularProgress } from "@material-ui/core/";
+import querystring from "querystring";
 
-import { SETTINGS_COMPONENT, AUTH_URL, TOKEN } from '../utils/constants.js';
-import { styles } from './Chat.jsx';
-import { API } from '../utils/chatUtils.js';
-import BotCommandDetails from './BotCommandDetails.jsx';
+import { SETTINGS_COMPONENT, AUTH_URL, TOKEN } from "../utils/constants.js";
+import { styles } from "./Chat.jsx";
+import { API } from "../utils/chatUtils.js";
+import BotCommandDetails from "./BotCommandDetails.jsx";
 
-const stylesLocal = theme =>
-	Object.assign(styles(theme), {
-		hidden: {
-			display: 'none'
-		},
-		media: {
-			height: 200
-		},
-		textCenter: {
-			textAlign: 'center'
-		},
-		modal: {
-			position: 'absolute',
-			width: 8 * 50,
-			top: `50%`,
-			left: `50%`,
-			transform: `translate(-50%, -50%)`,
-			border: '1px solid #e5e5e5',
-			backgroundColor: '#fff',
-			boxShadow: '0 5px 15px rgba(0, 0, 0, .5)',
-			padding: 8 * 4
-		}
-	});
+const stylesLocal = (theme) =>
+  Object.assign(styles(theme), {
+    hidden: {
+      display: "none",
+    },
+    media: {
+      height: 200,
+    },
+    textCenter: {
+      textAlign: "center",
+    },
+    modal: {
+      position: "absolute",
+      width: 8 * 50,
+      top: `50%`,
+      left: `50%`,
+      transform: `translate(-50%, -50%)`,
+      border: "1px solid #e5e5e5",
+      backgroundColor: "#fff",
+      boxShadow: "0 5px 15px rgba(0, 0, 0, .5)",
+      padding: 8 * 4,
+    },
+  });
 
 class SettingsComponent extends React.Component {
-	static COMPONENT_NAME = SETTINGS_COMPONENT;
+  static COMPONENT_NAME = SETTINGS_COMPONENT;
 
-	state = {
-		showLoginPage: false,
-		userData: null,
-		loginUrl: AUTH_URL,
-		loginPageLoading: false,
-		commandPopUp: {
-			open: false,
-			command: {}
-		}
-	};
+  state = {
+    showLoginPage: false,
+    userData: null,
+    loginUrl: AUTH_URL,
+    loginPageLoading: false,
+    commandPopUp: {
+      open: false,
+      command: {},
+    },
+  };
 
-	addChannel(event) {
-		var { channels, saveSettings, currentChannel } = this.props,
-			ChannelNameValue = this.ChannelNameField.value;
-		if (ChannelNameValue.length && !~channels.indexOf(ChannelNameValue.toLowerCase())) {
-			channels.push(ChannelNameValue.toLowerCase());
-			this.ChannelNameField.value = '';
-			let dataToSave = { channels };
-			if (!currentChannel) {
-				dataToSave.currentChannel = channels[0];
-			}
-			saveSettings(dataToSave);
-		}
-	}
+  addChannel(event) {
+    var { channels, saveSettings, currentChannel } = this.props,
+      ChannelNameValue = this.ChannelNameField.value;
+    if (
+      ChannelNameValue.length &&
+      !~channels.indexOf(ChannelNameValue.toLowerCase())
+    ) {
+      channels.push(ChannelNameValue.toLowerCase());
+      this.ChannelNameField.value = "";
+      let dataToSave = { channels };
+      if (!currentChannel) {
+        dataToSave.currentChannel = channels[0];
+      }
+      saveSettings(dataToSave);
+    }
+  }
 
-	addWidget(event) {}
+  addWidget(event) {}
 
-	login(event) {
-		var { showLoginPage, loginUrl } = this.state,
-			{ PASS } = this.props,
-			self = this;
+  login(event) {
+    var { showLoginPage, loginUrl } = this.state,
+      { PASS } = this.props,
+      self = this;
 
-		if (!showLoginPage) {
-			this.setState({ loginPageLoading: true });
-			fetch(AUTH_URL).then(resp => {
-				this.setState({
-					loginUrl: resp.url,
-					showLoginPage: true,
-					loginPageLoading: false
-				});
-			});
-		} else {
-			this.setState({ showLoginPage: !showLoginPage });
-		}
-	}
+    if (!showLoginPage) {
+      this.setState({ loginPageLoading: true });
+      fetch(AUTH_URL).then((resp) => {
+        this.setState({
+          loginUrl: resp.url,
+          showLoginPage: true,
+          loginPageLoading: false,
+        });
+      });
+    } else {
+      this.setState({ showLoginPage: !showLoginPage });
+    }
+  }
 
-	logout() {
-		this.props.saveSettings({ PASS: null });
-	}
+  logout() {
+    this.props.saveSettings({ PASS: null });
+  }
 
-	fetchuserData(token) {
-		if (!token) {
-			this.setState({ userData: null });
-		} else {
-			var self = this;
+  fetchuserData(token) {
+    if (!token) {
+      this.setState({ userData: null });
+    } else {
+      var self = this;
 
-			this.setState({
-				userDataLoading: true
-			});
-			API.getUserInfo(token)
-				.then(resp => {
-					if (resp.data[0]) {
-						self.setState({ userData: resp.data[0], userDataLoading: false });
-					}
-				})
-				.catch(err => {
-					self.props.showNotification("Can't receive account data");
-					self.setState({ userDataLoading: false });
-				});
-		}
-	}
+      this.setState({
+        userDataLoading: true,
+      });
+      API.getUserInfo(token)
+        .then((resp) => {
+          if (resp.data[0]) {
+            self.setState({
+              userData: resp.data[0],
+              userDataLoading: false,
+            });
+          }
+        })
+        .catch((err) => {
+          self.props.showNotification("Can't receive account data");
+          self.setState({ userDataLoading: false });
+        });
+    }
+  }
 
-	componentDidMount() {
-		const { PASS } = this.props;
-		this.fetchuserData(PASS);
-	}
+  componentDidMount() {
+    const { PASS } = this.props;
+    this.fetchuserData(PASS);
+  }
 
-	webViewListener(webView) {
-		var self = this;
-		if (!webView) return;
+  webViewListener(webView) {
+    var self = this;
+    if (!webView) return;
 
-		webView.addEventListener('did-get-redirect-request', e => {
-			var url = UrlUtils.parse(e.newURL),
-				hash = url.hash && url.hash.substr(1),
-				urlParams = hash && querystring.parse(hash),
-				error = urlParams && urlParams['error_description'],
-				authKey = urlParams && urlParams['access_token'];
+    webView.addEventListener("did-get-redirect-request", (e) => {
+      var url = UrlUtils.parse(e.newURL),
+        hash = url.hash && url.hash.substr(1),
+        urlParams = hash && querystring.parse(hash),
+        error = urlParams && urlParams["error_description"],
+        authKey = urlParams && urlParams["access_token"];
 
-			if (authKey) {
-				self.setState({ showLoginPage: false });
-				self.props.saveSettings({ PASS: authKey });
-			} else if (error) {
-				self.setState({ showLoginPage: false });
-				self.props.showNotification(error);
-			}
-		});
-	}
+      if (authKey) {
+        self.setState({ showLoginPage: false });
+        self.props.saveSettings({ PASS: authKey });
+      } else if (error) {
+        self.setState({ showLoginPage: false });
+        self.props.showNotification(error);
+      }
+    });
+  }
 
-	componentWillReceiveProps(nextProps) {
-		const { channels, commentsAutoplay, PASS } = nextProps;
-		this.setState({ channels, commentsAutoplay });
-		if (this.props.PASS !== PASS) {
-			this.fetchuserData(PASS);
-		}
-	}
+  componentWillReceiveProps(nextProps) {
+    const { channels, commentsAutoplay, PASS } = nextProps;
+    this.setState({ channels, commentsAutoplay });
+    if (this.props.PASS !== PASS) {
+      this.fetchuserData(PASS);
+    }
+  }
 
-	removeChannel(event) {
-		var channelToRemove = event.currentTarget.getAttribute('aria-label'),
-			{ channels } = this.props;
-		channels = channels.filter(channelName => channelName !== channelToRemove);
-		this.props.saveSettings({ channels });
-	}
+  removeChannel(event) {
+    var channelToRemove = event.currentTarget.getAttribute("aria-label"),
+      { channels } = this.props;
+    channels = channels.filter(
+      (channelName) => channelName !== channelToRemove
+    );
+    this.props.saveSettings({ channels });
+  }
 
-	removeCommand(command) {
-		var { commands } = this.props;
-		commands.splice(commands.indexOf(command), 1);
-		this.props.saveSettings({ commands });
-	}
+  removeCommand(command) {
+    var { commands } = this.props;
+    commands.splice(commands.indexOf(command), 1);
+    this.props.saveSettings({ commands });
+  }
 
-	closePopup(command) {
-		var { commandPopUp } = this.state,
-			{ commands } = this.props;
+  closePopup(command) {
+    var { commandPopUp } = this.state,
+      { commands } = this.props;
 
-		if (command) {
-			let index = null,
-				iterator = commands.length - 1;
-			while (iterator >= 0 && !index) {
-				if (commands[iterator].command === command.command) {
-					index = iterator;
-				}
-				iterator--;
-			}
+    if (command) {
+      let index = null,
+        iterator = commands.length - 1;
+      while (iterator >= 0 && !index) {
+        if (commands[iterator].command === command.command) {
+          index = iterator;
+        }
+        iterator--;
+      }
 
-			if (index !== null) {
-				commands[index] = command;
-			} else {
-				commands.push(command);
-			}
-			this.props.saveSettings({ commands });
-		}
-		commandPopUp.open = false;
-		this.setState({ commandPopUp });
-	}
+      if (index !== null) {
+        commands[index] = command;
+      } else {
+        commands.push(command);
+      }
+      this.props.saveSettings({ commands });
+    }
+    commandPopUp.open = false;
+    this.setState({ commandPopUp });
+  }
 
-	openPopup(command) {
-		var { commandPopUp } = this.state;
-		commandPopUp.open = true;
-		commandPopUp.command = command || {};
-		this.setState({ commandPopUp });
-	}
+  openPopup(command) {
+    var { commandPopUp } = this.state;
+    commandPopUp.open = true;
+    commandPopUp.command = command || {};
+    this.setState({ commandPopUp });
+  }
 
-	render() {
-		const {
-				channels,
-				drawerWidth,
-				classes,
-				botEnabled,
-				saveSettings,
-				followersNotification,
-				commentsAutoplay,
-				watchersNotification,
-				commands,
-				widgetUrl
-			} = this.props,
-			{ showLoginPage, userData, loginUrl, userDataLoading, commandPopUp, loginPageLoading } = this.state;
+  render() {
+    const {
+        channels,
+        drawerWidth,
+        classes,
+        botEnabled,
+        saveSettings,
+        followersNotification,
+        commentsAutoplay,
+        watchersNotification,
+        commands,
+        widgetUrl,
+      } = this.props,
+      {
+        showLoginPage,
+        userData,
+        loginUrl,
+        userDataLoading,
+        commandPopUp,
+        loginPageLoading,
+      } = this.state;
 
-		return (
-			<div style={{ marginLeft: drawerWidth }} className={classes.chatContainer}>
-				<Modal open={commandPopUp.open} onClose={this.closePopup.bind(this, null)}>
-					<div className={classes.modal}>
-						<BotCommandDetails command={commandPopUp.command} actionHandler={this.closePopup.bind(this)} />
-					</div>
-				</Modal>
-				<AppBar position="static" color="primary" className={classes.header}>
-					<Toolbar>
-						<Typography variant="title" color="inherit">
-							{'Settings'}
-						</Typography>
-					</Toolbar>
-				</AppBar>
-				<div className={classes.chatBody + ' ' + classes.spacingBlock} style={{ width: '100%' }}>
-					<Grid container>
-						<Grid md={6} xs={12} item lg={4}>
-							{userDataLoading ? (
-								<div className={classes.textCenter}>
-									<CircularProgress size={100} color="secondary" />
-								</div>
-							) : (
-								<Card>
-									{userData && (
-										<CardMedia
-											className={classes.media}
-											image={userData.profile_image_url}
-											title={userData.display_name}
-										/>
-									)}
-									<CardContent>
-										{userData ? (
-											<Typography variant="headline" component="h2">
-												{userData.display_name}
-											</Typography>
-										) : (
-											<Typography variant="headline" gutterBottom>
-												Authorize your bot account
-											</Typography>
-										)}
-										<Typography component="p">
-											Your bot is going to send messages from this account
-										</Typography>
-									</CardContent>
-									<CardActions>
-										<Button
-											color="primary"
-											disabled={loginPageLoading}
-											onClick={this.login.bind(this)}
-										>
-											{userData ? 'Change login' : 'Login'}
-										</Button>
-										{userData ? <Button onClick={this.logout.bind(this)}>Logout</Button> : null}
-									</CardActions>
-								</Card>
-							)}
-						</Grid>
-						<Grid md={6} xs={12} item lg={4}>
-							<Card>
-								<CardContent>
-									<Typography variant="headline" gutterBottom>
-										Channels list
-									</Typography>
-									<Typography component="p">Add channels to which you want connect to</Typography>
-									<Grid container alignItems="baseline">
-										<Grid item xs={12} sm={8} className={classes.spacingBlock}>
-											<TextField
-												id="channelNameField"
-												placeholder="Channel name"
-												className={classes.textField}
-												inputRef={ref => (this.ChannelNameField = ref)}
-												margin="normal"
-												fullWidth
-											/>
-										</Grid>
+    return (
+      <div
+        style={{ marginLeft: drawerWidth }}
+        className={classes.chatContainer}
+      >
+        <Modal
+          open={commandPopUp.open}
+          onClose={this.closePopup.bind(this, null)}
+        >
+          <div className={classes.modal}>
+            <BotCommandDetails
+              command={commandPopUp.command}
+              actionHandler={this.closePopup.bind(this)}
+            />
+          </div>
+        </Modal>
+        <AppBar position="static" color="primary" className={classes.header}>
+          <Toolbar>
+            <Typography variant="title" color="inherit">
+              {"Settings"}
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <div
+          className={classes.chatBody + " " + classes.spacingBlock}
+          style={{ width: "100%" }}
+        >
+          <Grid container>
+            <Grid md={6} xs={12} item lg={4}>
+              {userDataLoading ? (
+                <div className={classes.textCenter}>
+                  <CircularProgress size={100} color="secondary" />
+                </div>
+              ) : (
+                <Card>
+                  {userData && (
+                    <CardMedia
+                      className={classes.media}
+                      image={userData.profile_image_url}
+                      title={userData.display_name}
+                    />
+                  )}
+                  <CardContent>
+                    {userData ? (
+                      <Typography variant="headline" component="h2">
+                        {userData.display_name}
+                      </Typography>
+                    ) : (
+                      <Typography variant="headline" gutterBottom>
+                        Authorize your bot account
+                      </Typography>
+                    )}
+                    <Typography component="p">
+                      Your bot is going to send messages from this account
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    <Button
+                      color="primary"
+                      disabled={loginPageLoading}
+                      onClick={this.login.bind(this)}
+                    >
+                      {userData ? "Change login" : "Login"}
+                    </Button>
+                    {userData ? (
+                      <Button onClick={this.logout.bind(this)}>Logout</Button>
+                    ) : null}
+                  </CardActions>
+                </Card>
+              )}
+            </Grid>
+            <Grid md={6} xs={12} item lg={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="headline" gutterBottom>
+                    Channels list
+                  </Typography>
+                  <Typography component="p">
+                    Add channels to which you want connect to
+                  </Typography>
+                  <Grid container alignItems="baseline">
+                    <Grid item xs={12} sm={8} className={classes.spacingBlock}>
+                      <TextField
+                        id="channelNameField"
+                        placeholder="Channel name"
+                        className={classes.textField}
+                        inputRef={(ref) => (this.ChannelNameField = ref)}
+                        margin="normal"
+                        fullWidth
+                      />
+                    </Grid>
 
-										<Grid item xs={12} sm={4} className={classes.spacingBlock}>
-											<Button
-												style={{ width: '100%' }}
-												color="primary"
-												onClick={this.addChannel.bind(this)}
-											>
-												Add
-											</Button>
-										</Grid>
-									</Grid>
-									<List dense>
-										{channels.map(channelName => (
-											<ListItem key={channelName} button>
-												<ListItemText primary={channelName} />
-												<ListItemSecondaryAction>
-													<IconButton
-														aria-label={channelName}
-														onClick={this.removeChannel.bind(this)}
-													>
-														<DeleteIcon />
-													</IconButton>
-												</ListItemSecondaryAction>
-											</ListItem>
-										))}
-									</List>
-								</CardContent>
-							</Card>
-						</Grid>
-						<Grid md={6} xs={12} item lg={4}>
-							<Card>
-								<CardContent>
-									<Typography variant="headline" gutterBottom>
-										Chat settings
-									</Typography>
-									<FormControlLabel
-										control={
-											<Switch
-												checked={commentsAutoplay}
-												onChange={event =>
-													saveSettings({ commentsAutoplay: event.target.checked })
-												}
-											/>
-										}
-										label="Translate text to speach"
-									/>
-									<FormControlLabel
-										control={
-											<Switch
-												checked={followersNotification}
-												onChange={event =>
-													saveSettings({ followersNotification: event.target.checked })
-												}
-											/>
-										}
-										label="Show new followers notifiations"
-									/>
-									<FormControlLabel
-										control={
-											<Switch
-												checked={botEnabled}
-												onChange={event => saveSettings({ botEnabled: event.target.checked })}
-											/>
-										}
-										label="Enable bot commands"
-									/>
-									<FormControlLabel
-										control={
-											<Switch
-												checked={watchersNotification}
-												onChange={event =>
-													saveSettings({ watchersNotification: event.target.checked })
-												}
-											/>
-										}
-										label="Enable new watchers notification"
-									/>
-								</CardContent>
-							</Card>
-						</Grid>
-						<Grid md={6} xs={12} item lg={4}>
-							<Card>
-								<CardContent>
-									<Typography variant="headline" gutterBottom>
-										Add widget
-									</Typography>
-									<Grid container alignItems="baseline">
-										<Grid item xs={12} sm={8} className={classes.spacingBlock}>
-											<TextField
-												placeholder="widget url"
-												className={classes.textField}
-												inputRef={ref => (this.WidgetLinkField = ref)}
-												margin="normal"
-												fullWidth
-												value={widgetUrl}
-											/>
-										</Grid>
+                    <Grid item xs={12} sm={4} className={classes.spacingBlock}>
+                      <Button
+                        style={{ width: "100%" }}
+                        color="primary"
+                        onClick={this.addChannel.bind(this)}
+                      >
+                        Add
+                      </Button>
+                    </Grid>
+                  </Grid>
+                  <List dense>
+                    {channels.map((channelName) => (
+                      <ListItem key={channelName} button>
+                        <ListItemText primary={channelName} />
+                        <ListItemSecondaryAction>
+                          <IconButton
+                            aria-label={channelName}
+                            onClick={this.removeChannel.bind(this)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid md={6} xs={12} item lg={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="headline" gutterBottom>
+                    Chat settings
+                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={commentsAutoplay}
+                        onChange={(event) =>
+                          saveSettings({
+                            commentsAutoplay: event.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Translate text to speach"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={followersNotification}
+                        onChange={(event) =>
+                          saveSettings({
+                            followersNotification: event.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Show new followers notifiations"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={botEnabled}
+                        onChange={(event) =>
+                          saveSettings({
+                            botEnabled: event.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Enable bot commands"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={watchersNotification}
+                        onChange={(event) =>
+                          saveSettings({
+                            watchersNotification: event.target.checked,
+                          })
+                        }
+                      />
+                    }
+                    label="Enable new watchers notification"
+                  />
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid md={6} xs={12} item lg={4}>
+              <Card>
+                <CardContent>
+                  <Typography variant="headline" gutterBottom>
+                    Add widget
+                  </Typography>
+                  <Grid container alignItems="baseline">
+                    <Grid item xs={12} sm={8} className={classes.spacingBlock}>
+                      <TextField
+                        placeholder="widget url"
+                        className={classes.textField}
+                        inputRef={(ref) => (this.WidgetLinkField = ref)}
+                        margin="normal"
+                        fullWidth
+                        value={widgetUrl}
+                      />
+                    </Grid>
 
-										<Grid item xs={12} sm={4} className={classes.spacingBlock}>
-											<Button
-												style={{ width: '100%' }}
-												color="primary"
-												onClick={() => saveSettings({ widgetUrl: this.WidgetLinkField.value })}
-											>
-												Save
-											</Button>
-										</Grid>
-									</Grid>
-								</CardContent>
-							</Card>
-						</Grid>
-						{botEnabled && (
-							<Grid xs={12} item>
-								<Card>
-									<CardContent>
-										<Typography variant="headline" gutterBottom>
-											Bot commands
-										</Typography>
-										<List dense>
-											{commands &&
-												commands.map(command => (
-													<ListItem key={command.command} button>
-														<ListItemText
-															primary={command.command}
-															secondary={`${command.type}: ${command.text}`}
-														/>
-														<ListItemSecondaryAction>
-															<IconButton
-																title="Edit command"
-																onClick={e => this.openPopup(command)}
-															>
-																<EditIcon />
-															</IconButton>
-															<IconButton
-																title="Delete command"
-																onClick={e => this.removeCommand(command)}
-															>
-																<DeleteIcon />
-															</IconButton>
-														</ListItemSecondaryAction>
-													</ListItem>
-												))}
-										</List>
+                    <Grid item xs={12} sm={4} className={classes.spacingBlock}>
+                      <Button
+                        style={{ width: "100%" }}
+                        color="primary"
+                        onClick={() =>
+                          saveSettings({
+                            widgetUrl: this.WidgetLinkField.value,
+                          })
+                        }
+                      >
+                        Save
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+            {botEnabled && (
+              <Grid xs={12} item>
+                <Card>
+                  <CardContent>
+                    <Typography variant="headline" gutterBottom>
+                      Bot commands
+                    </Typography>
+                    <List dense>
+                      {commands &&
+                        commands.map((command) => (
+                          <ListItem key={command.command} button>
+                            <ListItemText
+                              primary={command.command}
+                              secondary={`${command.type}: ${command.text}`}
+                            />
+                            <ListItemSecondaryAction>
+                              <IconButton
+                                title="Edit command"
+                                onClick={(e) => this.openPopup(command)}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                              <IconButton
+                                title="Delete command"
+                                onClick={(e) => this.removeCommand(command)}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </ListItemSecondaryAction>
+                          </ListItem>
+                        ))}
+                    </List>
 
-										<Button
-											variant="raised"
-											color="primary"
-											onClick={this.openPopup.bind(this, null)}
-										>
-											Add command
-										</Button>
-									</CardContent>
-								</Card>
-							</Grid>
-						)}
-					</Grid>
-					{loginPageLoading && (
-						<Grid item xs={12}>
-							<div className={classes.textCenter}>
-								<CircularProgress size={100} color="secondary" />
-							</div>
-						</Grid>
-					)}
-					{showLoginPage && (
-						<div>
-							<webview src={loginUrl} ref={el => this.webViewListener(el)} style={{ height: '500px' }} />
-						</div>
-					)}
-				</div>
-			</div>
-		);
-	}
+                    <Button
+                      variant="raised"
+                      color="primary"
+                      onClick={this.openPopup.bind(this, null)}
+                    >
+                      Add command
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
+          </Grid>
+          {loginPageLoading && (
+            <Grid item xs={12}>
+              <div className={classes.textCenter}>
+                <CircularProgress size={100} color="secondary" />
+              </div>
+            </Grid>
+          )}
+          {showLoginPage && (
+            <div>
+              <webview
+                src={loginUrl}
+                ref={(el) => this.webViewListener(el)}
+                style={{ height: "500px" }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 }
 
 export default withStyles(stylesLocal)(SettingsComponent);

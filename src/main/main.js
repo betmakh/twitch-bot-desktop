@@ -7,7 +7,7 @@ const BrowserWindow = electron.BrowserWindow;
 
 import path from 'path';
 import url from 'url';
-import { ipcMain } from 'electron';
+// import { ipcMain } from 'electron';
 
 import './utils/events.js';
 import './utils/data.js';
